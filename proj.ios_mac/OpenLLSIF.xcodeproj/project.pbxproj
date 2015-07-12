@@ -10,8 +10,9 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
-		2E283C811B528A2B004EABDA /* libcocos2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E283C801B528A2B004EABDA /* libcocos2d iOS.a */; };
-		2E283C831B528C51004EABDA /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E283C821B528C51004EABDA /* res */; };
+		2E283C851B52A721004EABDA /* libcocos2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E283C841B52A721004EABDA /* libcocos2d iOS.a */; };
+		2E283CA71B52AC5E004EABDA /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E283CA61B52AC5E004EABDA /* res */; };
+		2E283CA91B52B250004EABDA /* Sound in Resources */ = {isa = PBXBuildFile; fileRef = 2E283CA81B52B250004EABDA /* Sound */; };
 		46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */; };
@@ -68,7 +69,16 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		2E283C801B528A2B004EABDA /* libcocos2d iOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcocos2d iOS.a"; path = "../cocos2d/build/lib/libcocos2d iOS.a"; sourceTree = "<group>"; };
-		2E283C821B528C51004EABDA /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
+		2E283C841B52A721004EABDA /* libcocos2d iOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcocos2d iOS.a"; path = "../../libcocos2d iOS.a"; sourceTree = "<group>"; };
+		2E283C8A1B52ABBD004EABDA /* Default */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Default; path = ../Resources/res/Default; sourceTree = "<group>"; };
+		2E283C8B1B52ABBD004EABDA /* home_background.csb */ = {isa = PBXFileReference; lastKnownFileType = file; name = home_background.csb; path = ../Resources/res/home_background.csb; sourceTree = "<group>"; };
+		2E283C8C1B52ABBD004EABDA /* HomeScene.csb */ = {isa = PBXFileReference; lastKnownFileType = file; name = HomeScene.csb; path = ../Resources/res/HomeScene.csb; sourceTree = "<group>"; };
+		2E283C8D1B52ABBD004EABDA /* Image */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Image; path = ../Resources/res/Image; sourceTree = "<group>"; };
+		2E283C8E1B52ABBD004EABDA /* MainScene.csb */ = {isa = PBXFileReference; lastKnownFileType = file; name = MainScene.csb; path = ../Resources/res/MainScene.csb; sourceTree = "<group>"; };
+		2E283C8F1B52ABBD004EABDA /* MTLmr3m.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = MTLmr3m.ttf; path = ../Resources/res/MTLmr3m.ttf; sourceTree = "<group>"; };
+		2E283C901B52ABBD004EABDA /* song_selection.csb */ = {isa = PBXFileReference; lastKnownFileType = file; name = song_selection.csb; path = ../Resources/res/song_selection.csb; sourceTree = "<group>"; };
+		2E283CA61B52AC5E004EABDA /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
+		2E283CA81B52B250004EABDA /* Sound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sound; sourceTree = "<group>"; };
 		46880B8419C43A87006E1F66 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		46880B8519C43A87006E1F66 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelloWorldScene.cpp; sourceTree = "<group>"; };
@@ -124,7 +134,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2E283C811B528A2B004EABDA /* libcocos2d iOS.a in Frameworks */,
+				2E283C851B52A721004EABDA /* libcocos2d iOS.a in Frameworks */,
 				52B47A471A53D09C004E4C60 /* Security.framework in Frameworks */,
 				D6B0611B1803AB670077942B /* CoreMotion.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
@@ -199,6 +209,14 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2E283C8A1B52ABBD004EABDA /* Default */,
+				2E283C8B1B52ABBD004EABDA /* home_background.csb */,
+				2E283C8C1B52ABBD004EABDA /* HomeScene.csb */,
+				2E283C8D1B52ABBD004EABDA /* Image */,
+				2E283C8E1B52ABBD004EABDA /* MainScene.csb */,
+				2E283C8F1B52ABBD004EABDA /* MTLmr3m.ttf */,
+				2E283C901B52ABBD004EABDA /* song_selection.csb */,
+				2E283C841B52A721004EABDA /* libcocos2d iOS.a */,
 				2E283C801B528A2B004EABDA /* libcocos2d iOS.a */,
 				8262943D1AAF051F00CB7CF7 /* Security.framework */,
 				52B47A461A53D09B004E4C60 /* Security.framework */,
@@ -224,7 +242,8 @@
 		46880B7519C43A67006E1F66 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				2E283C821B528C51004EABDA /* res */,
+				2E283CA81B52B250004EABDA /* Sound */,
+				2E283CA61B52AC5E004EABDA /* res */,
 				521A8EA819F11F5000D177D7 /* fonts */,
 			);
 			name = Resources;
@@ -378,11 +397,12 @@
 				5087E78017EB970100C73F5D /* Icon-114.png in Resources */,
 				50EF62A217ECD613001EB2F8 /* Icon-29.png in Resources */,
 				50EF629617ECD46A001EB2F8 /* Icon-40.png in Resources */,
+				2E283CA71B52AC5E004EABDA /* res in Resources */,
 				5087E78217EB970100C73F5D /* Icon-144.png in Resources */,
+				2E283CA91B52B250004EABDA /* Sound in Resources */,
 				50EF629817ECD46A001EB2F8 /* Icon-80.png in Resources */,
 				5087E78417EB970100C73F5D /* Icon-57.png in Resources */,
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
-				2E283C831B528C51004EABDA /* res in Resources */,
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
 			);
@@ -429,6 +449,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -449,7 +470,10 @@
 				);
 				INFOPLIST_FILE = ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = /Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/lib,
+					/Users/tetsushi2/Documents/Develop,
+				);
 				OTHER_LDFLAGS = (
 					"$(_COCOS_LIB_IOS_BEGIN)",
 					"$(_COCOS_LIB_IOS_END)",
@@ -465,6 +489,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
@@ -483,7 +508,10 @@
 				);
 				INFOPLIST_FILE = ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = /Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/lib,
+					/Users/tetsushi2/Documents/Develop,
+				);
 				OTHER_LDFLAGS = (
 					"$(_COCOS_LIB_IOS_BEGIN)",
 					"$(_COCOS_LIB_IOS_END)",
