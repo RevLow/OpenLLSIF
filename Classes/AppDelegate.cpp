@@ -51,7 +51,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // run
     director->runWithScene(scene);
-
+    
+    //画面サイズの最適化
+    glview->setDesignResolutionSize(960, 640, ResolutionPolicy::SHOW_ALL);
+    
     return true;
 }
 

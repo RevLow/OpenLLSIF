@@ -11,8 +11,9 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		2E283C851B52A721004EABDA /* libcocos2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E283C841B52A721004EABDA /* libcocos2d iOS.a */; };
-		2E283CA71B52AC5E004EABDA /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E283CA61B52AC5E004EABDA /* res */; };
 		2E283CA91B52B250004EABDA /* Sound in Resources */ = {isa = PBXBuildFile; fileRef = 2E283CA81B52B250004EABDA /* Sound */; };
+		2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E283CAA1B5325A0004EABDA /* HomeScene.cpp */; };
+		2E39812E1B532B1A001B096C /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E39812D1B532B1A001B096C /* res */; };
 		46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */; };
@@ -77,8 +78,10 @@
 		2E283C8E1B52ABBD004EABDA /* MainScene.csb */ = {isa = PBXFileReference; lastKnownFileType = file; name = MainScene.csb; path = ../Resources/res/MainScene.csb; sourceTree = "<group>"; };
 		2E283C8F1B52ABBD004EABDA /* MTLmr3m.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = MTLmr3m.ttf; path = ../Resources/res/MTLmr3m.ttf; sourceTree = "<group>"; };
 		2E283C901B52ABBD004EABDA /* song_selection.csb */ = {isa = PBXFileReference; lastKnownFileType = file; name = song_selection.csb; path = ../Resources/res/song_selection.csb; sourceTree = "<group>"; };
-		2E283CA61B52AC5E004EABDA /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		2E283CA81B52B250004EABDA /* Sound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sound; sourceTree = "<group>"; };
+		2E283CAA1B5325A0004EABDA /* HomeScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HomeScene.cpp; sourceTree = "<group>"; };
+		2E283CAB1B5325A0004EABDA /* HomeScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeScene.h; sourceTree = "<group>"; };
+		2E39812D1B532B1A001B096C /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		46880B8419C43A87006E1F66 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		46880B8519C43A87006E1F66 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelloWorldScene.cpp; sourceTree = "<group>"; };
@@ -242,8 +245,8 @@
 		46880B7519C43A67006E1F66 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				2E39812D1B532B1A001B096C /* res */,
 				2E283CA81B52B250004EABDA /* Sound */,
-				2E283CA61B52AC5E004EABDA /* res */,
 				521A8EA819F11F5000D177D7 /* fonts */,
 			);
 			name = Resources;
@@ -257,6 +260,8 @@
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
 				46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */,
 				46880B8719C43A87006E1F66 /* HelloWorldScene.h */,
+				2E283CAA1B5325A0004EABDA /* HomeScene.cpp */,
+				2E283CAB1B5325A0004EABDA /* HomeScene.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -397,12 +402,12 @@
 				5087E78017EB970100C73F5D /* Icon-114.png in Resources */,
 				50EF62A217ECD613001EB2F8 /* Icon-29.png in Resources */,
 				50EF629617ECD46A001EB2F8 /* Icon-40.png in Resources */,
-				2E283CA71B52AC5E004EABDA /* res in Resources */,
 				5087E78217EB970100C73F5D /* Icon-144.png in Resources */,
 				2E283CA91B52B250004EABDA /* Sound in Resources */,
 				50EF629817ECD46A001EB2F8 /* Icon-80.png in Resources */,
 				5087E78417EB970100C73F5D /* Icon-57.png in Resources */,
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
+				2E39812E1B532B1A001B096C /* res in Resources */,
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
 			);
@@ -425,6 +430,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
+				2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */,
 				46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
