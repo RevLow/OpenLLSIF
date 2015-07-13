@@ -2,7 +2,7 @@
 #include "HomeScene.h"
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
-#include <SimpleAudioEngine.h>
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
