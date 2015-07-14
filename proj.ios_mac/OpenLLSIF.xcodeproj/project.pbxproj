@@ -15,6 +15,7 @@
 		2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E283CAA1B5325A0004EABDA /* HomeScene.cpp */; };
 		2E3981301B534291001B096C /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E39812F1B534291001B096C /* res */; };
 		2E3981321B53BE85001B096C /* jacket in Resources */ = {isa = PBXBuildFile; fileRef = 2E3981311B53BE85001B096C /* jacket */; };
+		2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3981331B5510ED001B096C /* PointWithDepth.cpp */; };
 		46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */; };
@@ -84,6 +85,8 @@
 		2E283CAB1B5325A0004EABDA /* HomeScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeScene.h; sourceTree = "<group>"; };
 		2E39812F1B534291001B096C /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		2E3981311B53BE85001B096C /* jacket */ = {isa = PBXFileReference; lastKnownFileType = folder; path = jacket; sourceTree = "<group>"; };
+		2E3981331B5510ED001B096C /* PointWithDepth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PointWithDepth.cpp; sourceTree = "<group>"; };
+		2E3981341B5510ED001B096C /* PointWithDepth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointWithDepth.h; sourceTree = "<group>"; };
 		46880B8419C43A87006E1F66 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		46880B8519C43A87006E1F66 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelloWorldScene.cpp; sourceTree = "<group>"; };
@@ -265,6 +268,8 @@
 				46880B8719C43A87006E1F66 /* HelloWorldScene.h */,
 				2E283CAA1B5325A0004EABDA /* HomeScene.cpp */,
 				2E283CAB1B5325A0004EABDA /* HomeScene.h */,
+				2E3981331B5510ED001B096C /* PointWithDepth.cpp */,
+				2E3981341B5510ED001B096C /* PointWithDepth.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -439,6 +444,7 @@
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
+				2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

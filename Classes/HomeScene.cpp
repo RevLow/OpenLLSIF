@@ -11,6 +11,7 @@
 #include "cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
 #include <dirent.h>
+#include "PointWithDepth.h"
 
 USING_NS_CC;
 
@@ -147,28 +148,44 @@ bool HomeScene::init()
                                                                                                                               jacketNode->setName("jacketLayer");
                                                                                                                               
                                                                                                                               
-                                                                                                                              auto fileList = getDirContents("jacket");
-                                                                                                                              float theta = 360;
-                                                                                                                              float dTheta = 360 / fileList.size();
+                                                                                                                             
                                                                                                                               
-                                                                                                                              for(auto img : fileList)
+                                                                                                                              auto fileList = getDirContents("jacket");
+                                                                                                                              float theta = 0;
+                                                                                                                              float dTheta = 360 / fileList.size();
+                                                                                                                              float z = 0;
+                                                                                                                              
+                                                                                                                              for(int i=0; i < fileList.size();i++)
                                                                                                                               {
-                                                                                                                                  
-                                                                                                                                  theta -= dTheta;
-                                                                                                                                  //auto *sp = BillBoard::create("jacket/"+img);
+                                                                                                                                  auto img = fileList[i];
+                                                                                                                                  //auto *sp = BillBoard::create("jacket/"+img,BillBoard::Mode::VIEW_POINT_ORIENTED);
                                                                                                                                   auto *sp = Sprite::create("jacket/"+img);
-                                                                                                                                  Vec3 v(320*sin(theta), 0.0, 24*cos(theta));
-                                                                                                                                  jacketNode->addChild(sp, cos(theta));
-                                                                                                                                  sp->setScale(0.8, 0.8);
-                                                                                                                                  sp->setPosition3D(v);
                                                                                                                                   
+                                                                                                                                  double rad = MATH_DEG_TO_RAD(theta);
+                                                                                                                                  Vec3 v(480*sin(rad), 0.0, 4.8*cos(rad));
+                                                                                                                                  PointWithDepth point;
+                                                                                                                                  point.SetWorldPosition(v.x, v.y, v.z);
+                                                                                                                                  CCLOG("%f, %f, %f\n", point.x, point.y, point.GetScale());
                                                                                                                                   
-                                                                                                                                  CCLOG("%f\n", theta);
+                                                                                                                                  sp->setPosition(point);
+                                                                                                                                  sp->setScale(point.GetScale());
+                                                                                                                                  
+                                                                                                                                  jacketNode->addChild(sp,z);
+                                                                                                                                  
+                                                                                                                                  //次にaddChildする位置を決める
+                                                                                                                                  if(i < fileList.size() / 2) z--;
+                                                                                                                                  else if(i==fileList.size()/2) z = fileList.size()%2 ? z: z+1;
+                                                                                                                                  else z++;
+                        
+                                                                                                                                  theta += dTheta;
                                                                                                                               }
                                                                                                                               
                                                                                                                               
+                                                                                                                              
+                                                                                                                              
                                                                                                                               jacketNode->setLocalZOrder(-1);
-                                                                                                                              jacketNode->setPosition(480, 320);
+                                                                                                                              //jacketNode->setScale(0.7);
+                                                                                                                              jacketNode->setPosition(480, 380);
                                                                                                                               this->addChild(jacketNode);
                                                                                                                             
                                                                                                                           }), NULL));
