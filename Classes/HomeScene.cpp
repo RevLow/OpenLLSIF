@@ -10,8 +10,42 @@
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
+#include <dirent.h>
 
 USING_NS_CC;
+
+
+std::vector<std::string> getDirContents(std::string dirname) {
+    FileUtils* fu = FileUtils::getInstance();
+    
+    std::string dir = fu->fullPathForFilename(dirname);
+    
+    std::vector<std::string> list;
+    
+    DIR* dp;
+    struct dirent* ent;
+    
+    if ((dp = opendir(dir.c_str()), "r") == NULL) {
+        CCLOGERROR("ディレクトリが開けません。：%s", dir.c_str());
+        perror(dir.c_str());
+        return list;
+    }
+    
+    while ((ent = readdir(dp)) != NULL) {
+        CCLOG("ファイル：%s", ent->d_name);
+        if(ent->d_type != '\x04')
+        {
+            list.push_back(ent->d_name);
+        }
+        
+    };
+    closedir(dp);
+    
+    return list;
+}
+
+
+
 
 Scene* HomeScene::createScene()
 {
@@ -51,6 +85,12 @@ bool HomeScene::init()
     auto homeScene = CSLoader::getInstance()->createNode("res/HomeScene.csb");
     homeScene->setName("HomeSceneLayer");
     homeScene->setLocalZOrder(1);
+    action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/HomeScene.csb");
+    
+    homeScene->runAction(action);
+    //最初を0フレーム目まで移動させとく
+    action->gotoFrameAndPause(0);
+    
     addChild(homeScene);
     
     
@@ -58,31 +98,34 @@ bool HomeScene::init()
     //ホームボタンの設定
     auto homeButton = homeScene->getChildByName<ui::Button*>("Home_Button");
     homeButton->addClickEventListener([this](Ref *ref)
-    {
-        auto background = this->getChildByName("backgroundLayer");
-        
-        
-        background->runAction(Sequence::create(FadeTo::create(0.3f, 0),CallFunc::create([&]()
-        {
-            this->removeChildByName("backgroundLayer");
-            auto newLayer = CSLoader::getInstance()->createNode("res/home_background.csb");
-            auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/home_background.csb");
-            newLayer->setName("backgroundLayer");
-            
-            newLayer->runAction(action);
-            action->gotoFrameAndPlay(0, true);
-            this->addChild(newLayer, 0);
-        }), NULL));
-        
-        CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
-        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/decide.mp3");
-        
-    });
+                                        {
+                                            //ボタンを押したときの動作を設定
+                                            auto background = this->getChildByName("backgroundLayer");
+                                            
+                                            
+                                            background->runAction(Sequence::create(FadeTo::create(0.3f, 0),CallFunc::create([&]()
+                                                                                                                            {
+                                                                                                                                this->removeChildByName("backgroundLayer");
+                                                                                                                                this->removeChildByName("jacketLayer");
+                                                                                                                                auto newLayer = CSLoader::getInstance()->createNode("res/home_background.csb");
+                                                                                                                                auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/home_background.csb");
+                                                                                                                                newLayer->setName("backgroundLayer");
+                                                                                                                                
+                                                                                                                                newLayer->runAction(action);
+                                                                                                                                action->gotoFrameAndPlay(0, true);
+                                                                                                                                this->addChild(newLayer, 0);
+                                                                                                                            }), NULL));
+                                            
+                                            CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
+                                            CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/decide.mp3");
+                                            
+                                        });
     
     //ライブボタンの設定
     auto liveButton = homeScene->getChildByName<ui::Button*>("Live_Button");
     liveButton->addClickEventListener([this](Ref *ref)
                                       {
+                                          //ボタンを押したときの動作を設定
                                           auto background = this->getChildByName("backgroundLayer");
                                           
                                           background->runAction(Sequence::create(FadeTo::create(0.3f, 0),CallFunc::create([this]()
@@ -95,6 +138,39 @@ bool HomeScene::init()
                                                                                                                               newLayer->runAction(action);
                                                                                                                               action->gotoFrameAndPlay(0,true);
                                                                                                                               this->addChild(newLayer, 0);
+                                                                                                                              
+                                                                                                                              
+                                                                                                                              //ジャケットを配置するノードの作成
+                                                                                                                              //実際に使うときはzipファイル内から画像を抽出し、それを配置していく
+                                                                                                                              //ジャケットサイズは今後考える
+                                                                                                                              Node* jacketNode = Node::create();
+                                                                                                                              jacketNode->setName("jacketLayer");
+                                                                                                                              
+                                                                                                                              
+                                                                                                                              auto fileList = getDirContents("jacket");
+                                                                                                                              float theta = 360;
+                                                                                                                              float dTheta = 360 / fileList.size();
+                                                                                                                              
+                                                                                                                              for(auto img : fileList)
+                                                                                                                              {
+                                                                                                                                  
+                                                                                                                                  theta -= dTheta;
+                                                                                                                                  //auto *sp = BillBoard::create("jacket/"+img);
+                                                                                                                                  auto *sp = Sprite::create("jacket/"+img);
+                                                                                                                                  Vec3 v(320*sin(theta), 0.0, 24*cos(theta));
+                                                                                                                                  jacketNode->addChild(sp, cos(theta));
+                                                                                                                                  sp->setScale(0.8, 0.8);
+                                                                                                                                  sp->setPosition3D(v);
+                                                                                                                                  
+                                                                                                                                  
+                                                                                                                                  CCLOG("%f\n", theta);
+                                                                                                                              }
+                                                                                                                              
+                                                                                                                              
+                                                                                                                              jacketNode->setLocalZOrder(-1);
+                                                                                                                              jacketNode->setPosition(480, 320);
+                                                                                                                              this->addChild(jacketNode);
+                                                                                                                            
                                                                                                                           }), NULL));
                                           
                                           CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
