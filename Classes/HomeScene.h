@@ -24,6 +24,12 @@ public:
     CREATE_FUNC(HomeScene);
     
     virtual void onEnterTransitionDidFinish();
+protected:
+    void homeButton_action(Ref *ref);
+    void liveButton_action(Ref *ref);
+    
+    void nextAlbum_click(Ref *ref);
+
 };
 
 #endif /* defined(__OpenLLSIF__HomeScene__) */
