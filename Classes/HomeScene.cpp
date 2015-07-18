@@ -133,6 +133,7 @@ void HomeScene::onEnterTransitionDidFinish()
  */
 void HomeScene::homeButton_action(Ref *ref)
 {
+    
     //ボタンを押したときの動作を設定
     auto background = this->getChildByName("backgroundLayer");
 
@@ -170,6 +171,9 @@ void HomeScene::liveButton_action(Ref *ref)
     background->runAction(Sequence::create(FadeTo::create(0.3f, 0),CallFunc::create([this]()
                                                                                     {
                                                                                         this->removeChildByName("backgroundLayer");
+                                                                                        
+                                                                                        
+                                                                                        
                                                                                         auto newLayer = CSLoader::getInstance()->createNode("res/song_selection.csb");
                                                                                         auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/song_selection.csb");
                                                                                         newLayer->setName("backgroundLayer");
@@ -222,6 +226,11 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         }
                                                                                         
                                                                                         
+                                                                                        Sprite* backgroundSprite = Sprite::create("res/Image/hard_background.png");
+                                                                                        backgroundSprite->setName("backgroundImage");
+                                                                                        backgroundSprite->setPosition(480, 320);
+                                                                                        backgroundSprite->setLocalZOrder(-2);
+                                                                                        this->addChild(backgroundSprite);
                                                                                         
                                                                                         jacketNode->setLocalZOrder(-1);
                                                                                         jacketNode->setPosition(480, 380);
@@ -232,6 +241,9 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         //ボタンの設定
                                                                                         auto nextButton = newLayer->getChildByName<ui::Button*>("next_button");
                                                                                         nextButton->addClickEventListener(CC_CALLBACK_1(HomeScene::nextAlbum_click, this));
+                                                                                        
+                                                                                        auto previousButton = newLayer->getChildByName<ui::Button*>("previous_button");
+                                                                                        previousButton->addClickEventListener(CC_CALLBACK_1(HomeScene::previousAlbum_click, this));
                                                                                         
                                                                                     }), NULL));
     
@@ -246,6 +258,10 @@ void HomeScene::liveButton_action(Ref *ref)
  */
 void HomeScene::nextAlbum_click(Ref *ref)
 {
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/selection.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
+    
+    
     auto jacketNode = this->getChildByName("jacketLayer");
     
     //ループを行う事で最初の状態は変化してしまうためあらかじめ保持しておく
@@ -259,11 +275,63 @@ void HomeScene::nextAlbum_click(Ref *ref)
         auto node = jacketNode->getChildByTag(i);
         Node* nstNode = jacketNode->getChildByTag(i+1);
         
-        node->runAction(Spawn::create(MoveTo::create(0.3f, nstNode->getPosition()), ScaleTo::create(0.3f, nstNode->getScale()), NULL));
-        node->setLocalZOrder(nstNode->getLocalZOrder());
+        node->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, nstNode->getPosition()), ScaleTo::create(0.2f, nstNode->getScale()), NULL),
+                                         CallFunc::create([node, nstNode]()
+                                                          {
+                                                              node->setLocalZOrder(nstNode->getLocalZOrder());
+                                                          })
+                                         , NULL)
+                        
+                        );
     }
     //最後のノードは最初のノードの位置に行くため、保持しておいた情報をもとに変化させる
     auto finalNode = jacketNode->getChildByTag(jacketNode->getChildrenCount()-1);
-    finalNode->runAction(Spawn::create(MoveTo::create(0.3f, zeroPoint), ScaleTo::create(0.3f, zeroScale), NULL));
-    finalNode->setLocalZOrder(zeroLocalZ);
+    finalNode->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, zeroPoint), ScaleTo::create(0.2f, zeroScale), NULL),
+                                          CallFunc::create([finalNode, zeroLocalZ]
+                                                           {
+                                                               finalNode->setLocalZOrder(zeroLocalZ);
+                                                           })
+                                          , NULL));
+}
+
+/*
+ live画面中での前のボタンを押したときのジャケットに対する処理
+ addChildするときに指定したタグをもとに円形に配置したとなりのジャケットを参照、そして移動、スケールを繰り返す
+ */
+void HomeScene::previousAlbum_click(Ref *ref)
+{
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/selection.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
+    
+    auto jacketNode = this->getChildByName("jacketLayer");
+    
+    //ループを行う事で最初の状態は変化してしまうためあらかじめ保持しておく
+    int zeroLocalZ = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getLocalZOrder();
+    float zeroScale = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getScale();
+    Point zeroPoint = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getPosition();
+    
+    //ループは最後以外を行い、最後はループを抜けた後行う
+    for(int i=jacketNode->getChildrenCount() - 1;i>0;i--)
+    {
+        auto node = jacketNode->getChildByTag(i);
+        Node* nstNode = jacketNode->getChildByTag(i-1);
+        
+        node->runAction(Sequence::create(
+                                         Spawn::create(MoveTo::create(0.2f, nstNode->getPosition()), ScaleTo::create(0.2f, nstNode->getScale()), NULL),
+                                         CallFunc::create([node, nstNode]()
+                                                        {
+                                                            node->setLocalZOrder(nstNode->getLocalZOrder());
+                                                        })
+                                         , NULL)
+                        );
+    }
+    //最後のノードは最初のノードの位置に行くため、保持しておいた情報をもとに変化させる
+    auto finalNode = jacketNode->getChildByTag(0);
+    finalNode->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, zeroPoint), ScaleTo::create(0.2f, zeroScale), NULL),
+                                          CallFunc::create([finalNode, zeroLocalZ]
+    {
+        finalNode->setLocalZOrder(zeroLocalZ);
+    })
+                                          , NULL));
+    
 }

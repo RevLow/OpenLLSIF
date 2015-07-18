@@ -29,6 +29,7 @@ protected:
     void liveButton_action(Ref *ref);
     
     void nextAlbum_click(Ref *ref);
+    void previousAlbum_click(Ref *ref);
 
 };
 
