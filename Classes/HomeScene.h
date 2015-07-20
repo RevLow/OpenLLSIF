@@ -30,7 +30,10 @@ protected:
     
     void nextAlbum_click(Ref *ref);
     void previousAlbum_click(Ref *ref);
-
+    bool jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e);
+private:
+    //ジャケット内の先頭のインデックス番号を保持する
+    int touchable_index = 0;
 };
 
 #endif /* defined(__OpenLLSIF__HomeScene__) */

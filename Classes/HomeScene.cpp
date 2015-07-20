@@ -191,7 +191,7 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         
                                                                                         
                                                                                         
-                                                                                        
+                                                                                        //Jacketディレクトリからファイルのリストを取得
                                                                                         auto fileList = getDirContents("jacket");
                                                                                         float theta = 0;
                                                                                         float dTheta = 360 / fileList.size();
@@ -204,6 +204,7 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                             auto *sp = Sprite::create("jacket/"+img);
                                                                                             //あらかじめタグ付けを行っておく事で回転のボタンを押したときの処理を行えるようにする
                                                                                             sp->setTag(i);
+                                                                                            sp->setName("jacket/"+img);
                                                                                             
                                                                                             
                                                                                             double rad = MATH_DEG_TO_RAD(theta);
@@ -216,6 +217,7 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                             sp->setScale(point.GetScale());
                                                                                             
                                                                                             jacketNode->addChild(sp,z);
+                                                                                            
                                                                                             
                                                                                             //次にaddChildする位置を決める
                                                                                             if(i < fileList.size() / 2) z--;
@@ -245,6 +247,13 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         auto previousButton = newLayer->getChildByName<ui::Button*>("previous_button");
                                                                                         previousButton->addClickEventListener(CC_CALLBACK_1(HomeScene::previousAlbum_click, this));
                                                                                         
+                                                                                        
+                                                                                        //jacketNodeにイベントリスナーを追加する
+                                                                                        auto listener = EventListenerTouchOneByOne::create();
+                                                                                        //listener->setSwallowTouches(true);
+                                                                                        listener->onTouchBegan = CC_CALLBACK_2(HomeScene::jacket_touch, this);
+                                                                                        jacketNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+                                                                                        
                                                                                     }), NULL));
     
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
@@ -258,11 +267,15 @@ void HomeScene::liveButton_action(Ref *ref)
  */
 void HomeScene::nextAlbum_click(Ref *ref)
 {
+    
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/selection.mp3");
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
     
     
     auto jacketNode = this->getChildByName("jacketLayer");
+    
+    //クリック可能なスプライトを変更する
+    touchable_index = touchable_index == 0 ? jacketNode->getChildrenCount() - 1 : touchable_index-1;
     
     //ループを行う事で最初の状態は変化してしまうためあらかじめ保持しておく
     int zeroLocalZ = jacketNode->getChildByTag(0)->getLocalZOrder();
@@ -305,6 +318,9 @@ void HomeScene::previousAlbum_click(Ref *ref)
     
     auto jacketNode = this->getChildByName("jacketLayer");
     
+    //クリック可能なスプライトを変更する
+    touchable_index = touchable_index == jacketNode->getChildrenCount() - 1 ? 0 : touchable_index+1;
+    
     //ループを行う事で最初の状態は変化してしまうためあらかじめ保持しておく
     int zeroLocalZ = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getLocalZOrder();
     float zeroScale = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getScale();
@@ -334,4 +350,61 @@ void HomeScene::previousAlbum_click(Ref *ref)
     })
                                           , NULL));
     
+}
+
+/*
+ ジャケットをクリックしたときの処理を行う
+ touchable_indexとクリックされたスプライトのタグ番号を比較し、等しかったらゲームのシーンに移行する
+ 参考: http://ladywendy.com/lab/cocos2d-x-v3/170.html
+ */
+bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
+{
+    Node* node = this->getChildByName("jacketLayer");
+    
+    //クリックされたターゲットを取得する
+    //auto target = (Sprite*)e->getCurrentTarget();
+    
+    //クリックされたスプライトの領域
+    auto referenceSprite = (Sprite*)node->getChildByTag(touchable_index);
+    
+    Rect targetBox = referenceSprite->getBoundingBox();
+    
+    //クリックされた位置を取得
+    Vec2 touchPoint = node->convertTouchToNodeSpace(touch);
+    
+    if(targetBox.containsPoint(touchPoint))
+    {
+        CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide2.mp3");
+        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/decide2.mp3");
+        
+        
+        int num = node->getChildrenCount();
+        CCLOG("%d\n", num);
+        //選択項目以外を削除
+        for(int i=0;i < num;i++)
+        {
+            auto sp = node->getChildByTag(i);
+            CCLOG("%d", sp->getTag());
+            if(sp != referenceSprite)
+            {
+                node->removeChild(sp);
+            }
+        }
+        
+        //選択項目をアニメーション
+        auto seqAction = Sequence::create(Spawn::create(
+                                                        ScaleTo::create(0.5f, 1.5),
+                                                        FadeTo::create(0.5f, 0)
+                                                        , NULL),
+                                          CallFunc::create([node,referenceSprite]()
+                                                            {
+                                                                node->removeChild(referenceSprite);
+                                                            }), NULL);
+        referenceSprite->runAction(seqAction);
+        
+        return true;
+    }
+    
+    //touchPointが範囲内に入っていれば
+    return false;
 }
