@@ -10,3 +10,26 @@
 #ifdef __cplusplus
 	#include "cocos2d.h"
 #endif
+
+#ifdef __cplusplus
+#include "cocos2d.h"
+//cocos2d-xで引数付きのシーンを作る為に作成
+//参考: http://melpon.org/blog/cocos2dx-create-func
+template<class T>
+struct create_func{
+    template<class... Args>
+    static T* create(Args&&... args){
+        auto p = new T();
+        if(p->init(std::forward<Args>(args)...))
+        {
+            p->autorelease();
+            return p;
+        }
+        else
+        {
+            delete p;
+            return nullptr;
+        }
+    }
+};
+#endif

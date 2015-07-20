@@ -374,17 +374,17 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
     
     if(targetBox.containsPoint(touchPoint))
     {
+        //決定音を鳴らす
         CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide2.mp3");
         CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/decide2.mp3");
         
-        
+        //ノードの数が減っていくためあらかじめ数を保持しておく
         int num = node->getChildrenCount();
-        CCLOG("%d\n", num);
+        
         //選択項目以外を削除
         for(int i=0;i < num;i++)
         {
             auto sp = node->getChildByTag(i);
-            CCLOG("%d", sp->getTag());
             if(sp != referenceSprite)
             {
                 node->removeChild(sp);
@@ -398,9 +398,12 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
                                                         , NULL),
                                           CallFunc::create([node,referenceSprite]()
                                                             {
+                                                                //アニメーション終了後にreferenceSpriteを消去
                                                                 node->removeChild(referenceSprite);
                                                             }), NULL);
         referenceSprite->runAction(seqAction);
+        
+        //ここで次のシーンへの遷移を行う
         
         return true;
     }
