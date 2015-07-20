@@ -12,6 +12,7 @@
 #include "SimpleAudioEngine.h"
 #include <dirent.h>
 #include "PointWithDepth.h"
+#include "PlayScene.h"
 
 USING_NS_CC;
 
@@ -400,10 +401,13 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
                                                             {
                                                                 //アニメーション終了後にreferenceSpriteを消去
                                                                 node->removeChild(referenceSprite);
+                                                                //ここで次のシーンへの遷移を行う
+                                                                CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+                                                                Scene* scene = PlayScene::createScene("tmp.zip");
+                                                                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
                                                             }), NULL);
         referenceSprite->runAction(seqAction);
         
-        //ここで次のシーンへの遷移を行う
         
         return true;
     }

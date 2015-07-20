@@ -11,9 +11,19 @@
 
 #include <iostream>
 
-class PlayScene : puclic cocos2d::Layer
+USING_NS_CC;
+
+/*
+ ゲームで使うファイルを引数にし、作成するためcreate_func<T>を実装する
+ create_func<T>はPrefix.pchで定義しているため呼び出し可能
+ */
+class PlayScene : public Layer, create_func<PlayScene>
 {
+public:
+    static cocos2d::Scene* createScene(std::string playSongFile);
+    bool init(std::string playSongFile);
+    using create_func::create;
     
-}
+};
 
 #endif /* defined(__OpenLLSIF__PlayScene__) */
