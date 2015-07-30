@@ -32,6 +32,10 @@ protected:
     void previousAlbum_click(Ref *ref);
     bool jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e);
 private:
+    /*
+     ジャケットのタグ番号とファイルのパスの対応付けのためのMap
+     */
+    std::vector<std::string> JacketInfoMap;
     //ジャケット内の先頭のインデックス番号を保持する
     int touchable_index = 0;
 };

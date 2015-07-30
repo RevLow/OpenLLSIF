@@ -60,10 +60,24 @@ static AppDelegate s_sharedApplication;
     [eaglView setMultipleTouchEnabled:NO];
 
     // Use RootViewController manage CCEAGLView 
+//    _viewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
+//    _viewController.wantsFullScreenLayout = YES;
+//    _viewController.view = eaglView;
+
     _viewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
     _viewController.wantsFullScreenLayout = YES;
-    _viewController.view = eaglView;
-
+    eaglView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin |
+    UIViewAutoresizingFlexibleRightMargin |
+    UIViewAutoresizingFlexibleTopMargin |
+    UIViewAutoresizingFlexibleBottomMargin |
+    UIViewAutoresizingFlexibleWidth |
+    UIViewAutoresizingFlexibleHeight;
+    _viewController.view.autoresizesSubviews = YES;
+    _viewController.view.frame = eaglView.frame;
+    [_viewController.view addSubview:eaglView];
+    _viewController.view.backgroundColor = [UIColor clearColor];
+    eaglView.backgroundColor = [UIColor clearColor];
+    
     // Set RootViewController to window
     if ( [[UIDevice currentDevice].systemVersion floatValue] < 6.0)
     {

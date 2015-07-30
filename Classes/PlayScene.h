@@ -23,7 +23,12 @@ public:
     static cocos2d::Scene* createScene(std::string playSongFile);
     bool init(std::string playSongFile);
     using create_func::create;
-    
+private:
+    int BPM;        //音楽のBPM
+    int BGM_TIME;   //音楽の時間
+    int NOTE_COUNT; //全ノートの数
+    void Run();
+    void PlayGame(float deltaT);
 };
 
 #endif /* defined(__OpenLLSIF__PlayScene__) */
