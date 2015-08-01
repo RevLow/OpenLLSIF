@@ -108,11 +108,27 @@ bool HomeScene::init()
     auto configButton = homeScene->getChildByName<ui::Button*>("Config_Button");
     configButton->addClickEventListener([this](Ref* sender)
     {
+        //getTouchDispatcher()->addTargetedDelegate(this, kCCMenuHandlerPriority - 1, true);
+
         auto size = Director::getInstance()->getVisibleSize();
         auto configLayer = Config::ConfigLayer::create();
         this->addChild(configLayer);
+        
+        //イベントリスナーを追加する
+        auto listener = EventListenerTouchOneByOne::create();
+        
+        listener->setSwallowTouches(true);
+        listener->onTouchBegan = [](Touch* touch, Event* event){
+            return true;
+        };
+        
+        //重なりのPriorityにConfigを利用する
+        this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, configLayer);
+        configLayer->setAnchorPoint(Vec2(0.0,0.0));
         configLayer->setPosition(Vec2(size.width / 2, size.height / 2));
         configLayer->setLocalZOrder(2);
+        configLayer->setScale(0.5f);
+        configLayer->runAction(ScaleTo::create(0.1f, 1.0f));
     });
     
     return true;
@@ -270,6 +286,7 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         this->addChild(backgroundSprite);
                                                                                         
                                                                                         jacketNode->setLocalZOrder(-1);
+                                                                                        jacketNode->setScale(0.5f);
                                                                                         jacketNode->setPosition(480, 380);
                                                                                         this->addChild(jacketNode);
                                                                                         
@@ -285,9 +302,13 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         
                                                                                         //jacketNodeにイベントリスナーを追加する
                                                                                         auto listener = EventListenerTouchOneByOne::create();
+                                                                                        
                                                                                         //listener->setSwallowTouches(true);
                                                                                         listener->onTouchBegan = CC_CALLBACK_2(HomeScene::jacket_touch, this);
-                                                                                        jacketNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+                                                                                        
+                                                                                        //重なりのPriorityにjacketNodeを利用する
+                                                                                        //これにより、jacketNodeより上にきたNodeのイベントが優先される(主にConfigのレイヤーのため)
+                                                                                        this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, jacketNode);
                                                                                         
                                                                                     }), NULL));
     
@@ -302,6 +323,8 @@ void HomeScene::liveButton_action(Ref *ref)
  */
 void HomeScene::nextAlbum_click(Ref *ref)
 {
+    ui::Button* nstButton = (ui::Button*)ref;
+    nstButton->setEnabled(false);
     
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/selection.mp3");
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
@@ -335,8 +358,9 @@ void HomeScene::nextAlbum_click(Ref *ref)
     //最後のノードは最初のノードの位置に行くため、保持しておいた情報をもとに変化させる
     auto finalNode = jacketNode->getChildByTag(jacketNode->getChildrenCount()-1);
     finalNode->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, zeroPoint), ScaleTo::create(0.2f, zeroScale), NULL),
-                                          CallFunc::create([finalNode, zeroLocalZ]
+                                          CallFunc::create([finalNode, zeroLocalZ, nstButton]
                                                            {
+                                                               nstButton->setEnabled(true);
                                                                finalNode->setLocalZOrder(zeroLocalZ);
                                                            })
                                           , NULL));
@@ -348,6 +372,9 @@ void HomeScene::nextAlbum_click(Ref *ref)
  */
 void HomeScene::previousAlbum_click(Ref *ref)
 {
+    ui::Button* prevButton = (ui::Button*)ref;
+    prevButton->setEnabled(false);
+    
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/selection.mp3");
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
     
@@ -379,9 +406,10 @@ void HomeScene::previousAlbum_click(Ref *ref)
     //最後のノードは最初のノードの位置に行くため、保持しておいた情報をもとに変化させる
     auto finalNode = jacketNode->getChildByTag(0);
     finalNode->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, zeroPoint), ScaleTo::create(0.2f, zeroScale), NULL),
-                                          CallFunc::create([finalNode, zeroLocalZ]
+                                          CallFunc::create([finalNode, zeroLocalZ, prevButton]
     {
         finalNode->setLocalZOrder(zeroLocalZ);
+        prevButton->setEnabled(true);
     })
                                           , NULL));
     

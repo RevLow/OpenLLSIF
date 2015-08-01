@@ -18,6 +18,15 @@ const int MAX_BUTTON_COUNT=1;
 const std::string ButtonArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button.png"};
 const std::string ButtonOverArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button_Click.png"};
 
+
+/*=================================================================================================*/
+/*                         メインのウィンドウの作成                                                    */
+/*                                                                                                 */
+/*=================================================================================================*/
+
+/*
+ メインウィンドウの初期化処理
+ */
 bool ConfigLayer::init()
 {
     if(!Layer::init())
@@ -41,9 +50,19 @@ bool ConfigLayer::init()
     //ボタンを閉じる処理を設定
     exitButton->addClickEventListener([this](Ref* sender)
     {
-        //このノードの親を取得し、親から見てこのノードを削除する
-        auto parentNode = this->getParent();
-        parentNode->removeChild(this);
+        this->runAction(Sequence::create(
+                                         Spawn::create(ScaleTo::create(0.05f, 0.5f),
+                                                       FadeTo::create(0.05f, 0), NULL),
+                                         CallFunc::create([this]()
+                                                        {
+                                                            //このノードの親を取得し、親から見てこのノードを削除する
+                                                            auto parentNode = this->getParent();
+                                                            parentNode->removeChild(this);
+                                                        })
+                                         
+                                         , NULL));
+        
+
     });
     
     
@@ -60,12 +79,19 @@ bool ConfigLayer::init()
     return true;
 }
 
-
+/*
+ メインウィンドウのセルのサイズ指定
+ 幅は窓の幅、高さはボタンの大きさから170位を指定する
+ */
 Size ConfigLayer::cellSizeForTable(TableView* table)
 {
     return Size(window_size.width, 170);
 }
 
+/*
+ idx番目のCellが描画されるときに呼ばれるDelegateメソッド
+ ひとつに最大３つのボタンを配置させる
+ */
 TableViewCell* ConfigLayer::tableCellAtIndex(TableView* table, ssize_t idx)
 {
     int index = idx * 3;
@@ -116,11 +142,31 @@ void ConfigLayer::ButtonClick(Ref* sender)
             //Installボタンを押した場合はInstallレイヤーを作成し、のせる
             auto installLayer = InstallLayer::create();
             this->addChild(installLayer);
-            installLayer->setPosition(window_size.width / 2, window_size.height / 2);
+            
+            //イベントリスナーを追加する
+            auto listener = EventListenerTouchOneByOne::create();
+            listener->setSwallowTouches(true);
+            listener->onTouchBegan = [](Touch* touch, Event* event){
+                return true;
+            };
+            //重なりのPriorityにinstallLayerを利用する
+            this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, installLayer);
+            installLayer->setAnchorPoint(Vec2(0.0,0.0));
+            //installLayer->setPosition(window_size.width / 2, window_size.height / 2);
             break;
     }
 }
 
+
+
+
+
+
+
+/*=================================================================================================*/
+/*                         Installのウィンドウの作成                                                  */
+/*                                                                                                 */
+/*=================================================================================================*/
 
 
 bool InstallLayer::init()
@@ -129,6 +175,36 @@ bool InstallLayer::init()
     {
         return false;
     }
+    
+    //背景画像を設定
+    Sprite* background = Sprite::create("res/Image/Config/Song_Install_Window.png");
+    addChild(background);
+    
+    window_size = background->getContentSize();
+    //ウインドウを閉じるボタンを作成
+    cocos2d::ui::Button* exitButton = cocos2d::ui::Button::create("res/Image/Config/Exit_Button.png", "res/Image/Config/Exit_Button_Click.png");
+    addChild(exitButton);
+    exitButton->setPosition(Vec2(
+                                 window_size.width/2 - (exitButton->getContentSize().width / 2),
+                                 window_size.height/2 - (exitButton->getContentSize().height/2)));
+    
+    //ボタンを閉じる処理を設定
+    exitButton->addClickEventListener([this](Ref* sender)
+                                      {
+                                          this->runAction(Sequence::create(
+                                                                           Spawn::create(ScaleTo::create(0.05f, 0.5f),
+                                                                                         FadeTo::create(0.05f, 0), NULL),
+                                                                           CallFunc::create([this]()
+                                                                                            {
+                                                                                                //このノードの親を取得し、親から見てこのノードを削除する
+                                                                                                auto parentNode = this->getParent();
+                                                                                                parentNode->removeChild(this);
+                                                                                            })
+                                                                           
+                                                                           , NULL));
+                                          
+                                          
+                                      });
     
     return true;
 }

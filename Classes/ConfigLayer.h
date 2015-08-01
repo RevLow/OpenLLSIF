@@ -50,6 +50,9 @@ namespace Config
         CREATE_FUNC(InstallLayer);
         virtual bool init();
         
+    private:
+        Size window_size;
+        
 //        //TableViewDataSourceの抽象メソッド
 //        virtual Size cellSizeForTable(TableView* table);
 //        virtual TableViewCell* tableCellAtIndex(TableView* table,ssize_t idx);
