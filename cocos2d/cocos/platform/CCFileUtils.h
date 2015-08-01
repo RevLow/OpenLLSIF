@@ -299,6 +299,13 @@ public:
     virtual std::string getWritablePath() const = 0;
     
     /**
+     *  Gets the cache path.
+     *  @return  The path that can be write/read a file in
+     */
+    virtual std::string getCachedPath() const = 0;
+    
+    
+    /**
      *  Sets writable path.
      */
     virtual void setWritablePath(const std::string& writablePath);

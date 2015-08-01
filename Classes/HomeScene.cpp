@@ -13,6 +13,7 @@
 #include <dirent.h>
 #include "PointWithDepth.h"
 #include "PlayScene.h"
+#include "ConfigLayer.h"
 
 USING_NS_CC;
 
@@ -104,7 +105,15 @@ bool HomeScene::init()
     auto liveButton = homeScene->getChildByName<ui::Button*>("Live_Button");
     liveButton->addClickEventListener(CC_CALLBACK_1(HomeScene::liveButton_action, this));
     
-    
+    auto configButton = homeScene->getChildByName<ui::Button*>("Config_Button");
+    configButton->addClickEventListener([this](Ref* sender)
+    {
+        auto size = Director::getInstance()->getVisibleSize();
+        auto configLayer = Config::ConfigLayer::create();
+        this->addChild(configLayer);
+        configLayer->setPosition(Vec2(size.width / 2, size.height / 2));
+        configLayer->setLocalZOrder(2);
+    });
     
     return true;
 }
