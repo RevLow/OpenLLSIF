@@ -133,3 +133,13 @@ void PlayScene::PlayGame(float deltaT)
 {
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/Perfect.mp3");
 }
+
+/*
+ バックグラウンドから復帰したときに呼ぶ関数
+ AppDelegateで呼ぶように指定してある
+ */
+void PlayScene::applicationWillEnterForeground()
+{
+    auto videoLayer =  this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
+    videoLayer->play();
+}

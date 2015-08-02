@@ -23,6 +23,8 @@ public:
     static cocos2d::Scene* createScene(std::string playSongFile);
     bool init(std::string playSongFile);
     using create_func::create;
+    //画面から復帰したときに呼ぶ関数
+    virtual void applicationWillEnterForeground();
 private:
     int BPM;        //音楽のBPM
     int BGM_TIME;   //音楽の時間

@@ -10,43 +10,13 @@
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
-#include <dirent.h>
 #include "PointWithDepth.h"
 #include "PlayScene.h"
 #include "ConfigLayer.h"
 
+
+
 USING_NS_CC;
-
-
-/*
- 指定ディレクトリ内のファイルのリストを取得する関数
- */
-std::vector<std::string> getDirContents(std::string dirname) {
-    std::vector<std::string> list;
-    
-    DIR* dp;
-    struct dirent* ent;
-    
-    if ((dp = opendir(dirname.c_str()), "r") == NULL) {
-        CCLOGERROR("ディレクトリが開けません。：%s", dirname.c_str());
-        perror(dirname.c_str());
-        return list;
-    }
-    
-    while ((ent = readdir(dp)) != NULL) {
-        CCLOG("ファイル：%s", ent->d_name);
-        if(ent->d_type != '\x04')
-        {
-            list.push_back(ent->d_name);
-        }
-        
-    };
-    closedir(dp);
-    
-    return list;
-}
-
-
 
 
 Scene* HomeScene::createScene()
@@ -121,7 +91,6 @@ bool HomeScene::init()
         listener->onTouchBegan = [](Touch* touch, Event* event){
             return true;
         };
-        
         //重なりのPriorityにConfigを利用する
         this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, configLayer);
         configLayer->setAnchorPoint(Vec2(0.0,0.0));
@@ -205,91 +174,12 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         action->gotoFrameAndPlay(0,true);
                                                                                         this->addChild(newLayer, 0);
                                                                                         
-                                                                                        
-                                                                                        //ジャケットを配置するノードの作成
-                                                                                        //ジャケットサイズは500x500
-                                                                                        Node* jacketNode = Node::create();
-                                                                                        jacketNode->setName("jacketLayer");
-                                                                                        
-                                                                                        
-                                                                                        std::string docDir = FileUtils::getInstance()->getWritablePath();
-                                                                                        //Jacketディレクトリからファイルのリストを取得
-                                                                                        auto fileList = getDirContents(docDir);
-                                                                                        float theta = 0;
-                                                                                        float dTheta = 360 / fileList.size();
-                                                                                        float z = 0;
-                                                                                        
-
-                                                                                        for(int i=0; i < fileList.size();i++)
-                                                                                        {
-                                                                                            auto zipFile = fileList[i];
-                                                                                            
-                                                                                            unsigned long size = 0;
-                                                                                            //plistの情報を取得
-                                                                                            unsigned char* plistBuff = FileUtils::getInstance()->getFileDataFromZip(docDir+"/"+zipFile, "fileInfo.plist", (ssize_t*)&size);
-                                                                                            
-                                                                                            //plistからカバー画像のファイル名を取得
-                                                                                            ValueMap values = FileUtils::getInstance()->getValueMapFromData((const char*)plistBuff, size);
-                                                                                            auto imgFileName = values.at("Cover").asString();
-                                                                                            
-                                                                                            //不要になったplistのバッファを解放
-                                                                                            free((void*)plistBuff);
-                                                                                            
-                                                                                            unsigned char* imgBuff = FileUtils::getInstance()->getFileDataFromZip(docDir+"/"+zipFile,imgFileName, (ssize_t*)&size);
-                                                                                            
-                                                                                            auto img = new Image();
-                                                                                            //autoreleaseプールに追加しておく
-                                                                                            img->autorelease();
-                                                                                            img->initWithImageData(imgBuff, size);
-                                                                                            
-                                                                                            //不要になったimageのバッファを解放
-                                                                                            free(imgBuff);
-                                                                                            
-                                                                                            auto texture = new Texture2D();
-                                                                                            //autoreleaseプールに追加しておく
-                                                                                            texture->autorelease();
-                                                                                            texture->initWithImage(img);
-                                                                                            
-                                                                                            auto *sp = Sprite::createWithTexture(texture);
-                                                                                            //あらかじめタグ付けを行っておく事で回転のボタンを押したときの処理を行えるようにする
-                                                                                            sp->setTag(i);
-                                                                                            
-                                                                                            //コンテナに登録を行う
-                                                                                            JacketInfoMap.push_back(zipFile);
-                                                                                            
-                                                                                            
-                                                                                            double rad = MATH_DEG_TO_RAD(theta);
-                                                                                            Vec3 v(480*sin(rad), 0.0, 4.8*cos(rad));
-                                                                                            PointWithDepth point;
-                                                                                            point.SetWorldPosition(v.x, v.y, v.z);
-                                                                                            
-                                                                                            
-                                                                                            sp->setPosition(point);
-                                                                                            sp->setScale(point.GetScale());
-                                                                                            
-                                                                                            jacketNode->addChild(sp,z);
-                                                                                            
-                                                                                            
-                                                                                            //次にaddChildする位置を決める
-                                                                                            if(i < fileList.size() / 2) z--;
-                                                                                            else if(i==fileList.size()/2) z = fileList.size()%2 ? z: z+1;
-                                                                                            else z++;
-                                                                                            
-                                                                                            theta += dTheta;
-                                                                                        }
-                                                                                        
-                                                                                        
+                                                                                        //背景画像の作成
                                                                                         Sprite* backgroundSprite = Sprite::create("res/Image/hard_background.png");
                                                                                         backgroundSprite->setName("backgroundImage");
                                                                                         backgroundSprite->setPosition(480, 320);
                                                                                         backgroundSprite->setLocalZOrder(-2);
                                                                                         this->addChild(backgroundSprite);
-                                                                                        
-                                                                                        jacketNode->setLocalZOrder(-1);
-                                                                                        jacketNode->setScale(0.5f);
-                                                                                        jacketNode->setPosition(480, 380);
-                                                                                        this->addChild(jacketNode);
-                                                                                        
                                                                                         
                                                                                         
                                                                                         //ボタンの設定
@@ -299,17 +189,99 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         auto previousButton = newLayer->getChildByName<ui::Button*>("previous_button");
                                                                                         previousButton->addClickEventListener(CC_CALLBACK_1(HomeScene::previousAlbum_click, this));
                                                                                         
+                                                                                        std::string docDir = FileUtils::getInstance()->getWritablePath();
+                                                                                        //Jacketディレクトリからファイルのリストを取得
+                                                                                        auto fileList = getContentsList(docDir);
                                                                                         
-                                                                                        //jacketNodeにイベントリスナーを追加する
-                                                                                        auto listener = EventListenerTouchOneByOne::create();
-                                                                                        
-                                                                                        //listener->setSwallowTouches(true);
-                                                                                        listener->onTouchBegan = CC_CALLBACK_2(HomeScene::jacket_touch, this);
-                                                                                        
-                                                                                        //重なりのPriorityにjacketNodeを利用する
-                                                                                        //これにより、jacketNodeより上にきたNodeのイベントが優先される(主にConfigのレイヤーのため)
-                                                                                        this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, jacketNode);
-                                                                                        
+                                                                                        //ファイルが存在している場合のみ
+                                                                                        if(fileList.size() > 0)
+                                                                                        {
+                                                                                            //ジャケットを配置するノードの作成
+                                                                                            //ジャケットサイズは500x500
+                                                                                            Node* jacketNode = Node::create();
+                                                                                            jacketNode->setName("jacketLayer");
+                                                                                            
+                                                                                            
+                                                                                            
+                                                                                            float theta = 0;
+                                                                                            float dTheta = 360 / fileList.size();
+                                                                                            float z = 0;
+                                                                                            
+                                                                                            
+                                                                                            for(int i=0; i < fileList.size();i++)
+                                                                                            {
+                                                                                                auto zipFile = fileList[i];
+                                                                                                
+                                                                                                unsigned long size = 0;
+                                                                                                //plistの情報を取得
+                                                                                                unsigned char* plistBuff = FileUtils::getInstance()->getFileDataFromZip(docDir+"/"+zipFile, "fileInfo.plist", (ssize_t*)&size);
+                                                                                                
+                                                                                                //plistからカバー画像のファイル名を取得
+                                                                                                ValueMap values = FileUtils::getInstance()->getValueMapFromData((const char*)plistBuff, size);
+                                                                                                auto imgFileName = values.at("Cover").asString();
+                                                                                                
+                                                                                                //不要になったplistのバッファを解放
+                                                                                                free((void*)plistBuff);
+                                                                                                
+                                                                                                unsigned char* imgBuff = FileUtils::getInstance()->getFileDataFromZip(docDir+"/"+zipFile,imgFileName, (ssize_t*)&size);
+                                                                                                
+                                                                                                auto img = new Image();
+                                                                                                //autoreleaseプールに追加しておく
+                                                                                                img->autorelease();
+                                                                                                img->initWithImageData(imgBuff, size);
+                                                                                                
+                                                                                                //不要になったimageのバッファを解放
+                                                                                                free(imgBuff);
+                                                                                                
+                                                                                                auto texture = new Texture2D();
+                                                                                                //autoreleaseプールに追加しておく
+                                                                                                texture->autorelease();
+                                                                                                texture->initWithImage(img);
+                                                                                                
+                                                                                                auto *sp = Sprite::createWithTexture(texture);
+                                                                                                //あらかじめタグ付けを行っておく事で回転のボタンを押したときの処理を行えるようにする
+                                                                                                sp->setTag(i);
+                                                                                                
+                                                                                                //コンテナに登録を行う
+                                                                                                JacketInfoMap.push_back(zipFile);
+                                                                                                
+                                                                                                
+                                                                                                double rad = MATH_DEG_TO_RAD(theta);
+                                                                                                Vec3 v(480*sin(rad), 0.0, 4.8*cos(rad));
+                                                                                                PointWithDepth point;
+                                                                                                point.SetWorldPosition(v.x, v.y, v.z);
+                                                                                                
+                                                                                                
+                                                                                                sp->setPosition(point);
+                                                                                                sp->setScale(point.GetScale());
+                                                                                                
+                                                                                                jacketNode->addChild(sp,z);
+                                                                                                
+                                                                                                
+                                                                                                //次にaddChildする位置を決める
+                                                                                                if(i < fileList.size() / 2) z--;
+                                                                                                else if(i==fileList.size()/2) z = fileList.size()%2 ? z: z+1;
+                                                                                                else z++;
+                                                                                                
+                                                                                                theta += dTheta;
+                                                                                            }
+                                                                                            
+                                                                                            jacketNode->setLocalZOrder(-1);
+                                                                                            jacketNode->setScale(0.5f);
+                                                                                            jacketNode->setPosition(480, 380);
+                                                                                            this->addChild(jacketNode);
+                                                                                            
+                                                                                            
+                                                                                            //jacketNodeにイベントリスナーを追加する
+                                                                                            auto listener = EventListenerTouchOneByOne::create();
+                                                                                            
+                                                                                            //listener->setSwallowTouches(true);
+                                                                                            listener->onTouchBegan = CC_CALLBACK_2(HomeScene::jacket_touch, this);
+                                                                                            
+                                                                                            //重なりのPriorityにjacketNodeを利用する
+                                                                                            //これにより、jacketNodeより上にきたNodeのイベントが優先される(主にConfigのレイヤーのため)
+                                                                                            this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, jacketNode);
+                                                                                        }
                                                                                     }), NULL));
     
     CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
@@ -331,6 +303,14 @@ void HomeScene::nextAlbum_click(Ref *ref)
     
     
     auto jacketNode = this->getChildByName("jacketLayer");
+    
+    //もしも、jacketNodeが存在しない場合
+    //-> ひとつも楽曲が無い場合、ボタンを有効化し戻る
+    if(jacketNode == NULL)
+    {
+        nstButton->setEnabled(true);
+        return;
+    }
     
     //クリック可能なスプライトを変更する
     touchable_index = touchable_index == 0 ? jacketNode->getChildrenCount() - 1 : touchable_index-1;
@@ -379,6 +359,14 @@ void HomeScene::previousAlbum_click(Ref *ref)
     CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
     
     auto jacketNode = this->getChildByName("jacketLayer");
+    
+    //もしも、jacketNodeが存在しない場合
+    //-> ひとつも楽曲が無い場合、ボタンを有効化し、戻る
+    if(jacketNode == NULL)
+    {
+        prevButton->setEnabled(true);
+        return;
+    }
     
     //クリック可能なスプライトを変更する
     touchable_index = touchable_index == jacketNode->getChildrenCount() - 1 ? 0 : touchable_index+1;

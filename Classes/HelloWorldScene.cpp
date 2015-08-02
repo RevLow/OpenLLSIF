@@ -53,6 +53,7 @@ bool HelloWorld::init()
     //////////////////////////////
     //3, BGM再生
     //
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/BGM/paradice_live.mp3");
     CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("Sound/BGM/paradice_live.mp3");
     
     //////////////////////////////

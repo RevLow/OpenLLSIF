@@ -9,11 +9,10 @@
 #endif
 
 #ifdef __cplusplus
-	#include "cocos2d.h"
-#endif
 
-#ifdef __cplusplus
 #include "cocos2d.h"
+#include <dirent.h>
+
 //cocos2d-xで引数付きのシーンを作る為に作成
 //参考: http://melpon.org/blog/cocos2dx-create-func
 template<class T>
@@ -33,4 +32,37 @@ struct create_func{
         }
     }
 };
+
+
+
+/*
+ 指定ディレクトリ内のリストを取得する関数
+ dirname: 対象のディレクトリ
+ isContainDir: ディレクトリを対象に含めるか
+ */
+static std::vector<std::string> getContentsList(std::string dirname, bool isContainDir=false) {
+    std::vector<std::string> list;
+    
+    DIR* dp;
+    struct dirent* ent;
+    
+    if ((dp = opendir(dirname.c_str()), "r") == NULL) {
+        CCLOGERROR("ディレクトリが開けません。：%s", dirname.c_str());
+        perror(dirname.c_str());
+        return list;
+    }
+    
+    while ((ent = readdir(dp)) != NULL) {
+        CCLOG("ファイル：%s", ent->d_name);
+        if(ent->d_type != '\x04')
+        {
+            list.push_back(ent->d_name);
+        }
+        
+    };
+    closedir(dp);
+    
+    return list;
+}
+
 #endif

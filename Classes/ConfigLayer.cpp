@@ -8,6 +8,12 @@
 
 #include "ConfigLayer.h"
 #include "ui/CocosGUI.h"
+#include "cocostudio/CocoStudio.h"
+
+
+
+#import "external/unzip/unzip.h"
+
 
 using namespace Config;
 
@@ -17,6 +23,15 @@ const int MAX_BUTTON_COUNT=1;
 
 const std::string ButtonArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button.png"};
 const std::string ButtonOverArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button_Click.png"};
+
+
+//ボタンのクリックを制御する
+inline void ButtonEnableDisable(ui::Button* button, bool isable)
+{
+    button->setTouchEnabled(isable);
+    button->setEnabled(isable);
+    button->setBright(isable);
+}
 
 
 /*=================================================================================================*/
@@ -152,7 +167,6 @@ void ConfigLayer::ButtonClick(Ref* sender)
             //重なりのPriorityにinstallLayerを利用する
             this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, installLayer);
             installLayer->setAnchorPoint(Vec2(0.0,0.0));
-            //installLayer->setPosition(window_size.width / 2, window_size.height / 2);
             break;
     }
 }
@@ -206,5 +220,282 @@ bool InstallLayer::init()
                                           
                                       });
     
+    //ファイルのリストを作成する
+    std::string docPath = FileUtils::getInstance()->getWritablePath();
+    zipFileList = getContentsList(docPath);
+    
+    
+    
+    //テーブルビューを設定
+    TableView* tableView = TableView::create(this, Size(window_size.width - 50, window_size.height - 50));
+    tableView->setDirection(TableView::Direction::VERTICAL);
+    tableView->setName("SongTable");
+    
+    tableView->setVerticalFillOrder(TableView::VerticalFillOrder::TOP_DOWN);
+    tableView->setPosition(Vec2((-window_size.width / 2) + 20, (-window_size.height / 2) - 30));
+    tableView->setDelegate(this);
+    addChild(tableView);
+    tableView->reloadData();
+    
+    
     return true;
 }
+
+
+//TableViewDataSourceの抽象メソッド
+Size InstallLayer::cellSizeForTable(TableView* table)
+{
+    return Size(window_size.width, 100);
+}
+
+
+TableViewCell* InstallLayer::tableCellAtIndex(TableView* table,ssize_t idx)
+{
+    // セル
+    TableViewCell *cell = table->dequeueCell();
+    
+    cell = new TableViewCell();
+    cell->autorelease();
+    
+    // Background
+ 
+    Sprite* bg = Sprite::create();
+    bg->setAnchorPoint(Point(0, 0));
+    bg->setTextureRect(Rect(0, 0, window_size.width, 100));
+    bg->setColor(Color3B(245,245,245));
+    cell->addChild(bg);
+
+    
+    std::string zipFile = zipFileList.at(idx);
+    std::string docDir = FileUtils::getInstance()->getWritablePath();
+    
+
+    unsigned long size = 0;
+    //plistの情報を取得
+    unsigned char* plistBuff = FileUtils::getInstance()->getFileDataFromZip(docDir+"/"+zipFile, "fileInfo.plist", (ssize_t*)&size);
+    
+    //plistから楽曲の情報を取得
+    ValueMap values = FileUtils::getInstance()->getValueMapFromData((const char*)plistBuff, size);
+    auto imgFileName = values.at("Cover").asString();
+    auto text = values.at("Name").asString();
+    
+    
+    //不要になったplistのバッファを解放
+    free((void*)plistBuff);
+    
+    unsigned char* imgBuff = FileUtils::getInstance()->getFileDataFromZip(docDir+"/"+zipFile,imgFileName, (ssize_t*)&size);
+    
+    auto img = new Image();
+    //autoreleaseプールに追加しておく
+    img->autorelease();
+    img->initWithImageData(imgBuff, size);
+    
+    //不要になったimageのバッファを解放
+    free(imgBuff);
+    
+    auto texture = new Texture2D();
+    //autoreleaseプールに追加しておく
+    texture->autorelease();
+    texture->initWithImage(img);
+    
+    auto *sp = Sprite::createWithTexture(texture);
+    sp->setScale(0.2f, 0.2f);
+    sp->setPosition(Vec2(50, 50));
+    cell->addChild(sp);
+    
+    
+    // テキスト部分
+    auto *label_2 = LabelTTF::create(text.c_str(), "Arial", 36);
+    
+    label_2->setAnchorPoint(Point(0, 0));
+    label_2->setPosition(Point(100, 25));
+    label_2->setColor(Color3B(64,64,64));
+    cell->addChild(label_2);
+    
+    // ボーダーライン
+    Sprite* line = Sprite::create();
+    line->setAnchorPoint(Vec2(0, 0));
+    line->setTextureRect(Rect(0, 0, window_size.width, 1));
+    line->setColor(Color3B(124,124,124));
+    cell->addChild(line);
+    
+    cell->setName(text);
+    
+    return cell;
+}
+
+
+ssize_t InstallLayer::numberOfCellsInTableView(TableView* table)
+{
+    return zipFileList.size();
+}
+
+//TableViewDelegateの抽象メソッド
+void InstallLayer::tableCellTouched(TableView* table,TableViewCell* cell)
+{
+    installTargetFile = zipFileList.at(cell->getIdx());
+    installTargetFileName = cell->getName();
+    
+    auto dialog_Window = CSLoader::getInstance()->createNode("res/Dialog_Window.csb");
+    dialog_Window->setName("DialogLayer");
+    dialog_Window->setAnchorPoint(Vec2(0.5,0.5));
+    addChild(dialog_Window);
+    
+    //ボタンの設定
+    auto cancel_Button = dialog_Window->getChildByName<ui::Button*>("No_Button");
+    auto yes_Button = dialog_Window->getChildByName<ui::Button*>("Yes_Button");
+    yes_Button->addClickEventListener(CC_CALLBACK_1(InstallLayer::installFile, this));
+    cancel_Button->addClickEventListener([dialog_Window](Ref *sender){dialog_Window->removeFromParent();});
+
+    //プログレスバーの設定
+    auto installBar = dialog_Window->getChildByName<ui::LoadingBar*>("InstallBar");
+    installBar->setPercent(0.0f);
+    
+    
+    //メッセージの作成
+    auto message_Text = dialog_Window->getChildByName<ui::Text*>("Message_Text");
+    message_Text->setScale(0.8f);
+    message_Text->setString(installTargetFileName+"のインストールを行います。\n完了後ファイルは自動的に削除されます。");
+    
+    
+    //イベントリスナーを追加する
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->setSwallowTouches(true);
+    listener->onTouchBegan = [](Touch* touch, Event* event){
+        return true;
+    };
+    //重なりのPriorityにinstallLayerを利用する
+    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, dialog_Window);
+}
+
+
+
+
+//指定ファイルのインストールを実行する
+void InstallLayer::installFile(Ref* sender)
+{
+    auto dialog_window = this->getChildByName("DialogLayer");
+    auto yes_Button = dialog_window->getChildByName<ui::Button*>("Yes_Button");
+    auto no_Button = dialog_window->getChildByName<ui::Button*>("No_Button");
+    //yes_Buttonとno_Buttonをクリックできなくする
+    ButtonEnableDisable(yes_Button, false);
+    ButtonEnableDisable(no_Button, false);
+
+    //ZipFileの解凍処理
+    
+    //キャッシュのパスを取得する
+
+    std::string docPath = FileUtils::getInstance()->getWritablePath();
+    
+    
+
+    //zipデータのファイル数を確認する
+    //数を数えるのにわざわざunzFileを使うのは非効率か？
+    unzFile zipFileInfo = unzOpen((docPath+"/"+installTargetFile).c_str());
+    unz_global_info global_info;
+    
+    if (unzGetGlobalInfo(zipFileInfo, &global_info) != UNZ_OK)
+    {
+        unzClose(zipFileInfo);
+        return;
+    }
+    
+    int fileCount = global_info.number_entry / 2;
+    unzClose(zipFileInfo);
+    
+    //プログレスバーの一ファイルあたりの増加量を計算する
+    float delta = 100.0f / (float)fileCount;
+    
+
+    std::thread th1 = std::thread([&,delta]()
+                                  {
+                                      //この関数は標準ではなく、cocos2dxのコードを変更し、追加をしている
+                                      std::string cachePath = FileUtils::getInstance()->getCachedPath() +"Song/" + installTargetFileName + '/';
+                                      std::string writablePath(FileUtils::getInstance()->getWritablePath());
+                                      
+                                      ZipFile *zipFile = new ZipFile(writablePath+installTargetFile);
+                                      FileUtils::getInstance()->createDirectory( cachePath );
+                                      
+                                      for( std::string filename = zipFile->getFirstFilename(); !filename.empty(); filename = zipFile->getNextFilename() )
+                                      {
+                                          //不要なキャッシュファイルがあれば、はじく
+                                          //もう少し、スマートな方法があればいいけど
+                                          if(filename.find("__MACOSX") != std::string::npos ||
+                                             filename.find(".DS_Store") != std::string::npos ||
+                                             filename.find("Thumb.db") != std::string::npos ||
+                                             filename.find("desktop.ini") != std::string::npos ||
+                                             filename.find("._") != std::string::npos) continue;
+                                          
+                                          if( *filename.rbegin() == '/' )
+                                          {
+                                              // It's a directory.
+                                              cocos2d::FileUtils::getInstance()->createDirectory( cachePath + filename );
+                                              
+                                          }
+                                          else
+                                          {
+                                              // It's a file.
+                                              ssize_t filesize;
+                                              unsigned char* filedata = zipFile->getFileData( filename, &filesize );
+                                              {
+                                                  const std::string fullPath( cachePath + filename );
+                                                  FILE* file = fopen( fullPath.c_str(), "wb" );
+                                                  fwrite( filedata, filesize, 1, file );
+                                                  fclose( file );
+                                              }
+                                              free( filedata );
+                                          }
+                                          
+                                          std::unique_lock<std::mutex> lock(mtx);
+                                          //値をバーに代入するのが完了するまで待つ
+                                          cv.wait(lock);
+                                          
+                                          if(progressValue + delta <= 100.0f) progressValue += delta;
+                                          else progressValue = 100.0f;
+                                      }
+                                      delete zipFile;
+                                      
+                                      //インストールが完了したらファイルは自動削除する
+                                      FileUtils::getInstance()->removeFile(writablePath+installTargetFile);
+                                      if(progressValue <= 100.0f) progressValue = 100.0f;
+                                      
+                                      //最初から探索を行い、zipFileListからインストールしたファイルを削除する
+                                      for(auto it = zipFileList.begin(); it != zipFileList.end();it++)
+                                      {
+                                          if(it->find(installTargetFile) != std::string::npos)
+                                          {
+                                              zipFileList.erase(it);
+                                              break;
+                                          }
+                                      }
+                                      
+                                      auto tableView = this->getChildByName<TableView*>("SongTable");
+                                      tableView->reloadData();
+                                  }
+    
+    );
+    
+    
+    this->schedule(schedule_selector(InstallLayer::loadingBarChange));
+    th1.detach();
+}
+
+void InstallLayer::loadingBarChange(float deltaT)
+{
+    std::unique_lock<std::mutex> lock(mtx);
+    auto dialog_window = this->getChildByName("DialogLayer");
+    auto loadingBar = dialog_window->getChildByName<ui::LoadingBar*>("InstallBar");
+    loadingBar->setPercent(progressValue);
+ 
+    if(progressValue >= 100)
+    {
+        
+        this->unschedule(schedule_selector(InstallLayer::loadingBarChange));
+        dialog_window->removeFromParent();
+    }
+    
+    //値の代入が完了したので次の処理に進ませるよう、状態の完了を伝える
+    cv.notify_one();
+}
+
+

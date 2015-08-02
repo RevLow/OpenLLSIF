@@ -1,5 +1,7 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
+#include "PlayScene.h"
+
 USING_NS_CC;
 
 AppDelegate::AppDelegate() {
@@ -68,7 +70,16 @@ void AppDelegate::applicationDidEnterBackground() {
 // this function will be called when the app is active again
 void AppDelegate::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
-
+    
+    auto currentScene = Director::getInstance()->getRunningScene()->getChildren().at(1);
+    
+    //もし、現在のシーンがPlaySceneならPlaySceneのapplicationWillEnterForegroundを呼び出す。
+    if(typeid(*currentScene) == typeid(PlayScene))
+    {
+        PlayScene* scene = (PlayScene*)currentScene;
+        scene->applicationWillEnterForeground();
+    }
+    
     // if you use SimpleAudioEngine, it must resume here
     // SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
