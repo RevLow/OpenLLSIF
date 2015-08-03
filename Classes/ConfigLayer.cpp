@@ -381,33 +381,7 @@ void InstallLayer::installFile(Ref* sender)
     ButtonEnableDisable(yes_Button, false);
     ButtonEnableDisable(no_Button, false);
 
-    //ZipFileの解凍処理
-    
-    //キャッシュのパスを取得する
-
-    std::string docPath = FileUtils::getInstance()->getWritablePath();
-    
-    
-
-    //zipデータのファイル数を確認する
-    //数を数えるのにわざわざunzFileを使うのは非効率か？
-    unzFile zipFileInfo = unzOpen((docPath+"/"+installTargetFile).c_str());
-    unz_global_info global_info;
-    
-    if (unzGetGlobalInfo(zipFileInfo, &global_info) != UNZ_OK)
-    {
-        unzClose(zipFileInfo);
-        return;
-    }
-    
-    int fileCount = global_info.number_entry / 2;
-    unzClose(zipFileInfo);
-    
-    //プログレスバーの一ファイルあたりの増加量を計算する
-    float delta = 100.0f / (float)fileCount;
-    
-
-    std::thread th1 = std::thread([&,delta]()
+    std::thread th1 = std::thread([&]()
                                   {
                                       //この関数は標準ではなく、cocos2dxのコードを変更し、追加をしている
                                       std::string cachePath = FileUtils::getInstance()->getCachedPath() +"Song/" + installTargetFileName + '/';
@@ -416,16 +390,11 @@ void InstallLayer::installFile(Ref* sender)
                                       ZipFile *zipFile = new ZipFile(writablePath+installTargetFile);
                                       FileUtils::getInstance()->createDirectory( cachePath );
                                       
+                                      //cocos2dxを修正し、追加したzipファイル内のファイル数を取得する関数
+                                      int delta = 100 / zipFile->size();
+                                      
                                       for( std::string filename = zipFile->getFirstFilename(); !filename.empty(); filename = zipFile->getNextFilename() )
-                                      {
-                                          //不要なキャッシュファイルがあれば、はじく
-                                          //もう少し、スマートな方法があればいいけど
-                                          if(filename.find("__MACOSX") != std::string::npos ||
-                                             filename.find(".DS_Store") != std::string::npos ||
-                                             filename.find("Thumb.db") != std::string::npos ||
-                                             filename.find("desktop.ini") != std::string::npos ||
-                                             filename.find("._") != std::string::npos) continue;
-                                          
+                                      {   
                                           if( *filename.rbegin() == '/' )
                                           {
                                               // It's a directory.
