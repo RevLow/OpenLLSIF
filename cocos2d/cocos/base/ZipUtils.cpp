@@ -675,6 +675,15 @@ int ZipFile::getCurrentFileInfo(std::string *filename, unz_file_info *info)
     return ret;
 }
 
+
+unsigned long ZipFile::size()
+{
+    unz_global_info global_info;
+    if(unzGetGlobalInfo(_data->zipFile, &global_info) != UNZ_OK) return 0;
+    return global_info.number_entry;
+}
+
+
 bool ZipFile::initWithBuffer(const void *buffer, uLong size)
 {
     if (!buffer || size == 0) return false;

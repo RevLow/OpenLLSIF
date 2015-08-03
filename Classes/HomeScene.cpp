@@ -189,8 +189,8 @@ void HomeScene::liveButton_action(Ref *ref)
                                                                                         auto previousButton = newLayer->getChildByName<ui::Button*>("previous_button");
                                                                                         previousButton->addClickEventListener(CC_CALLBACK_1(HomeScene::previousAlbum_click, this));
                                                                                         
-                                                                                        std::string docDir = FileUtils::getInstance()->getWritablePath();
-                                                                                        //Jacketディレクトリからファイルのリストを取得
+                                                                                        std::string docDir = FileUtils::getInstance()->getCachedPath() + "Song/"; 
+                                                                                        //インストールディレクトリからフォルダのリストを取得
                                                                                         auto fileList = getContentsList(docDir);
                                                                                         
                                                                                         //ファイルが存在している場合のみ

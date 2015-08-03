@@ -279,6 +279,13 @@ typedef struct unz_file_info_s unz_file_info;
         std::string getFirstFilename();
         std::string getNextFilename();
         
+        /*
+         *内部に保存しているファイル数を取得する
+         *
+         */
+        unsigned long size();
+        
+        
         static ZipFile *createWithBuffer(const void* buffer, unsigned long size);
         
     private:
