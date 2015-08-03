@@ -8093,8 +8093,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1551A33E158F2AB200E66CFE /* libcocos2d Mac */,
 				A07A4C241783777C0073F6A7 /* libcocos2d iOS */,
+				1551A33E158F2AB200E66CFE /* libcocos2d Mac */,
 			);
 		};
 /* End PBXProject section */

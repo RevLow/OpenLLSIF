@@ -90,7 +90,7 @@ bool PlayScene::init(std::string playSongFile)
     playSplash->runAction(action);
     action->gotoFrameAndPlay(0, false);
     
-    this->BPM = 86;
+    this->BPM = 180;
     
     
     return true;

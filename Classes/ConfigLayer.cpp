@@ -222,7 +222,8 @@ bool InstallLayer::init()
     
     //ファイルのリストを作成する
     std::string docPath = FileUtils::getInstance()->getWritablePath();
-    zipFileList = getContentsList(docPath);
+    //Documentsフォルダ内の要素を取得。ただし、zipファイルでフィルタリングを行う
+    zipFileList = getContentsList(docPath, false, ".zip");
     
     
     

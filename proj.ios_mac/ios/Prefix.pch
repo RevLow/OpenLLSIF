@@ -34,35 +34,83 @@ struct create_func{
 };
 
 
+/*!
+ * パスから拡張子を小文字にして取り出す
+ * @param[in] path ファイルパス
+ * @return (小文字化した)拡張子
+ */
+inline std::string GetExtension(const std::string &path)
+{
+    std::string ext;
+    size_t pos1 = path.rfind('.');
+    if(pos1 != std::string::npos){
+        ext = path.substr(pos1+1, path.size()-pos1);
+        std::string::iterator itr = ext.begin();
+        while(itr != ext.end()){
+            *itr = tolower(*itr);
+            itr++;
+        }
+        itr = ext.end()-1;
+        while(itr != ext.begin()){    // パスの最後に\0やスペースがあったときの対策
+            if(*itr == 0 || *itr == 32){
+                ext.erase(itr--);
+            }
+            else{
+                itr--;
+            }
+        }
+    }
+    
+    return ext;
+}
+
 
 /*
  指定ディレクトリ内のリストを取得する関数
  dirname: 対象のディレクトリ
  isContainDir: ディレクトリを対象に含めるか
  */
-static std::vector<std::string> getContentsList(std::string dirname, bool isContainDir=false) {
+static std::vector<std::string> getContentsList(std::string dirname, bool isContainDir=false, std::string extFilter="") {
     std::vector<std::string> list;
     
-    DIR* dp;
+    DIR* dp = opendir(dirname.c_str());
     struct dirent* ent;
-    
-    if ((dp = opendir(dirname.c_str()), "r") == NULL) {
+    if (dp!=NULL)
+    {
+        while ((ent = readdir(dp)) != NULL)
+        {
+            //もしもディレクトリを含まない設定にした場合(標準は含まないようにしている)
+            if(ent->d_type == DT_DIR && isContainDir==false) continue;
+
+            //もしも拡張子フィルターがついている場合
+            if(extFilter!="")
+            {
+                //取得したファイル名の拡張子がフィルターと違ければ追加を行わない
+                if(GetExtension(ent->d_name) != extFilter) continue;
+            }
+            
+            //最初の文字が.じゃない
+            //つまり、隠しファイルやカレントディレクトリなどじゃ無い場合
+            if(ent->d_name[0] != '.')
+            {
+                CCLOG("ファイル: %s", ent->d_name);
+                list.push_back(ent->d_name);
+                
+            }
+        }
+    }
+    else
+    {
         CCLOGERROR("ディレクトリが開けません。：%s", dirname.c_str());
         perror(dirname.c_str());
         return list;
-    }
-    
-    while ((ent = readdir(dp)) != NULL) {
-        CCLOG("ファイル：%s", ent->d_name);
-        if(ent->d_type != '\x04')
-        {
-            list.push_back(ent->d_name);
-        }
-        
-    };
+    }    
     closedir(dp);
+    
+
     
     return list;
 }
+
 
 #endif

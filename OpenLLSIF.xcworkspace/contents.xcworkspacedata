@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:cocos2d/build/cocos2d_libs.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:proj.ios_mac/OpenLLSIF.xcodeproj">
+   </FileRef>
+</Workspace>
