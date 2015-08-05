@@ -21,6 +21,7 @@
 		2E6113801B64AA5F006C82F8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137F1B64AA5F006C82F8 /* CoreMedia.framework */; };
 		2E6113821B650752006C82F8 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E6113811B650752006C82F8 /* MediaPlayer.framework */; };
 		2E94E07D1B6CB30F003A4136 /* ConfigLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E94E07B1B6CB30F003A4136 /* ConfigLayer.cpp */; };
+		2EEC01611B72932900FAEE4F /* Note.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EEC015F1B72932900FAEE4F /* Note.cpp */; };
 		46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */; };
@@ -99,6 +100,8 @@
 		2E6113811B650752006C82F8 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
 		2E94E07B1B6CB30F003A4136 /* ConfigLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConfigLayer.cpp; sourceTree = "<group>"; };
 		2E94E07C1B6CB30F003A4136 /* ConfigLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigLayer.h; sourceTree = "<group>"; };
+		2EEC015F1B72932900FAEE4F /* Note.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Note.cpp; sourceTree = "<group>"; };
+		2EEC01601B72932900FAEE4F /* Note.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
 		46880B8419C43A87006E1F66 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		46880B8519C43A87006E1F66 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelloWorldScene.cpp; sourceTree = "<group>"; };
@@ -293,6 +296,8 @@
 				2E39813B1B5D27BD001B096C /* PlayScene.h */,
 				2E94E07B1B6CB30F003A4136 /* ConfigLayer.cpp */,
 				2E94E07C1B6CB30F003A4136 /* ConfigLayer.h */,
+				2EEC015F1B72932900FAEE4F /* Note.cpp */,
+				2EEC01601B72932900FAEE4F /* Note.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -469,6 +474,7 @@
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
 				2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */,
+				2EEC01611B72932900FAEE4F /* Note.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

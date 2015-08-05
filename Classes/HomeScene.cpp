@@ -447,9 +447,9 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
                                                                 CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
                                                                 //ゲームで使うファイルを取得する
                                                                 std::string zipFileName = JacketInfoMap.at(touchable_index);
-                                                                std::string docPath = FileUtils::getInstance()->getWritablePath();
+                                                                std::string docPath = FileUtils::getInstance()->getCachedPath() + "Song/" + zipFileName;
                                                                 //zipファイルの情報をもとにシーンを作成する
-                                                                Scene* scene = PlayScene::createScene(docPath+"/"+zipFileName);
+                                                                Scene* scene = PlayScene::createScene(docPath);
                                                                 Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
                                                             }), NULL);
         referenceSprite->runAction(seqAction);

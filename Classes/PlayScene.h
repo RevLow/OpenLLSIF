@@ -29,6 +29,7 @@ private:
     int BPM;        //音楽のBPM
     int BGM_TIME;   //音楽の時間
     int NOTE_COUNT; //全ノートの数
+    std::string songFilePath;
     void Run();
     void PlayGame(float deltaT);
 };

@@ -35,6 +35,15 @@ bool PlayScene::init(std::string playSongFile)
         return false;
     }
     
+    
+
+    ValueMap info = FileUtils::getInstance()->getValueMapFromFile((playSongFile + "/fileInfo.plist").c_str());
+    songFilePath = playSongFile + '/' + info.at("BGM").asString();
+    BPM = info.at("BPM").asInt();
+    std::string songName = info.at("Name").asString();
+    std::string videoPath = info.at("BGV").asString();
+    std::string coverImage = info.at("Cover").asString();
+    
     //ビデオを再生するためのレイヤーを追加
     //ただし、cocos2dのコードそのままだと最前面にビデオが来てしまうため
     //http://discuss.cocos2d-x.org/t/enhancement-request-for-videoplayer/16024
@@ -46,7 +55,7 @@ bool PlayScene::init(std::string playSongFile)
     vidPlayer->setKeepAspectRatioEnabled(true);
     this->addChild(vidPlayer, -1);
     vidPlayer->setName("VideoLayer");
-    vidPlayer->setFileName("/Users/tetsushi2/Documents/Develop/Video/Snow_Halation_PV.mp4");
+    vidPlayer->setFileName(playSongFile + '/' + videoPath);
     
     LayerColor *layer = LayerColor::create(Color4B::BLACK, 960, 640);
     layer->setOpacity(0);
@@ -68,7 +77,13 @@ bool PlayScene::init(std::string playSongFile)
     
     //ゲーム開始時のアニメーション用のレイヤーを重ねる
     auto playSplash = CSLoader::getInstance()->createNode("res/splash_layer.csb");
-    playScene->setLocalZOrder(1);
+    playSplash->setLocalZOrder(1);
+    auto spriteImage = playSplash->getChildByName<Sprite*>("jacketImage");
+    spriteImage->setTexture(playSongFile + '/' + coverImage);
+    auto songNameLabel = playSplash->getChildByName<ui::Text*>("song_name");
+    auto songNameShadowLabel = playSplash->getChildByName<ui::Text*>("song_name_shadow");
+    songNameLabel->setString(songName);
+    songNameShadowLabel->setString(songName);
     this->addChild(playSplash);
     
     //アニメーションを動かす
@@ -89,8 +104,6 @@ bool PlayScene::init(std::string playSongFile)
                                 });
     playSplash->runAction(action);
     action->gotoFrameAndPlay(0, false);
-    
-    this->BPM = 180;
     
     
     return true;
@@ -119,7 +132,7 @@ void PlayScene::Run()
                                                             auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
                                                             videoLayer->play();
                                                             //音楽の再生
-                                                            //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("Sound/BGM/Snow_halation.mp3");
+                                                            CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(songFilePath.c_str());
                                                             
                                                             CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/Perfect.mp3");
                                                             //八分音符でのtickを計算
