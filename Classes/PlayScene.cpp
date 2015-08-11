@@ -12,6 +12,7 @@
 #include "SimpleAudioEngine.h"
 #include "UIVideoPlayer.h"
 #include <thread>
+#include <time.h>
 
 Scene* PlayScene::createScene(std::string playSongFile)
 {
@@ -136,9 +137,28 @@ void PlayScene::Run()
                                                             
                                                             CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/Perfect.mp3");
                                                             //八分音符でのtickを計算
-                                                            float tick = (float)60/((float)BPM);
-                                                            CCLOG("TICK: %f", tick);
-                                                            this->schedule(schedule_selector(PlayScene::PlayGame), tick);
+                                                            //float tick = (float)60/((float)BPM);
+                                                            //CCLOG("TICK: %f", tick);
+                                                            //this->schedule(schedule_selector(PlayScene::PlayGame), tick);
+                                                            
+                                                            //時間監視用のスレッドを呼び出す
+                                                            std::thread th1([this]()
+                                                                            {
+                                                                                clock_t start = clock();
+                                                                                clock_t now = clock();
+                                                                                double sec = 0.0;
+                                                                                while (sec  <= 200000)//20秒以下の間続ける
+                                                                                {
+                                                                                    now = clock();
+                                                                                    sec = (double)(now - start);
+                                                                                    CCLOG("%ld", (long int)sec);
+                                                                                    //ここで指定の時間を超えた場合メインスレッド上でノートを作成し、
+                                                                                    //addChildさせる。
+                                                                                }
+                                                                                
+                                                                            });
+                                                            th1.detach();
+                                                            
                                                         })
                                           , NULL));
 }

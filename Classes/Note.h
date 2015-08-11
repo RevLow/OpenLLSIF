@@ -19,24 +19,9 @@ class Note : public Sprite, create_func<Note>
 public:
     using create_func::create;
     virtual bool init(ValueMap jsonInfo);
-};
-
-class NormalNote : Note
-{
-public:
-    virtual bool init(ValueMap jsonInfo);
-};
-
-class LongRangeNote : Note
-{
-public:
-    virtual bool init(ValueMap jsonInfo);
-};
-
-class StarNote : Note
-{
-public:
-    virtual bool init(ValueMap jsonInfo);
+private:
+    bool _isStar;
+    unsigned int _lane;
 };
 
 
