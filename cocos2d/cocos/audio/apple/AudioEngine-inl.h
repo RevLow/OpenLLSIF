@@ -56,6 +56,7 @@ public:
     void stopAll();
     float getDuration(int audioID);
     float getCurrentTime(int audioID);
+    time_t getStartTime(int audioID);
     bool setCurrentTime(int audioID, float time);
     void setFinishCallback(int audioID, const std::function<void (int, const std::string &)> &callback);
     

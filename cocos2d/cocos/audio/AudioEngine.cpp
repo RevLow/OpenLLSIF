@@ -329,6 +329,15 @@ float AudioEngine::getCurrentTime(int audioID)
     return 0.0f;
 }
 
+time_t AudioEngine::getStartTime(int audioID)
+{
+    auto it = _audioIDInfoMap.find(audioID);
+    if (it != _audioIDInfoMap.end() && it->second.state != AudioState::INITIALZING){
+        return _audioEngineImpl->getStartTime(audioID);
+    }
+    return 0.0f;
+}
+
 void AudioEngine::setFinishCallback(int audioID, const std::function<void (int, const std::string &)> &callback)
 {
     auto it = _audioIDInfoMap.find(audioID);

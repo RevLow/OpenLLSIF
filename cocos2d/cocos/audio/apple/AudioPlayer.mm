@@ -32,8 +32,10 @@
 #include "platform/CCFileUtils.h"
 #import <AudioToolbox/ExtendedAudioFile.h>
 
+
 using namespace cocos2d;
 using namespace cocos2d::experimental;
+
 
 AudioPlayer::AudioPlayer()
 : _audioCache(nullptr)
@@ -43,7 +45,7 @@ AudioPlayer::AudioPlayer()
 , _streamingSource(false)
 , _exitThread(false)
 , _timeDirty(false)
-{    
+{
 }
 
 AudioPlayer::~AudioPlayer()
@@ -107,6 +109,8 @@ bool AudioPlayer::play2d(AudioCache* cache)
         return false;
     }
     
+    //音響再生の開始時間を保持
+    _startTime = clock();
     return true;
 }
 

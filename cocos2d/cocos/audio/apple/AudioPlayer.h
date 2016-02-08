@@ -34,6 +34,7 @@
 #include <thread>
 #import <OpenAL/al.h>
 #include "CCPlatformMacros.h"
+#include <time.h>
 
 NS_CC_BEGIN
 namespace experimental{
@@ -50,6 +51,7 @@ public:
     //queue buffer related stuff
     bool setTime(float time);
     float getTime() { return _currTime;}
+    time_t startTime(){return _startTime;}
     bool setLoop(bool loop);
     
 protected:
@@ -74,6 +76,8 @@ protected:
     std::mutex _sleepMutex;
     bool _exitThread;
     bool _timeDirty;
+    
+    time_t _startTime;
     
     friend class AudioEngineImpl;
 };

@@ -9,8 +9,8 @@
 #include "ConfigLayer.h"
 #include "ui/CocosGUI.h"
 #include "cocostudio/CocoStudio.h"
-
-
+#include <uuid/uuid.h>
+#include "AudioManager.h"
 
 #import "external/unzip/unzip.h"
 
@@ -65,6 +65,11 @@ bool ConfigLayer::init()
     //ボタンを閉じる処理を設定
     exitButton->addClickEventListener([this](Ref* sender)
     {
+        //close.mp3を鳴らす
+        std::string filePath = "Sound/SE/close.mp3";
+        std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+        AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+        
         this->runAction(Sequence::create(
                                          Spawn::create(ScaleTo::create(0.05f, 0.5f),
                                                        FadeTo::create(0.05f, 0), NULL),
@@ -151,6 +156,11 @@ void ConfigLayer::ButtonClick(Ref* sender)
     auto btn = (ui::Button*)sender;
     int tag = btn->getTag();
     
+    //close.mp3を鳴らす
+    std::string filePath = "Sound/SE/decide.mp3";
+    std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+    AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+    
     switch (tag)
     {
         case 0:
@@ -205,6 +215,11 @@ bool InstallLayer::init()
     //ボタンを閉じる処理を設定
     exitButton->addClickEventListener([this](Ref* sender)
                                       {
+                                          //close.mp3を鳴らす
+                                          std::string filePath = "Sound/SE/close.mp3";
+                                          std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+                                          AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+                                          
                                           this->runAction(Sequence::create(
                                                                            Spawn::create(ScaleTo::create(0.05f, 0.5f),
                                                                                          FadeTo::create(0.05f, 0), NULL),
@@ -223,7 +238,7 @@ bool InstallLayer::init()
     //ファイルのリストを作成する
     std::string docPath = FileUtils::getInstance()->getWritablePath();
     //Documentsフォルダ内の要素を取得。ただし、zipファイルでフィルタリングを行う
-    zipFileList = getContentsList(docPath, false, ".zip");
+    zipFileList = getContentsList(docPath, false, "zip");
     
     
     
@@ -384,8 +399,15 @@ void InstallLayer::installFile(Ref* sender)
 
     std::thread th1 = std::thread([&]()
                                   {
+                                      //UUIDの生成
+                                      uuid_t value;
+                                      uuid_generate(value);
+                                      
+                                      uuid_string_t str;
+                                      uuid_unparse(value, str);
+                                      
                                       //この関数は標準ではなく、cocos2dxのコードを変更し、追加をしている
-                                      std::string cachePath = FileUtils::getInstance()->getCachedPath() +"Song/" + installTargetFileName + '/';
+                                      std::string cachePath = FileUtils::getInstance()->getCachedPath() +"Song/" + str + '/';
                                       std::string writablePath(FileUtils::getInstance()->getWritablePath());
                                       
                                       ZipFile *zipFile = new ZipFile(writablePath+installTargetFile);
@@ -438,7 +460,13 @@ void InstallLayer::installFile(Ref* sender)
                                               break;
                                           }
                                       }
+                                      //音楽の再生
+                                      std::string fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/close.mp3");
+                                      AudioManager::getInstance()->play(fullpath,AudioManager::SE);
                                       
+                                      //曲選択画面の選択を初期化
+                                      UserDefault::getInstance()->setIntegerForKey("SONG_SELECTION", 0);
+
                                       auto tableView = this->getChildByName<TableView*>("SongTable");
                                       tableView->reloadData();
                                   }

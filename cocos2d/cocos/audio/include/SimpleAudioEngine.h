@@ -248,7 +248,7 @@ public:
      * @param filePath The path of the effect file.
      */
     virtual void unloadEffect(const char* filePath);
-
+    
 protected:
     /**
     * Constructor of SimpleAudioEngine.

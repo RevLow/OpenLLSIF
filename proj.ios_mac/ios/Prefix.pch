@@ -112,5 +112,4 @@ static std::vector<std::string> getContentsList(std::string dirname, bool isCont
     return list;
 }
 
-
 #endif

@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>Image/Judge/judging_15.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{196,33}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{196,33}</string>
+			</dict>
+			<key>Image/Judge/judging_19.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{196,0},{196,33}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{196,33}</string>
+			</dict>
+			<key>Image/Judge/judging_09.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,196},{147,33}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{147,33}</string>
+			</dict>
+			<key>Image/Judge/judging_17.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,33},{126,38}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{126,38}</string>
+			</dict>
+			<key>Image/Judge/judging_07.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,159},{81,31}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{81,31}</string>
+			</dict>
+			<key>Image/Judge/judging_08.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{147,196},{93,30}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{93,30}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>JudgeAtlas.png</string>
+			<key>realTextureFileName</key>
+			<string>JudgeAtlas.png</string>
+			<key>size</key>
+			<string>{256,256}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>256</integer>
+			<key>height</key>
+			<integer>256</integer>
+		</dict>
+	</dict>
+</plist>

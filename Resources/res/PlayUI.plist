@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>Image/PlayUI/Non.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{962,0},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/Full_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,879},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/C_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{879,99},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/B_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{919,99},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/A_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,978},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/0_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,919},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/S_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,99},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/tx_live_play.texb_02.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{962,99}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{962,99}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>PlayUI.png</string>
+			<key>realTextureFileName</key>
+			<string>PlayUI.png</string>
+			<key>size</key>
+			<string>{1024,1024}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>1024</integer>
+			<key>height</key>
+			<integer>1024</integer>
+		</dict>
+	</dict>
+</plist>

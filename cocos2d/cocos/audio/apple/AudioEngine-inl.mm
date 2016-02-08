@@ -236,13 +236,13 @@ bool AudioEngineImpl::init()
         s_AudioEngineSessionHandler = [[AudioEngineSessionHandler alloc] init];
 #endif
         
-        s_ALDevice = alcOpenDevice(nullptr);
+        s_ALDevice = alcOpenDevice(NULL);
         
         if (s_ALDevice) {
             auto alError = alGetError();
             s_ALContext = alcCreateContext(s_ALDevice, nullptr);
             alcMakeContextCurrent(s_ALContext);
-            
+        
             alGenSources(MAX_AUDIOINSTANCES, _alSources);
             alError = alGetError();
             if(alError != AL_NO_ERROR)
@@ -467,6 +467,22 @@ float AudioEngineImpl::getCurrentTime(int audioID)
     
     return ret;
 }
+
+time_t AudioEngineImpl::getStartTime(int audioID)
+{
+    time_t ret = 0.0;
+    auto& player = _audioPlayers[audioID];
+    if(player._ready)
+    {
+        if (player._streamingSource)
+        {
+            ret = player.startTime();
+        }
+    }
+    
+    return ret;
+}
+
 
 bool AudioEngineImpl::setCurrentTime(int audioID, float time)
 {

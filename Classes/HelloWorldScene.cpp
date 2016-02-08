@@ -3,6 +3,7 @@
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
+#include "AudioManager.h"
 
 USING_NS_CC;
 
@@ -53,9 +54,11 @@ bool HelloWorld::init()
     //////////////////////////////
     //3, BGM再生
     //
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/BGM/paradice_live.mp3");
-    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("Sound/BGM/paradice_live.mp3");
-    
+    //CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/BGM/paradice_live.mp3");
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("Sound/BGM/paradice_live.mp3");
+    std::string filePath = "Sound/BGM/paradice_live.mp3";
+    std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+    AudioManager::getInstance()->play(fullPath, AudioManager::BGM, true);
     //////////////////////////////
     //4, アニメーション読み込み
     //
@@ -79,13 +82,17 @@ bool HelloWorld::init()
     //ボタンイベントの作成
     nextButton->addClickEventListener([](Ref* ref)
     {
-        CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
-        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/decide.mp3");
+        //CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/decide.mp3");
+        //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/decide.mp3");
         
-        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+        //CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+        std::string filePath = "Sound/SE/decide.mp3";
+        std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+        AudioManager::getInstance()->play(fullPath, AudioManager::AudioType::SE);
+        AudioManager::getInstance()->stop(AudioManager::BGM);
         
         //次のシーンを読み込む
-        auto scene = HomeScene::createScene();
+        auto scene = HomeScene::createScene(ViewScene::Home);
         //シーンの移動
         Director::getInstance()->replaceScene(TransitionFade::create(0.5, scene));
     });

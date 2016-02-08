@@ -281,6 +281,7 @@ public:
      */
     static AudioProfile* getProfile(const std::string &profileName);
 
+    static time_t getStartTime(int audioID);
 protected:
     
     static void remove(int audioID);

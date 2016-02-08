@@ -65,6 +65,15 @@ void AppDelegate::applicationDidEnterBackground() {
 
     // if you use SimpleAudioEngine, it must be pause
     // SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+    auto currentScene = Director::getInstance()->getRunningScene()->getChildren().at(1);
+    
+    //もし、現在のシーンがPlaySceneならPlaySceneのapplicationDidEnterBackgroundを呼び出す。
+    if(typeid(*currentScene) == typeid(PlayScene))
+    {
+        PlayScene* scene = (PlayScene*)currentScene;
+        scene->applicationDidEnterBackground();
+    }
+
 }
 
 // this function will be called when the app is active again
