@@ -4137,6 +4137,7 @@
 				50272538190BF1B900AAF4ED /* cocos2d.h */,
 				46A15FCE1807A544005B8026 /* README.md */,
 				50DC5180187B817900A9C23F /* RELEASE_NOTES.md */,
+				1AAF584A180E40B9000584C8 /* local-storage */,
 				46A169A11807B037005B8026 /* 2d */,
 				B29594B81926D61F003EEF37 /* 3d */,
 				46A15FD01807A56F005B8026 /* audio */,
@@ -4151,8 +4152,8 @@
 				46A170611807CE7A005B8026 /* physics */,
 				50ABBEDB1926664700A911A9 /* platform */,
 				1551A340158F2AB200E66CFE /* Products */,
-				500DC89819105D41007B91BF /* renderer */,
 				1AAF5849180E40B8000584C8 /* storage */,
+				500DC89819105D41007B91BF /* renderer */,
 				2905F9E618CF08D000240AA3 /* ui */,
 			);
 			sourceTree = "<group>";
@@ -5075,7 +5076,6 @@
 		1AAF5849180E40B8000584C8 /* storage */ = {
 			isa = PBXGroup;
 			children = (
-				1AAF584A180E40B9000584C8 /* local-storage */,
 			);
 			name = storage;
 			path = ../cocos/storage;
@@ -5089,7 +5089,8 @@
 				1AAF584C180E40B9000584C8 /* LocalStorage.cpp */,
 				1AAF584D180E40B9000584C8 /* LocalStorage.h */,
 			);
-			path = "local-storage";
+			name = "local-storage";
+			path = "../cocos/storage/local-storage";
 			sourceTree = "<group>";
 		};
 		1AC026971914068200FA920D /* ConvertUTF */ = {

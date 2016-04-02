@@ -79,7 +79,8 @@ public:
     virtual Texture2D* getTexture() const override { return _texture; }
     
     virtual void updateColor() override;
-    
+    virtual void updateBlendFunc();
+
     inline void setBlendFunc(const BlendFunc &blendFunc) override { _blendFunc = blendFunc; }
     inline const BlendFunc& getBlendFunc() const override { return _blendFunc; }
     
@@ -105,7 +106,7 @@ CC_CONSTRUCTOR_ACCESS:
     virtual bool init(Texture2D* texture, const std::vector<Vec2> &texturePolygon, bool determineBounds = false);
     virtual bool init(Texture2D* texture, const std::vector<Vec2> &texturePolygon, const std::vector<Vec2> &uvPoints);
 
-
+    virtual void setOpacityModifyRGB(bool modify) override;
 protected:
 
     Texture2D *_texture;
@@ -122,6 +123,9 @@ protected:
     virtual void calculateTextureCoordinates();
 
     void onDraw(const Mat4 &transform, uint32_t flags);
+
+    // opacity and RGB protocol
+    bool _opacityModifyRGB;
 };
 
 

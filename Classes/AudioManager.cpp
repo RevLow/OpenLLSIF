@@ -54,7 +54,7 @@ void AudioManager::play(std::string &filePath,AudioManager::AudioType type, bool
     }
     else
     {
-        int id = AudioEngine::play2d(filePath, loop, getMuteBgmVolume());
+        int id = AudioEngine::play2d(filePath, loop, getMuteSeVolume());
         _seList.push_back(id);
     }
     

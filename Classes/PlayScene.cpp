@@ -11,7 +11,6 @@
 #include "cocostudio/CocoStudio.h"
 #include "UIVideoPlayer.h"
 #include <thread>
-//#include <chrono>
 #include "json11.hpp"
 #include "AudioManager.h"
 #include "HomeScene.h"
@@ -42,7 +41,9 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
         return false;
     }
     
-    
+    //PLAYUI用のテクスチャアトラスを読み込む
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
+
 
     ValueMap info = FileUtils::getInstance()->getValueMapFromFile((playSongFile + "/fileInfo.plist").c_str());
     songFilePath = playSongFile + '/' + info.at("BGM").asString();
@@ -56,22 +57,22 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
     switch (level)
     {
         case GameLevel::EASY:
-            notesSpeed = 60.0f / 60.0f * 1000.0f;
+            notesSpeed = 1.6 * 1000.0f;
             ModeText = "EASY";
             backgroundSprite = Sprite::create("background/background_easy.png");
             break;
         case GameLevel::NORMAL:
-            notesSpeed = 55.0f / 60.0f * 1000.0f;
+            notesSpeed = 1.3 * 1000.0f;
             ModeText = "NORMAL";
             backgroundSprite = Sprite::create("background/background_normal.png");
             break;
         case GameLevel::HARD:
-            notesSpeed = 50.0f / 60.0f * 1000.0f;
+            notesSpeed = 1.0 * 1000.0f;
             ModeText = "HARD";
             backgroundSprite = Sprite::create("background/background_hard.png");
             break;
         case GameLevel::EXPERT:
-            notesSpeed = 45.0f / 60.0f * 1000.0f;
+            notesSpeed =  0.8 * 0.95 * 1000.0f;
             ModeText = "EXPERT";
             backgroundSprite = Sprite::create("background/background_expert.png");
             break;
@@ -178,7 +179,14 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
     auto playSplash = CSLoader::getInstance()->createNode("res/splash_layer.csb");
     playSplash->setLocalZOrder(1);
     auto spriteImage = playSplash->getChildByName<Sprite*>("jacketImage");
-    spriteImage->setTexture(playSongFile + '/' + coverImage);
+    Sprite* sp = Sprite::create(playSongFile + '/' + coverImage);
+    if(sp->getContentSize().width != spriteImage->getContentSize().width)
+    {
+        double scalefactor = spriteImage->getContentSize().width / sp->getContentSize().width;
+        sp = Sprite::create(playSongFile + '/' + coverImage, scalefactor);
+    }
+    spriteImage->setTexture(sp->getTexture());
+    
     auto songNameLabel = playSplash->getChildByName<ui::Text*>("song_name");
     auto songNameShadowLabel = playSplash->getChildByName<ui::Text*>("song_name_shadow");
     songNameLabel->setString(songName);
@@ -223,6 +231,11 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
 void PlayScene::Run()
 {
     auto playScene = this->getChildByName("PlayLayer");
+    auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/PlayScene.csb");
+    Sprite* music_notes = playScene->getChildByName<Sprite*>("music_icon_7");
+    music_notes->runAction(action);
+    action->gotoFrameAndPlay(0, true);
+    
     //背景画像を設定
     
     Vec2 v = unitVector[0];
@@ -230,35 +243,35 @@ void PlayScene::Run()
     //タップ判定のエリアの作成
     for(int i=0;i<9;i++)
     {
-        
+        Vec2 offset = unitVector[i] / notesSpeed;
+        offset *= 10 + 5;
+        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
+        double alpha = 20.0;
         std::stringstream ss;
         ss << (i+1);
         Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
         auto areaSize = sp->getContentSize();
-        Circle *circle = Circle::create(sp->getPosition(), areaSize.width / 2 + 15.0);
+        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width / 2 + alpha );
         
-#ifdef DEBUG
-        DrawNode *draw = circle->getDrawNode(Color4F::RED);
-        draw->setPosition(circle->getPoint());
-        addChild(draw);
-#endif
         expandedAreas.pushBack(circle);
     }
     //感知エリアの初期化
     for(int i=0;i<9;i++)
     {
+        Vec2 offset = unitVector[i] / notesSpeed;
+        offset *= 10;
+        
         std::stringstream ss;
         ss << (i+1);
         Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
         auto areaSize = sp->getContentSize();
-        Circle *circle = Circle::create(sp->getPosition(), areaSize.width / 2);
-        
-#ifdef DEBUG
-        DrawNode *draw = circle->getDrawNode(Color4F::BLUE);
-        draw->setPosition(circle->getPoint());
-        addChild(draw);
-#endif
-        judgeAreas.pushBack(circle);
+        Vec2 v1 = sp->getPosition() - playScene->getChildByName<Sprite*>("music_icon_7")->getPosition();
+        Vec2 v2(-1, 0);
+        float angle = v1.getAngle(v2);
+        //Circle *circle = Circle::create(sp->getPosition()  - offset , areaSize.width / 2);
+        Ellipse *ellipse = Ellipse::create(sp->getPosition() -offset, areaSize.width + 20, areaSize.width / 2);
+        ellipse->rotate(angle);
+        judgeAreas.pushBack(ellipse);
     }
 
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
@@ -271,7 +284,7 @@ void PlayScene::Run()
     }
     
     auto backgroundLayer = this->getChildByName<LayerColor*>("BlackLayer");
-    backgroundLayer->runAction(FadeTo::create(0.5f, 200));
+    backgroundLayer->runAction(FadeTo::create(0.5f, videoLayer!= nullptr ? 200 : 100));
     
     //透明度を戻した後、実行を行う
     playScene->runAction(Sequence::create(
@@ -305,9 +318,6 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
     for(auto note : maps)
     {
         cocos2d::Vec2 v = unitVector[note->at("lane").asInt()];
-        //1msあたりのスピードを計測
-        v.x *= 1.0/notesSpeed;
-        v.y *= 1.0/notesSpeed;
         
         Note *n = Note::create(*note, v);
         
@@ -384,12 +394,75 @@ void PlayScene::CreateJudgeSprite(NoteJudge j)
         addChild(overSprite);
         
         overSprite->runAction(Sequence::create(FadeIn::create(0.06f),
-                              Spawn::create(FadeOut::create(0.1f), ScaleTo::create(0.05f, 2.5f), NULL), NULL));
+                              Spawn::create(FadeOut::create(0.1f), ScaleTo::create(0.05f, 2.0f), NULL), NULL));
     }
 
     
 }
 
+void PlayScene::CreateTapFx(Vec2 position)
+{
+    std::vector<Sprite*> fx_array, inner_fx;
+    
+    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx1.png"));
+    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx2.png"));
+    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx3.png"));
+    
+    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx1.png"));
+    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx2.png"));
+    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx3.png"));
+    
+    for (auto it = fx_array.begin(); it != fx_array.end();it++)
+    {
+        (*it)->setOpacity(0);
+        (*it)->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
+        //(*it)->setScale(0.5f);
+        (*it)->setPosition(position);
+        
+        addChild(*it);
+    }
+    //削除
+    auto remove = RemoveSelf::create(true);
+    auto action = Spawn::create(FadeOut::create(0.1), ScaleTo::create(0.1, 2.5f),NULL);
+
+    fx_array[0]->runAction(Sequence::create(FadeIn::create(0.05),
+                                            EaseOut::create(action, 2.0),remove, NULL));
+    
+    action = Spawn::create(ScaleTo::create(0.1, 2.8f), FadeOut::create(0.184), NULL);
+    fx_array[1]->runAction(Sequence::create(FadeIn::create(0),
+                                            EaseOut::create(action, 2.0),
+                                            remove, NULL));
+    action = Spawn::create(ScaleTo::create(0.1, 3.0f), FadeOut::create(0.184), NULL);
+    fx_array[2]->runAction(Sequence::create(FadeIn::create(0.0184),
+                                            EaseOut::create(action, 2.0),
+                                            remove, NULL));
+    
+    //iner_fxに対する処理
+    for (auto it = inner_fx.begin(); it != inner_fx.end();it++)
+    {
+        (*it)->setOpacity(0);
+        //(*it)->setBlendFunc(BlendFunc::ADDITIVE);
+        //(*it)->setScale(0.5f);
+        (*it)->setPosition(position);
+        
+        addChild(*it);
+    }
+    //削除
+    action = Spawn::create(FadeOut::create(0.1), ScaleTo::create(0.1, 2.5f),NULL);
+    
+    inner_fx[0]->runAction(Sequence::create(FadeIn::create(0.05),
+                                            EaseOut::create(action, 2.0),remove, NULL));
+    
+    action = Spawn::create(ScaleTo::create(0.1, 2.8f), FadeOut::create(0.184), NULL);
+    inner_fx[1]->runAction(Sequence::create(FadeIn::create(0),
+                                            EaseOut::create(action, 2.0),
+                                            remove, NULL));
+    action = Spawn::create(ScaleTo::create(0.1, 3.0f), FadeOut::create(0.184), NULL);
+    inner_fx[2]->runAction(Sequence::create(FadeIn::create(0.0184),
+                                            EaseOut::create(action, 2.0),
+                                            remove, NULL));
+    
+}
 
 /**
  * =========================================== CallBacks
@@ -467,10 +540,10 @@ void PlayScene::update(float dt)
     //ここで指定の時間を超えた場合メインスレッド上でノートを作成し、
     //addChildさせる。
     std::vector< std::shared_ptr<cocos2d::ValueMap> > notes;
-    for (auto it = notesVector.begin(); it != notesVector.end(); it++)
+    for (auto it = notesVector.begin(); it != notesVector.end();)
     {
         //先頭の情報をとってくる
-        if(*it == nullptr) break;
+        //if(*it == nullptr) break;
         
         std::shared_ptr<cocos2d::ValueMap> map = (**it).front();
         if(map->at("starttime").asDouble() - notesSpeed < elapse)
@@ -481,10 +554,11 @@ void PlayScene::update(float dt)
             
             if((**it).empty())
             {
-                notesVector.erase(it);
-                CCLOG("ERASE");
+                it = notesVector.erase(it);
+                continue;
             }
         }
+        it++;
     }
     
     if(!notes.empty())
@@ -510,6 +584,8 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
             
             if(area->containsPoint(loc))
             {
+                
+//                
                 for (auto child : children)
                 {
                     Note* note = dynamic_cast<Note*>(child);
@@ -517,7 +593,7 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
                     {
                         auto baseNotes = note->getChildByName<RenderTexture*>("BaseNotes");
                         Circle *notes_area = Circle::create(baseNotes->getPosition(), 70.0f*baseNotes->getScale() / 2.0);
-                        Circle *judge_area = judgeAreas.at(i);
+                        Ellipse *judge_area = judgeAreas.at(i);
                         
                         if(judge_area->intersectCircle(notes_area))
                         {
@@ -551,6 +627,8 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
                             }
                             AudioManager::getInstance()->play(fullpath, AudioManager::SE);
                             CreateJudgeSprite(j);
+                            CreateTapFx(baseNotes->getPosition());
+                            
                             
                             //今のレーンの判定はこれ以上行わない
                             goto for_exit;
@@ -597,7 +675,7 @@ void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Eve
                 }
                 AudioManager::getInstance()->play(fullpath, AudioManager::SE);
                 CreateJudgeSprite(j);
-
+                CreateTapFx(n->getChildByName("BaseNotes")->getPosition());
                 
                 _longNotes.erase(t->getID());
             }

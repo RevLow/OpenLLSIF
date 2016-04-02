@@ -29,29 +29,7 @@
 			<key>Image/PlayUI/C_03.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{879,99},{879,40}}</string>
-				<key>offset</key>
-				<string>{0,0}</string>
-				<key>rotated</key>
-				<true />
-				<key>sourceSize</key>
-				<string>{879,40}</string>
-			</dict>
-			<key>Image/PlayUI/B_03.png</key>
-			<dict>
-				<key>frame</key>
-				<string>{{919,99},{879,40}}</string>
-				<key>offset</key>
-				<string>{0,0}</string>
-				<key>rotated</key>
-				<true />
-				<key>sourceSize</key>
-				<string>{879,40}</string>
-			</dict>
-			<key>Image/PlayUI/A_03.png</key>
-			<dict>
-				<key>frame</key>
-				<string>{{0,978},{879,40}}</string>
+				<string>{{0,979},{879,40}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -59,7 +37,7 @@
 				<key>sourceSize</key>
 				<string>{879,40}</string>
 			</dict>
-			<key>Image/PlayUI/0_03.png</key>
+			<key>Image/PlayUI/B_03.png</key>
 			<dict>
 				<key>frame</key>
 				<string>{{0,919},{879,40}}</string>
@@ -70,10 +48,32 @@
 				<key>sourceSize</key>
 				<string>{879,40}</string>
 			</dict>
-			<key>Image/PlayUI/S_03.png</key>
+			<key>Image/PlayUI/A_03.png</key>
 			<dict>
 				<key>frame</key>
 				<string>{{0,99},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/0_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,394},{879,40}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{879,40}</string>
+			</dict>
+			<key>Image/PlayUI/S_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,669},{879,40}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -91,6 +91,292 @@
 				<false />
 				<key>sourceSize</key>
 				<string>{962,99}</string>
+			</dict>
+			<key>Image/PlayUI/TapFx1.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{650,709},{99,97}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{99,97}</string>
+			</dict>
+			<key>Image/PlayUI/TapFx2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{879,669},{75,75}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{75,75}</string>
+			</dict>
+			<key>Image/PlayUI/TapFx3.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,574},{68,68}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{68,68}</string>
+			</dict>
+			<key>Image/PlayUI/breakFx1.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{817,709},{62,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{62,70}</string>
+			</dict>
+			<key>Image/PlayUI/breakFx2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,504},{68,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{68,70}</string>
+			</dict>
+			<key>Image/PlayUI/breakFx3.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{200,744},{78,71}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{78,71}</string>
+			</dict>
+			<key>Image/PlayUI/note_1.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{879,879},{110,100}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{110,100}</string>
+			</dict>
+			<key>Image/PlayUI/note_2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,744},{110,100}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{110,100}</string>
+			</dict>
+			<key>Image/PlayUI/note_3.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{275,709},{110,100}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{110,100}</string>
+			</dict>
+			<key>Image/PlayUI/note_4.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{100,744},{110,100}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{110,100}</string>
+			</dict>
+			<key>Image/PlayUI/note_ellipse.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{68,504},{68,68}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{68,68}</string>
+			</dict>
+			<key>Image/PlayUI/LifeCage0.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{879,394},{275,35}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{275,35}</string>
+			</dict>
+			<key>Image/PlayUI/LifeCage1.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{914,394},{275,35}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{275,35}</string>
+			</dict>
+			<key>Image/PlayUI/LifeCage2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,709},{275,35}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{275,35}</string>
+			</dict>
+			<key>Image/PlayUI/LifeCage3.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{271,819},{275,35}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{275,35}</string>
+			</dict>
+			<key>Image/PlayUI/LifeCage4.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{375,744},{275,35}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{275,35}</string>
+			</dict>
+			<key>Image/PlayUI/LifeCage5.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{375,709},{275,35}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{275,35}</string>
+			</dict>
+			<key>Image/PlayUI/pause_off.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{817,779},{60,60}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{60,60}</string>
+			</dict>
+			<key>Image/PlayUI/pause_on.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{877,814},{60,60}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{60,60}</string>
+			</dict>
+			<key>Image/notes/cool_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{546,779},{70,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,70}</string>
+			</dict>
+			<key>Image/notes/longbar_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{747,709},{70,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,70}</string>
+			</dict>
+			<key>Image/notes/longNoteLine_07.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{879,99},{70,295}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,295}</string>
+			</dict>
+			<key>Image/notes/longnotes_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{879,744},{70,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,70}</string>
+			</dict>
+			<key>Image/notes/pure_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{747,779},{70,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,70}</string>
+			</dict>
+			<key>Image/notes/smile_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{616,808},{70,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,70}</string>
+			</dict>
+			<key>Image/notes/star_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,434},{70,70}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{70,70}</string>
 			</dict>
 		</dict>
 		<key>metadata</key>

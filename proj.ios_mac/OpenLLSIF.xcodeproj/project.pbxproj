@@ -14,6 +14,8 @@
 		2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E283CAA1B5325A0004EABDA /* HomeScene.cpp */; };
 		2E2EBDD01C493E33009AF4E6 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDCE1C493E33009AF4E6 /* json11.cpp */; };
 		2E2EBDD31C4B7EDD009AF4E6 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDD11C4B7EDD009AF4E6 /* AudioManager.cpp */; };
+		2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B61C72191F00DDF6AD /* longNotesSpark.png */; };
+		2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B81C72192B00DDF6AD /* particle_texture.plist */; };
 		2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3981331B5510ED001B096C /* PointWithDepth.cpp */; };
 		2E39813C1B5D27BD001B096C /* PlayScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E39813A1B5D27BD001B096C /* PlayScene.cpp */; };
 		2E61137C1B64AA1C006C82F8 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137B1B64AA1C006C82F8 /* CoreVideo.framework */; };
@@ -24,7 +26,6 @@
 		2E9807601C63B03800D33CC2 /* PRFilledPolygon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E98075C1C63B03800D33CC2 /* PRFilledPolygon.cpp */; };
 		2E9807611C63B03800D33CC2 /* triangulate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E98075E1C63B03800D33CC2 /* triangulate.cpp */; };
 		2E9807EC1C654EBD00D33CC2 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807EB1C654EBD00D33CC2 /* res */; };
-		2E9807F21C6745DE00D33CC2 /* notes in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807F11C6745DE00D33CC2 /* notes */; };
 		2E9807F41C679A8700D33CC2 /* background in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807F31C679A8700D33CC2 /* background */; };
 		2EC2146E1C523D37005CED97 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146D1C523D37005CED97 /* OpenGLES.framework */; };
 		2EC214701C523D52005CED97 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146F1C523D52005CED97 /* UIKit.framework */; };
@@ -102,6 +103,8 @@
 		2E2EBDCF1C493E33009AF4E6 /* json11.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json11.hpp; sourceTree = "<group>"; };
 		2E2EBDD11C4B7EDD009AF4E6 /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioManager.cpp; sourceTree = "<group>"; };
 		2E2EBDD21C4B7EDD009AF4E6 /* AudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioManager.h; sourceTree = "<group>"; };
+		2E3230B61C72191F00DDF6AD /* longNotesSpark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = longNotesSpark.png; sourceTree = "<group>"; };
+		2E3230B81C72192B00DDF6AD /* particle_texture.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = particle_texture.plist; sourceTree = "<group>"; };
 		2E3981331B5510ED001B096C /* PointWithDepth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PointWithDepth.cpp; sourceTree = "<group>"; };
 		2E3981341B5510ED001B096C /* PointWithDepth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointWithDepth.h; sourceTree = "<group>"; };
 		2E39813A1B5D27BD001B096C /* PlayScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayScene.cpp; sourceTree = "<group>"; };
@@ -117,7 +120,6 @@
 		2E98075E1C63B03800D33CC2 /* triangulate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = triangulate.cpp; sourceTree = "<group>"; };
 		2E98075F1C63B03800D33CC2 /* triangulate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangulate.h; sourceTree = "<group>"; };
 		2E9807EB1C654EBD00D33CC2 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
-		2E9807F11C6745DE00D33CC2 /* notes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = notes; sourceTree = "<group>"; };
 		2E9807F31C679A8700D33CC2 /* background */ = {isa = PBXFileReference; lastKnownFileType = folder; path = background; sourceTree = "<group>"; };
 		2EC2146D1C523D37005CED97 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		2EC2146F1C523D52005CED97 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -318,11 +320,20 @@
 			name = Modules;
 			sourceTree = "<group>";
 		};
+		2E3230B51C7218F800DDF6AD /* Particle */ = {
+			isa = PBXGroup;
+			children = (
+				2E3230B61C72191F00DDF6AD /* longNotesSpark.png */,
+				2E3230B81C72192B00DDF6AD /* particle_texture.plist */,
+			);
+			name = Particle;
+			sourceTree = "<group>";
+		};
 		46880B7519C43A67006E1F66 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				2E3230B51C7218F800DDF6AD /* Particle */,
 				2E9807F31C679A8700D33CC2 /* background */,
-				2E9807F11C6745DE00D33CC2 /* notes */,
 				2E9807EB1C654EBD00D33CC2 /* res */,
 				2E283CA81B52B250004EABDA /* Sound */,
 				521A8EA819F11F5000D177D7 /* fonts */,
@@ -481,7 +492,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2E9807F21C6745DE00D33CC2 /* notes in Resources */,
 				5087E78117EB970100C73F5D /* Icon-120.png in Resources */,
 				5087E78617EB970100C73F5D /* Icon-76.png in Resources */,
 				5087E77F17EB970100C73F5D /* Default@2x.png in Resources */,
@@ -502,8 +512,10 @@
 				5087E78417EB970100C73F5D /* Icon-57.png in Resources */,
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
 				2E9807EC1C654EBD00D33CC2 /* res in Resources */,
+				2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */,
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
+				2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,14 +590,14 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "";
 				COMPRESS_PNG_FILES = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/devLibrary,
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ios/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -635,13 +647,13 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "";
 				COMPRESS_PNG_FILES = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/devLibrary,
 				);
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ios/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (

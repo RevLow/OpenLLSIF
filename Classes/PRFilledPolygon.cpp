@@ -52,11 +52,16 @@ bool FilledPolygon::init(Texture2D* texture, const std::vector<Vec2> &texturePol
 {
     GLProgram *glProgram = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_U_COLOR);
     setGLProgramState(GLProgramState::create(glProgram));
+//    
+    // shader state
+    //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_U_COLOR));
+
     
     setTexture(texture);
     setTexturePolygon(texturePolygon, determineBounds);
     updateColor();
     
+    _opacityModifyRGB = true;
 	return true;
 }
 
@@ -77,10 +82,13 @@ bool FilledPolygon::init(Texture2D* texture, const std::vector<Vec2> &texturePol
     GLProgram *glProgram = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_U_COLOR);
     setGLProgramState(GLProgramState::create(glProgram));
     
+    //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_U_COLOR));
+    
     setTexture(texture);
     setTexturePolygon(texturePolygon, uvPoints);
     updateColor();
     
+    _opacityModifyRGB = true;
 	return true;
 }
 
@@ -181,25 +189,6 @@ void FilledPolygon::setTexturePolygon(const std::vector<Vec2> &texturePolygon, c
 
 void FilledPolygon::calculateTextureCoordinates()
 {
-    
-//    _textureTriangles[0].x = -1;
-//    _textureTriangles[0].y = -1;
-//    
-//    _textureTriangles[1].x = -1;
-//    _textureTriangles[1].y = 1;
-//    
-//    _textureTriangles[2].x = 1;
-//    _textureTriangles[2].y = 1;
-//
-//    _textureTriangles[3].x = 1;
-//    _textureTriangles[3].y = 1;
-//    
-//    _textureTriangles[4].x = 1;
-//    _textureTriangles[4].y = -1;
-//    
-//    _textureTriangles[5].x = -1;
-//    _textureTriangles[5].y = -1;
-    
     if (_determineBounds) {
         for (int j = 0; j < _verticesCount; j++) {
             _textureTriangles[j].x = (_positionTriangles[j].x + _origin.x) * 1.0f / _texture->getPixelsWide() * CC_CONTENT_SCALE_FACTOR();
@@ -230,27 +219,56 @@ void FilledPolygon::setTexture(Texture2D* texture)
         }
         
         // update blend func
-        if ( !_texture || !_texture->hasPremultipliedAlpha() ) {
-            _blendFunc.src = GL_SRC_ALPHA;
-            _blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
-        } else {
-            _blendFunc.src = CC_BLEND_SRC;
-            _blendFunc.dst = CC_BLEND_DST;
-        }
+        updateBlendFunc();
+//        if ( !_texture || !_texture->hasPremultipliedAlpha() ) {
+//            _blendFunc.src = GL_SRC_ALPHA;
+//            _blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
+//        } else {
+//            _blendFunc.src = CC_BLEND_SRC;
+//            _blendFunc.dst = CC_BLEND_DST;
+//        }
         
         // update texture triangles
         if (_textureTriangles != nullptr) {
             calculateTextureCoordinates();
         }
+        
+        //blendfuncの更新
     }
 }
 
 void FilledPolygon::updateColor()
 {
+ 
     // set parameters to shader uniform
     getGLProgramState()->setUniformVec4("u_color", Vec4(_displayedColor.r, _displayedColor.g, _displayedColor.b, _displayedOpacity)/255.0f);
 }
 
+void FilledPolygon::updateBlendFunc(void)
+{
+//    CCASSERT(! _batchNode, "CCSprite: updateBlendFunc doesn't work when the sprite is rendered using a SpriteBatchNode");
+    
+    // it is possible to have an untextured sprite
+    if (! _texture || ! _texture->hasPremultipliedAlpha())
+    {
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+        setOpacityModifyRGB(false);
+    }
+    else
+    {
+        _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+        setOpacityModifyRGB(true);
+    }
+}
+
+void FilledPolygon::setOpacityModifyRGB(bool modify)
+{
+    if (_opacityModifyRGB != modify)
+    {
+        _opacityModifyRGB = modify;
+        updateColor();
+    }
+}
 
 void FilledPolygon::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {

@@ -54,10 +54,10 @@ bool HelloWorld::init()
     //////////////////////////////
     //3, BGM再生
     //
-    //CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("Sound/BGM/paradice_live.mp3");
-    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("Sound/BGM/paradice_live.mp3");
+
     std::string filePath = "Sound/BGM/paradice_live.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+    AudioManager::getInstance()->setBgmVolume(0.8);
     AudioManager::getInstance()->play(fullPath, AudioManager::BGM, true);
     //////////////////////////////
     //4, アニメーション読み込み

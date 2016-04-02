@@ -62,11 +62,12 @@ private:
     //! 楽曲譜面のデータを格納するためのベクター
     std::list< std::shared_ptr< std::queue<std::shared_ptr<cocos2d::ValueMap> > > > notesVector;
     
+    //ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> unitVector;
     //タップ判定用のエリア
     Vector<Circle*> expandedAreas;
     //ノーツ感知のエリア
-    Vector<Circle*> judgeAreas;
+    Vector<Ellipse*> judgeAreas;
     
     cocos2d::Map<int, Note*> _longNotes;
     
@@ -86,7 +87,7 @@ private:
     
     void CreateJudgeSprite(NoteJudge j);
     
-    
+    void CreateTapFx(Vec2 position);
     //タップイベント
     void onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
     void onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);

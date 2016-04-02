@@ -13,6 +13,7 @@
 #include "cocos2d.h"
 #include "StopWatch.h"
 
+
 USING_NS_CC;
 
 enum NoteJudge
@@ -38,6 +39,22 @@ public:
     DrawNode* getDrawNode(Color4F c);
 };
 
+//楕円形用のクラス
+class Ellipse : public Node, create_func<Ellipse>
+{
+    CC_SYNTHESIZE(float, angle, Angle);
+    CC_SYNTHESIZE(float, x_radius, XRadius);
+    CC_SYNTHESIZE(float, y_radius, YRadius);
+    CC_SYNTHESIZE(Point, m_obPosition, Point);
+    
+    using create_func::create;
+public:
+    virtual bool init(const Point p, float xr, float yr);
+    void rotate(float theta);
+    bool containsPoint(const Vec2 p);
+    bool intersectCircle(Circle* circle);
+    bool intersectEllipse(Ellipse* ellipse);
+};
 
 class Note : public Layer, create_func<Note>
 {

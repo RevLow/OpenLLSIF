@@ -73,7 +73,8 @@ void AppDelegate::applicationDidEnterBackground() {
         PlayScene* scene = (PlayScene*)currentScene;
         scene->applicationDidEnterBackground();
     }
-
+    //無駄なキャッシュはパーズする。ゲーム終了時のため
+    Director::getInstance()->purgeCachedData();
 }
 
 // this function will be called when the app is active again

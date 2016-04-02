@@ -268,8 +268,12 @@ void HomeScene::loadLiveScene()
             auto plistData = FileUtils::getInstance()->getValueMapFromFile(docDir + songDir +"/fileInfo.plist");
             std::string jacketCover = plistData.at("Cover").asString();
             
+            Sprite *sp = Sprite::create(docDir + songDir + '/' + jacketCover);
+            if(sp->getContentSize().width != 500)
+            {
+                sp = Sprite::create(docDir + songDir + '/' + jacketCover, 500.0 / sp->getContentSize().width);
+            }
             
-            auto *sp = Sprite::create(docDir + songDir + '/' +jacketCover);
             //あらかじめタグ付けを行っておく事で回転のボタンを押したときの処理を行えるようにする
             sp->setTag(index);
             
@@ -287,13 +291,16 @@ void HomeScene::loadLiveScene()
             }
             
             double rad = MATH_DEG_TO_RAD(theta);
-            Vec3 v(480*sin(rad), 0.0, 4.8*cos(rad));
+            Vec3 v(980*sin(rad), 0.0, 4.8*cos(rad));
             PointWithDepth point;
             point.SetWorldPosition(v.x, v.y, v.z);
+            double height = sp->getBoundingBox().size.height / 2.0;
             
-            
-            sp->setPosition(point);
-            sp->setScale(point.GetScale());
+            sp->setAnchorPoint(Vec2(sp->getAnchorPoint().x, 0.0));
+            sp->setPosition(point.x, point.y - height);
+
+            double scale = i==0?point.GetScale() + 0.15 : point.GetScale();
+            sp->setScale(scale);
             
             jacketNode->addChild(sp,z);
             
@@ -338,8 +345,7 @@ void HomeScene::nextAlbum_click(Ref *ref)
     ui::Button* nstButton = (ui::Button*)ref;
     nstButton->setEnabled(false);
     
-    //CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/selection.mp3");
-    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("Sound/SE/selection.mp3");
+
     //selection.mp3を鳴らす
     std::string filePath = "Sound/SE/selection.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
@@ -512,6 +518,7 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
             }
         }
         
+        
         //選択項目をアニメーション
         auto seqAction = Sequence::create(Spawn::create(
                                                         ScaleTo::create(0.5f, 1.5),
@@ -531,6 +538,8 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
                                                                 Scene* scene = PlayScene::createScene(docPath, GameLevel::EXPERT);
                                                                 Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
                                                             }), NULL);
+        referenceSprite->setAnchorPoint(Vec2(0.5,0.5));
+        referenceSprite->setPositionY(referenceSprite->getPositionY()+referenceSprite->getBoundingBox().size.height/2);
         referenceSprite->runAction(seqAction);
         
         

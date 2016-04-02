@@ -74,6 +74,24 @@ Sprite* Sprite::createWithTexture(Texture2D *texture, const Rect& rect, bool rot
     return nullptr;
 }
 
+Sprite* Sprite::create(const std::string& filename, const float& scaleFactor)
+{
+    Sprite *sprite = new (std::nothrow) Sprite();
+    if (sprite)
+    {
+        sprite->_defaultScaleFactor = scaleFactor;
+        
+        if (sprite->initWithFile(filename))
+        {
+            sprite->autorelease();
+            return sprite;
+        }
+        
+    }
+    CC_SAFE_DELETE(sprite);
+    return nullptr;
+}
+
 Sprite* Sprite::create(const std::string& filename)
 {
     Sprite *sprite = new (std::nothrow) Sprite();
@@ -266,6 +284,7 @@ Sprite::Sprite(void)
 , _texture(nullptr)
 , _spriteFrame(nullptr)
 , _insideBounds(true)
+,_defaultScaleFactor(1.0)
 {
 #if CC_SPRITE_DEBUG_DRAW
     _debugDrawNode = DrawNode::create();
@@ -359,6 +378,11 @@ void Sprite::setTextureRect(const Rect& rect)
     setTextureRect(rect, false, rect.size);
 }
 
+void Sprite::setContentSize(const Size& contentSize)
+{
+    Node::setContentSize(contentSize * _defaultScaleFactor);
+}
+
 void Sprite::setTextureRect(const Rect& rect, bool rotated, const Size& untrimmedSize)
 {
     _rectRotated = rotated;
@@ -411,6 +435,8 @@ void Sprite::setTextureRect(const Rect& rect, bool rotated, const Size& untrimme
 void Sprite::setVertexRect(const Rect& rect)
 {
     _rect = rect;
+    _unflippedOffsetPositionFromCenter = _unflippedOffsetPositionFromCenter * _defaultScaleFactor;
+    _rect.size= _rect.size * _defaultScaleFactor;
 }
 
 void Sprite::setTextureCoords(Rect rect)

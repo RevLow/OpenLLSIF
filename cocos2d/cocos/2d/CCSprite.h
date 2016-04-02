@@ -100,6 +100,12 @@ public:
     static Sprite* create(const std::string& filename);
 
     /**
+     * テクスチャのスケールを指定して初期化を行う
+     *@param filename: 初期化するスプライトのパス
+     *@param scalefactor: 初期化のさいのテクスチャのサイズ
+     */
+    static Sprite* create(const std::string& filename, const float& scalefactor);
+    /**
      * Creates a sprite with an image filename and a rect.
      *
      * @param   filename A path to image file, e.g., "scene1/monster.png".
@@ -437,6 +443,7 @@ public:
     virtual void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags) override;
     virtual void setOpacityModifyRGB(bool modify) override;
     virtual bool isOpacityModifyRGB() const override;
+    virtual void setContentSize(const Size& contentSize) override;
     /// @}
 
 CC_CONSTRUCTOR_ACCESS:
@@ -530,11 +537,10 @@ CC_CONSTRUCTOR_ACCESS:
      * @lua     init
      */
     virtual bool initWithFile(const std::string& filename, const Rect& rect);
-
 protected:
-
-    void updateColor() override;
     virtual void setTextureCoords(Rect rect);
+    void updateColor() override;
+
     virtual void updateBlendFunc();
     virtual void setReorderChildDirtyRecursively();
     virtual void setDirtyRecursively(bool value);
@@ -584,6 +590,8 @@ protected:
     bool _flippedY;                         /// Whether the sprite is flipped vertically or not
 
     bool _insideBounds;                     /// whether or not the sprite was inside bounds the previous frame
+
+    float _defaultScaleFactor;              ///デフォルトのスケール値を指定。
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(Sprite);
 };
