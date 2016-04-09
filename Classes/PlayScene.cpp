@@ -72,7 +72,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
             backgroundSprite = Sprite::create("background/background_hard.png");
             break;
         case GameLevel::EXPERT:
-            notesSpeed =  0.8 * 0.95 * 1000.0f;
+            notesSpeed =  0.8 * 1000.0f;
             ModeText = "EXPERT";
             backgroundSprite = Sprite::create("background/background_expert.png");
             break;
@@ -214,8 +214,10 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
     
     _longNotes = cocos2d::Map<int, Note*>();
     
-    
-    
+    //Note型を格納するためのレイヤー
+    Layer *notesLayer = Layer::create();
+    notesLayer->setName("Notes_Layer");
+    addChild(notesLayer);
     return true;
 }
 
@@ -246,12 +248,13 @@ void PlayScene::Run()
         Vec2 offset = unitVector[i] / notesSpeed;
         offset *= 10 + 5;
         //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
-        double alpha = 20.0;
+        double alpha = 25.0;
         std::stringstream ss;
         ss << (i+1);
         Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
         auto areaSize = sp->getContentSize();
         Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width / 2 + alpha );
+        
         
         expandedAreas.pushBack(circle);
     }

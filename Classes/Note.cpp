@@ -71,6 +71,15 @@ void Ellipse::rotate(float theta)
 
 bool Ellipse::containsPoint(const Vec2 p)
 {
+    float Ofs_x = p.x - m_obPosition.x;
+    float Ofs_y = p.y - m_obPosition.y;
+    
+    float After_x = Ofs_x*cos(angle) + Ofs_y*sin(angle);
+    float After_y  = x_radius/y_radius * ( -Ofs_x*sin(angle) + Ofs_y*cos(angle) );
+    
+    // 原点から移動後点までの距離を算出
+    if( After_x*After_x + After_y*After_y <= x_radius*x_radius )
+        return true;   // 衝突
     return false;
 }
 
