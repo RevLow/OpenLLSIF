@@ -246,14 +246,14 @@ void PlayScene::Run()
     for(int i=0;i<9;i++)
     {
         Vec2 offset = unitVector[i] / notesSpeed;
-        offset *= 10 + 5;
+        offset *= 15 + 5;
         //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
         double alpha = 25.0;
         std::stringstream ss;
         ss << (i+1);
         Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
         auto areaSize = sp->getContentSize();
-        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width / 2 + alpha );
+        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width/2 + alpha );
         
         
         expandedAreas.pushBack(circle);
@@ -318,6 +318,8 @@ void PlayScene::Run()
 
 void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps)
 {
+    Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+    
     for(auto note : maps)
     {
         cocos2d::Vec2 v = unitVector[note->at("lane").asInt()];
@@ -335,7 +337,7 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
             //Missの処理を行う
             this->CreateJudgeSprite(NoteJudge::MISS);
         });
-        addChild(n);
+        notesLayer->addChild(n);
     }
 }
 
@@ -575,7 +577,8 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
     
     //auto playScene = this->getChildByName("PlayLayer");
     //auto target = unused_event->getCurrentTarget();
-    Vector<Node*> children = this->getChildren();
+    Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+    Vector<Node*> children = notesLayer->getChildren();
     
     //クリックされた位置を取得
     for(int i=0;i<9;i++)

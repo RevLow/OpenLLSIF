@@ -418,18 +418,19 @@ void Note::update(float frame)
         //つかんでいる状態の場合は点滅を行う
         if(_longnotesHold)
         {
-            //poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-            DrawNode *innerPoly = getChildByName<DrawNode*>("innerLongnotesLine");
-            if(innerPoly == nullptr)
-            {
-                innerPoly = DrawNode::create();
-                innerPoly->setName("innerLongnotesLine");
-                poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-                innerPoly->setPositionZ(poly->getPositionZ() - 3);
-                addChild(innerPoly);
-            }
+            poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
+            poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
+//            DrawNode *innerPoly = getChildByName<DrawNode*>("innerLongnotesLine");
+//            if(innerPoly == nullptr)
+//            {
+//                innerPoly = DrawNode::create();
+//                innerPoly->setName("innerLongnotesLine");
+//                poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
+//                innerPoly->setPositionZ(poly->getPositionZ() - 3);
+//                addChild(innerPoly);
+//            }
 //
-            static float x = MATH_DEG_TO_RAD(90);
+            static float x = MATH_DEG_TO_RAD(0);
             x += MATH_DEG_TO_RAD(8.0);                 //数値はよしなに
             float middle = 0.5f;
             float opacity = sin(x) * middle + middle; // 0~255
@@ -439,11 +440,11 @@ void Note::update(float frame)
             GLubyte opacityByte = static_cast<GLubyte>((opacity/1.2f) * 255.0f);
             poly->setOpacity(opacityByte);
             
-            innerPoly->clear();
-            innerPoly->drawPolygon(&vList[0], 4, Color4F(0.9,0.9, 0.8, opacity/1.2f),0, Color4F::BLACK);
-
-            innerPoly->setRotation(angle);
-            innerPoly->setPosition(_endOfPoint);
+//            innerPoly->clear();
+//            innerPoly->drawPolygon(&vList[0], 4, Color4F(0.9,0.9, 0.5, opacity/1.2f),0, Color4F::BLACK);
+//
+//            innerPoly->setRotation(angle);
+//            innerPoly->setPosition(_endOfPoint);
             
             auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
             if(particle == nullptr)
