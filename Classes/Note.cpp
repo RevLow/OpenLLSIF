@@ -430,15 +430,27 @@ void Note::update(float frame)
 //                addChild(innerPoly);
 //            }
 //
+            //単純なsin関数での透明度
             static float x = MATH_DEG_TO_RAD(0);
-            x += MATH_DEG_TO_RAD(8.0);                 //数値はよしなに
+            static float time = 0.0f;
+            
             float middle = 0.5f;
             float opacity = sin(x) * middle + middle; // 0~255
             opacity *= 0.5;
             if(x >= FLT_MAX) x=0;
-            opacity += 0.2;
-            GLubyte opacityByte = static_cast<GLubyte>((opacity/1.2f) * 255.0f);
+            //opacity += 0.2;
+            GLubyte opacityByte = static_cast<GLubyte>(opacity * 255.0f);
+            
             poly->setOpacity(opacityByte);
+            if(opacity >= 1.0f && time < 20.0f)
+            {
+                time += elapsed;
+            }
+            else
+            {
+                x += MATH_DEG_TO_RAD(8.0);                 //数値はよしなに
+                time = 0.0f;
+            }
             
 //            innerPoly->clear();
 //            innerPoly->drawPolygon(&vList[0], 4, Color4F(0.9,0.9, 0.5, opacity/1.2f),0, Color4F::BLACK);

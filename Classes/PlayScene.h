@@ -65,7 +65,7 @@ private:
     //ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> unitVector;
     //タップ判定用のエリア
-    Vector<Circle*> expandedAreas;
+    Vector<Ellipse*> expandedAreas;
     //ノーツ感知のエリア
     Vector<Ellipse*> judgeAreas;
     

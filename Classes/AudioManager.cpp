@@ -54,7 +54,17 @@ void AudioManager::play(std::string &filePath,AudioManager::AudioType type, bool
     }
     else
     {
-        int id = AudioEngine::play2d(filePath, loop, getMuteSeVolume());
+//        if(_seList.size()!=0&&_seList.size()>3)
+//        {
+//            AudioEngine::stop(_seList[0]);
+//            _seList.erase(_seList.begin());
+//        }
+        
+        AudioProfile *profile = AudioEngine::getDefaultProfile();
+        //profile->maxInstances = 2;
+        //AudioEngine::setMaxAudioInstance(4);
+        int id = AudioEngine::play2d(filePath, loop, getMuteSeVolume(), profile);
+        
         _seList.push_back(id);
     }
     
