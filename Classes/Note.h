@@ -77,6 +77,12 @@ public:
     }
     //ノーツが消えるときに呼ばれるコールバック
     void setOutDisplayedCallback(const std::function<void()> &f);
+    
+    // 第何番目のレーンか
+    unsigned int getLane()
+    {
+        return _lane;
+    }
 private:
     double _speed;
     bool _isStar = false;//星付きか
