@@ -243,21 +243,6 @@ void PlayScene::Run()
     Vec2 v = unitVector[0];
     
     //タップ判定のエリアの作成
-//    for(int i=0;i<9;i++)
-//    {
-//        Vec2 offset = unitVector[i] / notesSpeed;
-//        offset *= 15 + 5;
-//        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
-//        double alpha = 25.0;
-//        std::stringstream ss;
-//        ss << (i+1);
-//        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
-//        auto areaSize = sp->getContentSize();
-//        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width/2 + alpha );
-//        
-//        
-//        expandedAreas.pushBack(circle);
-//    }
     for(int i=0;i<9;i++)
     {
         Vec2 offset = unitVector[i] / notesSpeed;
@@ -268,14 +253,29 @@ void PlayScene::Run()
         ss << (i+1);
         Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
         auto areaSize = sp->getContentSize();
-        Ellipse *ellipse = Ellipse::create(sp->getPosition() - offset, areaSize.width, areaSize.width/2 + alpha );
-        Vec2 v1 = sp->getPosition() - playScene->getChildByName<Sprite*>("music_icon_7")->getPosition();
-        Vec2 v2(-1, 0);
-        float angle = v1.getAngle(v2);
+        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width/2 + alpha );
         
-        ellipse->rotate(angle);
-        expandedAreas.pushBack(ellipse);
+        
+        expandedAreas.pushBack(circle);
     }
+//    for(int i=0;i<9;i++)
+//    {
+//        Vec2 offset = unitVector[i] / notesSpeed;
+//        offset *= 15 + 5;
+//        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
+//        double alpha = 25.0;
+//        std::stringstream ss;
+//        ss << (i+1);
+//        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
+//        auto areaSize = sp->getContentSize();
+//        Ellipse *ellipse = Ellipse::create(sp->getPosition() - offset, areaSize.width, areaSize.width/2 + alpha );
+//        Vec2 v1 = sp->getPosition() - playScene->getChildByName<Sprite*>("music_icon_7")->getPosition();
+//        Vec2 v2(-1, 0);
+//        float angle = v1.getAngle(v2);
+//        
+//        ellipse->rotate(angle);
+//        expandedAreas.pushBack(ellipse);
+//    }
     //感知エリアの初期化
     for(int i=0;i<9;i++)
     {
@@ -289,10 +289,10 @@ void PlayScene::Run()
         Vec2 v1 = sp->getPosition() - playScene->getChildByName<Sprite*>("music_icon_7")->getPosition();
         Vec2 v2(-1, 0);
         float angle = v1.getAngle(v2);
-        //Circle *circle = Circle::create(sp->getPosition()  - offset , areaSize.width / 2);
-        Ellipse *ellipse = Ellipse::create(sp->getPosition() -offset, areaSize.width + 20, areaSize.width / 2);
-        ellipse->rotate(angle);
-        judgeAreas.pushBack(ellipse);
+         Circle *circle = Circle::create(sp->getPosition()  - offset , areaSize.width/2 + 25);
+        //Ellipse *ellipse = Ellipse::create(sp->getPosition() -offset, areaSize.width + 20, areaSize.width / 2);
+        //ellipse->rotate(angle);
+        judgeAreas.pushBack(circle);
     }
 
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
@@ -604,12 +604,10 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
         for (int j=0; j < touches.size(); j++)
         {
             auto loc = touches[j]->getLocation();
-            Ellipse *area = expandedAreas.at(i);
+            Circle *area = expandedAreas.at(i);
             
             if(area->containsPoint(loc))
             {
-                
-//                
                 for (auto child : children)
                 {
                     Note* note = dynamic_cast<Note*>(child);
@@ -617,7 +615,7 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
                     {
                         auto baseNotes = note->getChildByName<RenderTexture*>("BaseNotes");
                         Circle *notes_area = Circle::create(baseNotes->getPosition(), 70.0f*baseNotes->getScale() / 2.0);
-                        Ellipse *judge_area = judgeAreas.at(i);
+                        Circle *judge_area = judgeAreas.at(i);
                         
                         if(judge_area->intersectCircle(notes_area))
                         {

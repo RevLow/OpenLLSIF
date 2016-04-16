@@ -65,9 +65,9 @@ private:
     //ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> unitVector;
     //タップ判定用のエリア
-    Vector<Ellipse*> expandedAreas;
+    Vector<Circle*> expandedAreas;
     //ノーツ感知のエリア
-    Vector<Ellipse*> judgeAreas;
+    Vector<Circle*> judgeAreas;
     
     cocos2d::Map<int, Note*> _longNotes;
     
