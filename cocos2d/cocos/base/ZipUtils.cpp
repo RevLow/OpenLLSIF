@@ -252,8 +252,8 @@ int ZipUtils::inflateGZipFile(const char *path, unsigned char **out)
     int len;
     unsigned int offset = 0;
     
-    CCASSERT(out, "");
-    CCASSERT(&*out, "");
+    CCASSERT(out, "out can't be nullptr.");
+    CCASSERT(&*out, "&*out can't be nullptr.");
     
     gzFile inFile = gzopen(path, "rb");
     if( inFile == nullptr ) {
@@ -675,14 +675,12 @@ int ZipFile::getCurrentFileInfo(std::string *filename, unz_file_info *info)
     return ret;
 }
 
-
 unsigned long ZipFile::size()
 {
     unz_global_info global_info;
     if(unzGetGlobalInfo(_data->zipFile, &global_info) != UNZ_OK) return 0;
     return global_info.number_entry;
 }
-
 
 bool ZipFile::initWithBuffer(const void *buffer, uLong size)
 {

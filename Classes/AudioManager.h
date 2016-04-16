@@ -37,7 +37,8 @@ public:
     void setOnExitCallback(const std::function<void(int, const std::string&)> &callbackFunc);
     bool isPlaying();
     float getCurrentTime();
-    time_t getStartTime();
+    void preload(const std::string& filePath);
+    //time_t getStartTime();
 private:
     struct BgmData
     {

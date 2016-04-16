@@ -70,6 +70,11 @@ void AudioManager::play(std::string &filePath,AudioManager::AudioType type, bool
     
 }
 
+void AudioManager::preload(const std::string& filePath)
+{
+    AudioEngine::preload(filePath);
+}
+
 void AudioManager::stop(AudioManager::AudioType type)
 {
     if(_bgmData.playing && type == AudioManager::BGM)
@@ -168,7 +173,8 @@ float AudioManager::getCurrentTime()
     return AudioEngine::getCurrentTime(_bgmData.bgmId);
 }
 
+/*
 time_t AudioManager::getStartTime()
 {
     return AudioEngine::getStartTime(_bgmData.bgmId);
-}
+}*/

@@ -47,6 +47,8 @@ THE SOFTWARE.
 #include "renderer/CCTextureCache.h"
 #include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
+#include "renderer/CCRenderState.h"
+#include "renderer/CCFrameBuffer.h"
 #include "2d/CCCamera.h"
 #include "base/CCUserDefault.h"
 #include "base/ccFPSImages.h"
@@ -59,14 +61,9 @@ THE SOFTWARE.
 #include "base/CCConfiguration.h"
 #include "base/CCAsyncTaskPool.h"
 #include "platform/CCApplication.h"
-//#include "platform/CCGLViewImpl.h"
 
 #if CC_ENABLE_SCRIPT_BINDING
 #include "CCScriptSupport.h"
-#endif
-
-#if CC_USE_PHYSICS
-#include "physics/CCPhysicsWorld.h"
 #endif
 
 /**
@@ -92,6 +89,7 @@ extern const char* cocos2dVersion(void);
 const char *Director::EVENT_PROJECTION_CHANGED = "director_projection_changed";
 const char *Director::EVENT_AFTER_DRAW = "director_after_draw";
 const char *Director::EVENT_AFTER_VISIT = "director_after_visit";
+const char *Director::EVENT_BEFORE_UPDATE = "director_before_update";
 const char *Director::EVENT_AFTER_UPDATE = "director_after_update";
 
 Director* Director::getInstance()
@@ -143,7 +141,8 @@ bool Director::init(void)
     _winSizeInPoints = Size::ZERO;
 
     _openGLView = nullptr;
-
+    _defaultFBO = nullptr;
+    
     _contentScaleFactor = 1.0f;
 
     _console = new (std::nothrow) Console;
@@ -159,17 +158,18 @@ bool Director::init(void)
     _eventAfterDraw->setUserData(this);
     _eventAfterVisit = new (std::nothrow) EventCustom(EVENT_AFTER_VISIT);
     _eventAfterVisit->setUserData(this);
+    _eventBeforeUpdate = new (std::nothrow) EventCustom(EVENT_BEFORE_UPDATE);
+    _eventBeforeUpdate->setUserData(this);
     _eventAfterUpdate = new (std::nothrow) EventCustom(EVENT_AFTER_UPDATE);
     _eventAfterUpdate->setUserData(this);
     _eventProjectionChanged = new (std::nothrow) EventCustom(EVENT_PROJECTION_CHANGED);
     _eventProjectionChanged->setUserData(this);
-
-
     //init TextureCache
     initTextureCache();
     initMatrixStack();
 
     _renderer = new (std::nothrow) Renderer;
+    RenderState::initialize();
 
     return true;
 }
@@ -186,7 +186,9 @@ Director::~Director(void)
     CC_SAFE_RELEASE(_notificationNode);
     CC_SAFE_RELEASE(_scheduler);
     CC_SAFE_RELEASE(_actionManager);
+    CC_SAFE_DELETE(_defaultFBO);
     
+    delete _eventBeforeUpdate;
     delete _eventAfterUpdate;
     delete _eventAfterDraw;
     delete _eventAfterVisit;
@@ -267,12 +269,13 @@ void Director::drawScene()
     //tick before glClear: issue #533
     if (! _paused)
     {
+        _eventDispatcher->dispatchEvent(_eventBeforeUpdate);
         _scheduler->update(_deltaTime);
         _eventDispatcher->dispatchEvent(_eventAfterUpdate);
     }
 
     _renderer->clear();
-
+    experimental::FrameBuffer::clearAllFBOs();
     /* to avoid flickr, nextScene MUST be here: after tick and before draw.
      * FIXME: Which bug is this one. It seems that it can't be reproduced with v0.9
      */
@@ -285,12 +288,8 @@ void Director::drawScene()
     
     if (_runningScene)
     {
-#if CC_USE_PHYSICS
-        auto physicsWorld = _runningScene->getPhysicsWorld();
-        if (physicsWorld && physicsWorld->isAutoStep())
-        {
-            physicsWorld->update(_deltaTime, false);
-        }
+#if (CC_USE_PHYSICS || (CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION) || CC_USE_NAVMESH)
+        _runningScene->stepPhysicsAndNavigation(_deltaTime);
 #endif
         //clear draw stats
         _renderer->clearDrawStats();
@@ -402,6 +401,11 @@ void Director::setOpenGLView(GLView *openGLView)
         {
             _eventDispatcher->setEnabled(true);
         }
+        
+        _defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
+        //ビデオ表示のために透過する
+        _defaultFBO->setClearColor(cocos2d::Color4F(0.0,0.0,0.0,0.0));
+        _defaultFBO->retain();
     }
 }
 
@@ -412,11 +416,7 @@ TextureCache* Director::getTextureCache() const
 
 void Director::initTextureCache()
 {
-#ifdef EMSCRIPTEN
-    _textureCache = new (std::nothrow) TextureCacheEmscripten();
-#else
     _textureCache = new (std::nothrow) TextureCache();
-#endif // EMSCRIPTEN
 }
 
 void Director::destroyTextureCache()
@@ -444,7 +444,7 @@ void Director::setNextDeltaTimeZero(bool nextDeltaTimeZero)
 //
 // FIXME TODO
 // Matrix code MUST NOT be part of the Director
-// MUST BE moved outide.
+// MUST BE moved outside.
 // Why the Director must have this code ?
 //
 void Director::initMatrixStack()
@@ -604,12 +604,7 @@ void Director::setProjection(Projection projection)
         case Projection::_2D:
         {
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
-            if(getOpenGLView() != nullptr)
-            {
-                multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, getOpenGLView()->getOrientationMatrix());
-            }
-#endif
+
             Mat4 orthoMatrix;
             Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1024, 1024, &orthoMatrix);
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
@@ -624,15 +619,7 @@ void Director::setProjection(Projection projection)
             Mat4 matrixPerspective, matrixLookup;
 
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-            
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
-            //if needed, we need to add a rotation for Landscape orientations on Windows Phone 8 since it is always in Portrait Mode
-            GLView* view = getOpenGLView();
-            if(getOpenGLView() != nullptr)
-            {
-                multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, getOpenGLView()->getOrientationMatrix());
-            }
-#endif
+
             // issue #1334
             Mat4::createPerspective(60, (GLfloat)size.width/size.height, 10, zeye+size.height/2, &matrixPerspective);
 
@@ -706,6 +693,9 @@ void Director::setDepthTest(bool on)
 void Director::setClearColor(const Color4F& clearColor)
 {
     _renderer->setClearColor(clearColor);
+    auto defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
+    
+    if(defaultFBO) defaultFBO->setClearColor(clearColor);
 }
 
 static void GLToClipTransform(Mat4 *transformOut)
@@ -713,15 +703,9 @@ static void GLToClipTransform(Mat4 *transformOut)
     if(nullptr == transformOut) return;
     
     Director* director = Director::getInstance();
-    CCASSERT(nullptr != director, "Director is null when seting matrix stack");
+    CCASSERT(nullptr != director, "Director is null when setting matrix stack");
 
     auto projection = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
-    //if needed, we need to undo the rotation for Landscape orientation in order to get the correct positions
-    projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
-#endif
-
     auto modelview = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
     *transformOut = projection * modelview;
 }
@@ -963,6 +947,7 @@ void Director::reset()
     
     stopAnimation();
     
+    CC_SAFE_RELEASE_NULL(_notificationNode);
     CC_SAFE_RELEASE_NULL(_FPSLabel);
     CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
     CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
@@ -1000,6 +985,8 @@ void Director::reset()
     UserDefault::destroyInstance();
     
     GL::invalidateStateCache();
+
+    RenderState::finalize();
     
     destroyTextureCache();
 }
@@ -1025,6 +1012,9 @@ void Director::restartDirector()
 {
     reset();
     
+    // RenderState need to be reinitialized
+    RenderState::initialize();
+
     // Texture cache need to be reinitialized
     initTextureCache();
     
@@ -1268,8 +1258,18 @@ void Director::setContentScaleFactor(float scaleFactor)
 
 void Director::setNotificationNode(Node *node)
 {
-    CC_SAFE_RELEASE(_notificationNode);
-    _notificationNode = node;
+	if (_notificationNode != nullptr){
+		_notificationNode->onExitTransitionDidStart();
+		_notificationNode->onExit();
+		_notificationNode->cleanup();
+	}
+	CC_SAFE_RELEASE(_notificationNode);
+
+	_notificationNode = node;
+	if (node == nullptr)
+		return;
+	_notificationNode->onEnter();
+	_notificationNode->onEnterTransitionDidFinish();
     CC_SAFE_RETAIN(_notificationNode);
 }
 
@@ -1319,9 +1319,9 @@ void DisplayLinkDirector::startAnimation()
 
     _invalid = false;
 
-#ifndef WP8_SHADER_COMPILER
+    _cocos2d_thread_id = std::this_thread::get_id();
+
     Application::getInstance()->setAnimationInterval(_animationInterval);
-#endif
 
     // fix issue #3509, skip one fps to avoid incorrect time calculation.
     setNextDeltaTimeZero(true);
@@ -1353,7 +1353,7 @@ void DisplayLinkDirector::stopAnimation()
     _invalid = true;
 }
 
-void DisplayLinkDirector::setAnimationInterval(double interval)
+void DisplayLinkDirector::setAnimationInterval(float interval)
 {
     _animationInterval = interval;
     if (! _invalid)

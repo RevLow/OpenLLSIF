@@ -1,35 +1,36 @@
-# cocos2d-x v3.6 Release Notes #
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [Cocos2d-x 3.10 Release Notes](#cocos2d-x-
+- -release-notes)
 - [Misc Information](#misc-information)
 - [Requirements](#requirements)
   - [Runtime Requirements](#runtime-requirements)
   - [Compiler Requirements](#compiler-requirements)
   - [How to run tests](#how-to-run-tests)
+    - [Cocos Console](#cocos-console)
     - [Mac OSX & iOS](#mac-osx-&-ios)
     - [Android](#android)
     - [Windows](#windows)
     - [Linux](#linux)
   - [How to start a new game](#how-to-start-a-new-game)
-- [v3.6](#v36)
-  - [Highlights of v3.6](#highlights-of-v36)
-  - [Features in detail](#features-in-detail-1)
-    - [3D TextureCube](#3d-texturecube)
-    - [3D Skybox](#3d-skybox)
-    - [3D Terrain](#3d-terrain)
-    - [Animate3D Quality Control](#animate3d-quality-control)
-    - [Un-bottleneck your fill-rate with SpritePolygon](#un-bottleneck-your-fill-rate-with-spritepolygon)
-    - [LuaJit ARM64](#luajit-arm64)
-    - [Button memory usage optimization](#button-memory-usage-optimization)
+- [v3.10](#v310)
+  - [Highlights features, improvements and API updates of v3.10](#highlights-features-improvements-and-api-updates-of-v310)
+  - [The main features in detail of Cocos2d-x v3.10:](#the-main-features-in-detail-of-cocos2d-x-v310)
+    - [UI System](#ui-system)
+    - [AudioEngine](#audioengine)
+    - [Others](#others)
+  - [Other changes](#other-changes)
+  - [NEW APIS](#new-apis)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Cocos2d-x 3.10 Release Notes #
 
 # Misc Information
 
 * [Full Changelog](https://github.com/cocos2d/cocos2d-x/blob/v3/CHANGELOG)
-* v3.0 Release Notes can be found here: [v3.0 Release Notes](https://github.com/cocos2d/cocos2d-x/blob/cocos2d-x-3.0/docs/RELEASE_NOTES.md)
 
 # Requirements
 
@@ -40,22 +41,49 @@
 * OS X 10.7 or newer
 * Windows 7 or newer
 * Windows Phone 8.1
+* Windows 10 UWP
 * Linux Ubuntu 14.04 or newer
+* Mordern browsers and IE 9+ (On mobile platforms, only iOS and Android 5 activated WebGL support)
 
 ## Compiler Requirements
 
 * Xcode 5.1 or newer for iOS or Mac
 * gcc 4.9 or newer for Linux
 * ndk-r10c for Android
-* Visual Studio 2012  or newer for Windows (win32)
-* Visual Studio 2012  or newer for Windows Phone 8
+* Visual Studio 2013 or newer for Windows (win32)
+* Visual Studio 2013 update4 or newer for Windows 8.1 universal Apps
+* Visual Studio 2015 RC or newer and Windows 10.0 (build 10074 or higher) for Windows 10.0 UWP Apps
 
 ## How to run tests
+
+### Cocos Console
+
+You can use [Cocos Console](www.cocos2d-x.org/wiki/Cocos2d-console) command line tool to run the test cases on almost all supported platforms.
+
+In console application:
+```
+// Enter cpp test folder
+cd tests/cpp-tests
+// Or enter js test folder
+cd tests/js-tests
+// Or enter lua test folder
+cd tests/lua-tests
+
+// Compile or run test case
+cocos compile -p ios|mac|android|win32|win8_1|metro|web -m debug|release
+cocos run -p ios|mac|android|win32|win8_1|metro|web -m debug|release
+```
+
+For example, if you want to run cpp test in release mode on Android, you can use the following command:
+
+```
+cocos run -p android -m release
+```
 
 ### Mac OSX & iOS
 
 * Enter `cocos2d-x/build` folder, open `cocos2d_test.xcodeproj`
-* Select `iOS` or `OS X` target in scheme toolbar
+* Select `cpp-tests`, `lua-tests`, `js-tests` for `iOS` or `OS X` target in scheme toolbar
 * Click `run` button
 
 ### Android
@@ -87,10 +115,11 @@ Then
 
 ### Windows
 
-* Enter `cocos2d-x/build`, and open `cocos2d-win32.vs2012.sln`
-* Select `cpp-empty-test` as running target
+* For win32 project, enter `cocos2d-x/build`, and open `cocos2d-win32.sln`
+* For win 8.1 project, enter `cocos2d-x/build`, and open `cocos2d-win8.1-universal.sln`
+* For win 10 project, enter `cocos2d-x/build`, and open `cocos2d-win10.sln`
+* Select running target
 * Click run button
-
 
 ### Linux
 
@@ -112,205 +141,262 @@ Run
 
 ## How to start a new game
 
-Please refer to this document: [ReadMe](../README.md)
+Use Cocos Console to create a new game:
 
-# v3.6
-
-## Highlights of v3.6
-
-* 3D: added skybox support
-* 3D: added terrain support
-* added `SpritePolygon` to fix overdraw issue
-* used luajit v2.1-20150331 on 64-bit iOS devices
-* removed WP8 support
-* memory usage optimization of `ui::Button`
-* 3rd: updated Spine runtime to v2.1.25
-* 3rd: updated libcurl to v7.4 on all supported platforms except WP8.1 universal
-* 3rd: updated chipmunk to v6.2.2
-* 3rd: updated openssl to v1.0.11
-* 3rd: updated freetype to v2.5.5
-* 3rd: updated png to v1.6.16
-
-Because Angle doesn't support WP8 any more, and WP8's market share is around 20% worldwide with variations across countries, so we removed WP8 support suggested by MS OPEN TECK guys since v3.6.
-
-
-## Features in detail
-
-### 3D TextureCube
-
-TextureCube is useful for skybox and environment mapping. It uses 6 faces of a cube as map shape, and 6 pictures are projected onto the sides of a cube and stored as six square textures.
-
-**TexturesCube usage**
-
-```c++
-auto texturecube = TextureCube::create("left.jpg", "right.jpg", "top.jpg", "bottom.jpg","front.jpg", "back.jpg");
-//set texture parameters
-Texture2D::TexParams tRepeatParams;
-tRepeatParams.magFilter = GL_NEAREST;
-tRepeatParams.minFilter = GL_NEAREST;
-tRepeatParams.wrapS = GL_MIRRORED_REPEAT;
-tRepeatParams.wrapT = GL_MIRRORED_REPEAT;
-texturecube->setTexParameters(tRepeatParams);
-
-//create a GLProgramState using custom shader
-auto shader = GLProgram::createWithFilenames("cube_map.vert", "cube_map.frag");
-auto state = GLProgramState::create(shader);
-// pass the texture sampler to our custom shader, state is a pointer of GLProgramState, u_cubeTex is a uniform in shader
-state->setUniformTexture("u_cubeTex", texturecube);
+```
+cocos new -l cpp|js|lua MyNewGame
 ```
 
-Then the shader cube_map.frag can be something like this,
+# v3.10
 
-```c++
-varying vec3        v_reflect; //reflect direction
-uniform samplerCube u_cubeTex;
+## Highlights features, improvements and API updates of v3.10
 
-void main(void)
-{
-    gl_FragColor = textureCube(u_cubeTex, v_reflect); //sample the color of reflection direction
-}
-```
+We are happy to announce the release of Cocos2d-x v3.10. Following are the highlighted features, improvements and API updates in this version. 
 
-For more information please refer to cpp-tests/Sprite3DTest/Sprite3DCubeMapTest.
+1. Provides a unified setup for both Cocos2d-x and Cocos. This allows you to stay up to date with the latest Cocos2d-x releases. This includes using precompiled binaries and source code, in a single place. As always the source code is available from [GitHub](https://github.com/cocos2d/cocos2d-x) but, there is no longer a `.zip` file available containing the source code. 
+2. New __Cocos Launcher__ tool! __Cocos Launcher__ allows:
+  * One step to create a new project with the engine, by using precompiled libraries or source code.
+  * Easy integration with SDKBOX for 3rd party services: Facebook, IAP and many more.
+  * Developers to provide feedback and get support, directly within __Cocos Launcher__, making it simple to contact the engine team for help.　
+3. UI System:
+  * Reimplemented `Scale9Sprite` to improve performance and reduce memory consumption.
+  * Changed `PageView` to derive from `ListView`. `PageView` can add any widget as a child.
+  * Added three new *overflow types* to `Label`: **CLAMP**，**SHRINK**, **RESIZE_HEIGHT**.
+  * Fixed a bug in `ClippingNode` that corrects its behavior when being set as a child.
+4. Improved **JavaScript Bindings**: follows [SpiderMonkey GC best practices](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/GC_Rooting_Guide) making it more robust.
 
-### 3D Skybox
+## The main features in detail of Cocos2d-x v3.10:
 
-Skybox is a common component in 3D game. It is based on TextureCube.
+### UI System
 
-Usage of skybox
-
-```c++
-// create a texture cube
-auto textureCube = TextureCube::create("left.jpg", "right.jpg","top.jpg", "bottom.jpg","front.jpg", "back.jpg");
-//create a skybox
-auto skyBox = Skybox::create();
-skyBox->retain();
-//set cube texture to the skybox
-skyBox->setTexture(textureCube);
-addChild(_skyBox);
-```
-
-For more information please refer to cpp-tests/Sprite3DTest/Sprite3DCubeMapTest.
-
-![tecturecube-and-skybox](https://raw.githubusercontent.com/minggo/Pictures/master/texturecube-skybox.gif)
-
-### 3D Terrain
-
-Terrain is an important component in 3D game. A texture is used to stand for the height map. And up to 4 textures can be used to blend the details of the terrain, grass, road, and so on.
-
-Usage of terrain
-
-```c++
-//blended layers
-Terrain::DetailMap dirt("TerrainTest/dirt.jpg"), grass("TerrainTest/Grass2.jpg"), road("TerrainTest/road.jpg"), green("TerrainTest/GreenSkin.jpg");
-
-//height map, alpha map (blend weight), and blended layers
-Terrain::TerrainData data("TerrainTest/heightmap16.jpg", "TerrainTest/alphamap.png", dirt, grass, road, green);
-
-//create terrain here
-_terrain = Terrain::create(data,Terrain::CrackFixedType::SKIRT);
-//set lod distance
-_terrain->setLODDistance(3.2,6.4,9.6);
-//it must be less than 5
-_terrain->setMaxDetailMapAmount(4);
-addChild(_terrain);
-```
-
-For more information please refer to cpp-tests/Sprite3DTest/TerrainTest.
-
-![terrian](https://raw.githubusercontent.com/minggo/Pictures/master/terrian.png)
-
-### Animate3D Quality Control
-
-In order to make Animate3D run fast, you can use low quality animation. There are three types of animation quality：
-
-* Animate3DQuality::QUALITY_NONE
-* Animate3DQuality::QUALITY_LOW
-* Animate3DQuality::QUALITY_HIGH
-
-`Animate3DQuality::QUALITY_NONE` means the animation will not be updated. You can use this type on the animation that you are sure it is not visible. `Animate3DQuality::QUALITY_LOW` will use the nearest keyframe to display current frame; `Animate3DQuality::QUALITY_HIGH` will will interpolate between keyframes.
-
-
-```c++
-std::string fileName = "Sprite3DTest/orc.c3b";
-auto sprite = Sprite3D::create(fileName);
-addChild(sprite);
+1. Reimplemented `Scale9Sprite` and improve the scale9sprite performance and reduce memory consumption.
     
-auto animation = Animation3D::create(fileName);
-if (animation)
-{
-   auto animate = Animate3D::create(animation);
-   //use low quality animation
-   animate->setQuality(Animate3DQuality::QUALITY_LOW);
-   sprite->runAction(RepeatForever::create(animate));
-}
-```
+    Reimplemented ui::Scale9Sprite, now the Slice sprite uses 16 vertices and 54 indices instead of the old 9 sprites way, The memory consumption is much lower than the previous implementation, and it is also more efficient.
 
-The animation quality is also configurable in config.plist, the key is cocos2d.x.3d.animate_high_quality. All created Animate3D base on this key if exist. You can modify it using the above method.
+    In SIMPLE mode, the 4 borders are all 0 and the whole sprite will scale horizontally and vertically. In this mode only 1 quad is used for rendering, for example:
 
-### Un-bottleneck your fill-rate with SpritePolygon
+        auto blocks = ui::Scale9Sprite::createWithSpriteFrameName("blocks9c.png");
+        //When setting to SIMPLE, only 4 vertexes is used to rendering.
+        blocks->setRenderingType(Scale9Sprite::RenderingType::SIMPLE);
 
-SpritePolygon is a 2d Node, like Sprites, it displays a 2d Image.
-But the difference is where Sprites is made of 2 triangles to form a quad, SpritePolygon is made of N number of triangles. `It is an experimental feature.`
+    In SLICE mode, it will use 18 triangles to rendering the slice 9 sprite. If the 4 borders are 0, there still be 18 triangles computed. So choose your RenderingType wisely, for example:
 
-![sprite-polygon](https://raw.githubusercontent.com/minggo/Pictures/master/sprite-polygon.jpg)
+		auto sprite = ui::Scale9Sprite::createWithSpriteFrameName("blocks9c.png");
+        //When setting to SLICE, 16 vertexes will be used to rendering.
+        sprite->setRenderingType(Scale9Sprite::RenderingType::SLICE);
+    
+2. Changed `PageView` to derived from ListView, PageView can add any type of widget as child.
 
-This allows the GPU to draw the same graphics with much lower pixels.
+    PageView was derived from Layout and it implemented the features of scrolling and item arrangement from scratch. But the features are already there in ListView. So remove those duplicated implementations from PageView and make it inherit from ListView.
 
-Because 2d games tends to not use much vertices compared to 3d games, but almost of all sprites are `none rectangular`, GPU wastes precious bandwidth drawing area that is totally transparent. Fill-rate is often the bottleneck in a graphic intense 2d game. SpritePolygon is the perfect cure for "Over-Draw".
+    By consequence, PageView becomes simpler and easier to maintain because it considers only paging implementation. for example:
 
-Following picture is the result of performance comparing, corresponding performance test cases are in `tests/cpp-tests/Classes/SpritePolygonTest`:
+        // Create the page view
+        Size size(240, 130);
+        PageView* pageView = PageView::create();
+        pageView->setDirection(PageView::Direction::HORIZONTAL);
+        pageView->setContentSize(size);
+        Size backgroundSize = background->getContentSize();
+        //"removeAllPages" is changed to "removeAllItems"
+        pageView->removeAllItems();
+        pageView->setIndicatorEnabled(true);
 
-![spritepolygon-performance](http://discuss.cocos2d-x.org/uploads/default/_optimized/336/215/1423528cff_690x149.png)
+        int pageCount = 4;
+        for (int i = 0; i < pageCount; ++i)
+        {
+            Layout* layout = Layout::create();
+            layout->setContentSize(size);
+            
+            ImageView* imageView = ImageView::create("cocosui/scrollviewbg.png");
+            imageView->setScale9Enabled(true);
+            imageView->setContentSize(size);
+            imageView->setPosition(Vec2(layout->getContentSize().width / 2.0f, layout->getContentSize().height / 2.0f));
+            layout->addChild(imageView);
+            
+            Text* label = Text::create(StringUtils::format("page %d",(i+1)), "fonts/Marker Felt.ttf", 30);
+            label->setColor(Color3B(192, 192, 192));
+            label->setPosition(Vec2(layout->getContentSize().width / 2.0f, layout->getContentSize().height / 2.0f));
+            layout->addChild(label);
+            //"insertPage" is changed to "insertCustomItem"
+            pageView->insertCustomItem(layout, i);
+        }
+        //"removePageAtIndex" is changed to "removeItem"
+        pageView->removeItem(0);
+        //"scrollToPage" is changed to "scrollToItem"
+        pageView->scrollToItem(pageCount - 2);
 
-For more detail description of SpritePolygon please refer to [this thread](http://discuss.cocos2d-x.org/t/new-feature-meshsprite-polygonsprite/21153)
+     More detail usage please refer to: tests/cpp-tests/Classes/UITest/CocoStudioGUITest/UIPageViewTest/UIPageViewTest.cpp.
+    
+   
+3. Added three overflow type to new label: CLAMP, SHRINK, RESIZE_HEIGHT.
+  
+     Overflow type is used to control label overflow result, In SHRINK mode, the font size will change dynamically to adapt the content size. In CLAMP mode, when label content goes out of the bounding box, it will be clipped, In RESIZE_HEIGHT mode, you can only change the width of label and the height is changed automatically. For example:
+       
+        //Change the label's Overflow type
+        label->setOverflow(Label::Overflow::RESIZE_HEIGHT);
 
-### luajit arm64 
+     More detail usage please refer to: tests/cpp-tests/Classes/LabelTest/LabelTestNew.cpp.
 
-The version of the luajit is [v2.1-20150331](https://github.com/openresty/luajit2/releases). We have consulted the author of luajit, he said it was stability enough to be used. We will update to v2.1 when it is released.
+     Limitations:
 
-Using luajit arm64 version is that because it can improve the performance. In previous versions of cocos2d-x, it uses lua on iOS 64-bit devices. 
 
-Bytecode of luajit and luajit arm64 are not compatible, which means you can not use one version of bytecode on iOS 32-bit devices and iOS 64-bit devices.
+     currently only TTF and BMFont support all the valid Overflow type. Char Map font supports all the Overflow type except for SHRINK, because we can't measure its font size. System font only support Overflow::Normal and Overflow::RESIZE_HEIGHT.
 
-As there is not mandatory requirement of having arm64 bit bin on Android, so we don't use luajit arm64 on Android as its bytecode is not compatible with luajit arm32.
+## Other changes
+[NEW]           RichText supported new line element.
 
-### Button memory usage optimization
-Now the title label of Button is created on demand. A Button without title won't
-create an extra empty label.
+[NEW]           UIText::clone supports clone the text effect.
 
-And we have also removed some redundant string variables in Button's header file.
+[NEW]           UI: Added methods to query label effect state.
+    
+[REFINE]        IOS: Added virtual keyword for some render related function.
 
-We use Cpp-Empty-Test to verify this optimization.
+[REFINE]        UI: Fixed boring deprecated warning in HttpRequest.
 
-Here is the test code:
+[REFINE]        Network: Fixed Downloader bug on iOS & Android platform.
 
-```
-auto visibleSize = Director::getInstance()->getVisibleSize();
-auto origin = Director::getInstance()->getVisibleOrigin();
+[REFINE]        Studio: Fixed deprecation warning in SkeletonRenderer.
 
-int num = 100;
-for (int i=0; i < num; ++i)
-{
-auto button = ui::Button::create("ClosedNormal.png",
-"ClosedSelected.png");
-button->setPosition(origin + visibleSize/2);
-this->addChild(button);
-}
-```
+[REFINE]        JS: Added js test case for fix, improve template.
 
-And here is the result:
+[REFINE]        Network: Permit http access to cocos2d-x.org in test projects on iOS.
 
-#### On iOS platform
+[REFINE]        Network: Crash when removing a remotely downloaded image from texture 
+cache in js-binding.
 
-|Num of buttons|100 | 200 | 500| 1000|
-|-----|-----|-----|-----|-----|
-|Before optimization | 61M | 61.9M | 67.1M | 72.2M|
-|After optimization |60.7M| 61.1M | 66M | 67.9M|
+[REFINE]        Win10: WinRT project update version to v3.10.
 
-#### On Mac platform
+[REFINE]        Console: Added quiet option for Cocos Toolkit.
 
-|Num of buttons|100 | 200 | 500| 1000|
-|-----|-----|-----|-----|-----|
-|Before optimization |26.8M | 27.1M| 33.2M| 35.4M|
-|After optimization |25.1M|25.9M|28M|32.4M|
+[REFINE]        JS: New GC model for js-binding.
+
+[REFINE]        Doc: Fixed typos in documentation and comments.
+
+[REFINE]        UI: Updated controlButton size calculate with new Scale9Sprite logic.
+
+[REFINE]        Win10: Added missing _USRJSSTATIC preprocessor define for ARM builds.
+
+[REFINE]        JS: Added ccvector_to / ccmap_to converted to new js-binding API.
+
+[REFINE]        UI: Slider misprint fix.
+
+[FIX]           Core: Fixed premultiplyAlpha for mipmaps and compressed textures.
+
+[FIX]           UI: Fixed Scale9sprite rendering error when content size smaller than the sum of leftInset and rightInset.
+
+[FIX]           Win32: Fixed EditBox crash when removing an EditBox in a scheduler.
+
+[FIX]           Android: Fixed cannot add view to mFrameLayout when extends Cocos2dxActivity.
+
+[FIX]           2D: Fixed actionNode set at wrong position bug.
+
+[FIX]           3D: Fixed the movement of PUParticle lags one frame.
+
+[FIX]           UI: Fixed the wront argument of setPlaceholderFontName in EditBox.
+
+[FIX]           UI: Fixed EditBox editBoxEditingDidEnd may use the original text after change the text of EditBox in user script.
+
+[FIX]           Audio: Fixed `FinishCallback` never be called in Windows.
+
+[FIX]           UI: Fixed Layout stencil clipping nested with Clipping Node rendering issue.
+
+[FIX]           UI: Keyboard doesn't hide when click the screen outside of EditBox on iOS platform.
+
+[FIX]           UI: Fixed a fatal bug in EditBox implement on Windows platform.
+
+[FIX]           UI: Fixed edit box setPlaceholderFontName and scale font size issue.
+
+[FIX]           Core: Fixed memory leak when initWithImage() failed.
+
+[FIX]           Network: CCDownloader on iOS is broken in v3.9 js-binding.
+
+[FIX]           JS: Bindings fixes for Menu, Sprite and Label.
+
+[FIX]           Studio: Removed weak reference in ActionNode.
+
+[FIX]           UI: shouldStartLoading method should return value to js in js-binding.
+
+[FIX]           UI: Fixed scrollview render error.
+
+[FIX]           JS: Fixed win32 js project crash issue.
+
+[FIX]           UI: Button touch doesn't work with scale9 enabled.
+
+[FIX]           JS: Fixed evalString doesn't return result issue.
+
+[FIX]           JS: Fixed ComponentJS proxy management issue in JSB.
+
+[FIX]           Android: Fixed include in cocos network module.
+
+[FIX]           Network: Fixed web socket crash.
+
+[FIX]           UI: Fixed TextField missing default password style text setting.
+
+[TEST]          S9SpriteTest: Scale9Sprite fade actions with cascade opacity.
+
+[TEST]          Web: Removed default focus block from UIFocusTestVertical.
+
+[TEST]          Lua: Fixed pageViewTest Horizontal scroll won't work in Lua-test.
+
+You can also take a look at the [full changelog](https://github.com/cocos2d/cocos2d-x/blob/v3/CHANGELOG).
+
+## NEW APIS
+
+1. RichText
+
+    Added RichElementNewLine class to create new RichText Element.
+
+    For more information: [https://github.com/cocos2d/cocos2d-x/pull/14033](https://github.com/cocos2d/cocos2d-x/pull/14033 "https://github.com/cocos2d/cocos2d-x/pull/14033")
+
+2. PageViewIndicator
+
+    Added PageViewIndicator class to create PageViewIndicator.
+
+    For more information: [https://github.com/cocos2d/cocos2d-x/blob/v3/cocos/ui/UIPageViewIndicator.h](https://github.com/cocos2d/cocos2d-x/blob/v3/cocos/ui/UIPageViewIndicator.h "https://github.com/cocos2d/cocos2d-x/blob/v3/cocos/ui/UIPageViewIndicator.h")
+
+3. PageView 
+
+    Changed PageView to derived from ListView.
+    For more information: [https://github.com/cocos2d/cocos2d-x/pull/14252](https://github.com/cocos2d/cocos2d-x/pull/14252 "https://github.com/cocos2d/cocos2d-x/pull/14252")
+
+4. ApplicationProtocol
+
+    Added the API getVersion.
+
+
+5. PolygonInfo
+
+    Added the API setTriangles.
+
+6. Scale9Sprite
+
+    Added setRenderingType, getRenderingType.
+
+9. FontFNT
+
+    Added setFontSize, getOriginalFontSize.
+
+10. Label
+
+    Added setBMFontSize, getBMFontSize, enableWrap, isWrapEnabled, setOverflow, getOverflow, initWithTTF, isShadowEnabled, getShadowOffset, getShadowBlurRadius, getShadowColor, getOutlineSize, getLabelEffectType, getEffectColor.
+
+11. AudioEngineImpl
+
+    Added AudioEngineImpl to implement FMOD.
+
+12. Lua Module
+
+    Added luaval_to_node, node_to_luaval.
+
+13. JS Module
+
+    Added js_cocos2dx_ComponentJS_create
+
+14. ui::Text
+
+    Added isShadowEnabled, getShadowOffset, getShadowBlurRadius, getShadowColor,  getOutlineSize, getLabelEffectType, getEffectColor.
+
+15. UITextTest_Clone 
+
+    Added UITextTest_Clone class.
+    

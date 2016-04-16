@@ -59,7 +59,7 @@ public:
     virtual void onEnter() override;
     
     /**
-     * Create a UICCTextField intance with a placeholder, a fontName and a fontSize.
+     * Create a UICCTextField instance with a placeholder, a fontName and a fontSize.
      *@param placeholder Placeholder in string.
      *@param fontName Font name in string.
      *@param fontSize Font size in float.
@@ -104,8 +104,8 @@ public:
     bool isMaxLengthEnabled()const;
 
     /**
-     * Set maxmize length.
-     *@param length  The maxmize length in integer.
+     * Set maximize length.
+     *@param length  The maximize length in integer.
      */
     void setMaxLength(int length);
 
@@ -116,7 +116,7 @@ public:
     int getMaxLength()const;
 
     /**
-     * Return the total inputed charaters.
+     * Return the total inputed characters.
      *@return Total inputed character count.
      */
     int getCharCount()const;
@@ -316,7 +316,7 @@ public:
      */
     void setTouchAreaEnabled(bool enable);
     
-    virtual bool hitTest(const Vec2 &pt) override;
+    virtual bool hitTest(const Vec2 &pt, const Camera* camera, Vec3 *p) const override;
     
     
     /**
@@ -353,6 +353,13 @@ public:
      * @param color A color value in `Color4B`.
      */
     void setPlaceHolderColor(const Color4B& color);
+    
+    /**
+     * @brief Query the text string color.
+     *
+     * @return The color of the text.
+     */
+    const Color4B& getTextColor()const;
     
     /**
      * @brief Change the text color.
@@ -565,12 +572,12 @@ public:
     virtual std::string getDescription() const override;
     
     /**
-     * @brief Get the the renderer size in auto mode.
+     * @brief Get the renderer size in auto mode.
      *
      * @return A delimitation zone.
      */
     virtual Size getAutoRenderSize();
-    //overide functions.
+    //override functions.
     virtual Size getVirtualRendererSize() const override;
     virtual Node* getVirtualRenderer() override;
     virtual void onEnter() override;
@@ -594,6 +601,13 @@ public:
      * @param alignment A alignment arguments in @see `TextHAlignment`.
      */
     void setTextHorizontalAlignment(TextHAlignment alignment);
+
+    /**
+     * @brief Inquire the horizontal alignment
+     *
+     * @return The horizontal alignment
+     */
+    TextHAlignment getTextHorizontalAlignment() const;
     
     /**
      * @brief Change the vertical text alignment.
@@ -601,6 +615,13 @@ public:
      * @param alignment A alignment arguments in @see `TextVAlignment`.
      */
     void setTextVerticalAlignment(TextVAlignment alignment);
+
+    /**
+     * @brief Inquire the horizontal alignment
+     *
+     * @return The horizontal alignment
+     */
+    TextVAlignment getTextVerticalAlignment() const;
     
 CC_CONSTRUCTOR_ACCESS:
     virtual bool init() override;

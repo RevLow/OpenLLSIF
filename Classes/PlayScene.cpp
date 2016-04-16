@@ -147,7 +147,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
     layer->setOpacity(0);
     layer->setName("BlackLayer");
     this->addChild(layer);
-    
+
     //背景画像の設定
     backgroundSprite->setName("backgroundImage");
     backgroundSprite->setPosition(visibleSize.width / 2, visibleSize.height / 2);
@@ -307,6 +307,11 @@ void PlayScene::Run()
     auto backgroundLayer = this->getChildByName<LayerColor*>("BlackLayer");
     backgroundLayer->runAction(FadeTo::create(0.5f, videoLayer!= nullptr ? 200 : 100));
     
+    //音声のプリロード
+    AudioManager::getInstance()->preload("Sound/SE/perfect.mp3");
+    AudioManager::getInstance()->preload("Sound/SE/great.mp3");
+    AudioManager::getInstance()->preload("Sound/SE/good.mp3");
+    AudioManager::getInstance()->preload("Sound/SE/bad.mp3");
     //透明度を戻した後、実行を行う
     playScene->runAction(Sequence::create(
                                           FadeTo::create(0.5f, 255),

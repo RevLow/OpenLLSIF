@@ -76,7 +76,7 @@ namespace experimental{
             virtual void setFileName(const std::string& videoPath);
             
             /**
-             * @brief Get the local video filie name.
+             * @brief Get the local video file name.
              *
              * @return The video file name.
              */
@@ -103,12 +103,12 @@ namespace experimental{
             /**
              * Pauses playback.
              */
-            virtual void pause();
+            virtual void pause()override;
 
             /**
              * Resumes playback.
              */
-            virtual void resume();
+            virtual void resume()override;
 
             /**
              * Stops playback.

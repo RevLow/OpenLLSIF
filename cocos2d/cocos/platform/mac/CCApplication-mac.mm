@@ -108,7 +108,7 @@ int Application::run()
     return 0;
 }
 
-void Application::setAnimationInterval(double interval)
+void Application::setAnimationInterval(float interval)
 {
     _animationInterval = interval*1000.0f;
 }
@@ -116,6 +116,14 @@ void Application::setAnimationInterval(double interval)
 Application::Platform Application::getTargetPlatform()
 {
     return Platform::OS_MAC;
+}
+
+std::string Application::getVersion() {
+    NSString* version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    if (version) {
+        return [version UTF8String];
+    }
+    return "";
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

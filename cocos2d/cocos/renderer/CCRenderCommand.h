@@ -32,7 +32,7 @@
 #include "base/ccTypes.h"
 
 /**
- * @addtogroup support
+ * @addtogroup renderer
  * @{
  */
 
@@ -80,13 +80,13 @@ public:
     /** Returns the Command type. */
     inline Type getType() const { return _type; }
     
-    /** Retruns whether is transparent. */
+    /** Returns whether is transparent. */
     inline bool isTransparent() const { return _isTransparent; }
     
     /** Set transparent flag. */
     inline void setTransparent(bool isTransparent) { _isTransparent = isTransparent; }
     /**
-     Get skip batching status, if a rendering is skip batching, it will be forced to be rendering seperately.
+     Get skip batching status, if a rendering is skip batching, it will be forced to be rendering separately.
      */
     inline bool isSkipBatching() const { return _skipBatching; }
     /**Set skip batching.*/
@@ -101,7 +101,7 @@ public:
 protected:
     /**Constructor.*/
     RenderCommand();
-    /**Desctructor.*/
+    /**Destructor.*/
     virtual ~RenderCommand();
     //used for debug but it is not implemented.
     void printID();
@@ -117,7 +117,7 @@ protected:
     
     /**
      QuadCommand and TrianglesCommand could be auto batched if there material ID is the same, however, if
-     a command is skip batching, it would be forced to draw in a seperate function call, and break the batch.
+     a command is skip batching, it would be forced to draw in a separate function call, and break the batch.
      */
     bool _skipBatching;
     

@@ -87,7 +87,7 @@ struct GLContextAttrs
 NS_CC_BEGIN
 
 /**
- * @addtogroup core
+ * @addtogroup platform
  * @{
  */
 /**
@@ -120,10 +120,6 @@ public:
      * @param open Open or close IME keyboard.
      */
     virtual void setIMEKeyboardState(bool open) = 0;
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
-    virtual void setIMEKeyboardState(bool open, std::string str) = 0;
-#endif
     
     /** When the window is closed, it will return false if the platforms is Ios or Android.
      * If the platforms is windows or Mac,it will return true.
@@ -215,11 +211,6 @@ public:
     virtual void* getEAGLView() const { return nullptr; }
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_IOS) */
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
-	virtual Size getRenerTargetSize() const = 0;
-	virtual const Mat4& getOrientationMatrix() const = 0;
-	virtual const Mat4& getReverseOrientationMatrix() const = 0;
-#endif
     /**
      * Get the visible area size of opengl viewport.
      *
@@ -322,6 +313,17 @@ public:
      * @param ys The points of y.
      */
     virtual void handleTouchesMove(int num, intptr_t ids[], float xs[], float ys[]);
+
+    /** Touch events are handled by default; if you want to customize your handlers, please override this function.
+     *
+     * @param num The number of touch.
+     * @param ids The identity of the touch.
+     * @param xs The points of x.
+     * @param ys The points of y.
+     * @param fs The force of 3d touches.
+     # @param ms The maximum force of 3d touches
+     */
+    virtual void handleTouchesMove(int num, intptr_t ids[], float xs[], float ys[], float fs[], float ms[]);
     
     /** Touch events are handled by default; if you want to customize your handlers, please override this function.
      *

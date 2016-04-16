@@ -41,7 +41,7 @@ struct libwebsocket_context;
 struct libwebsocket_protocols;
 
 /**
- * @addtogroup core
+ * @addtogroup network
  * @{
  */
 
@@ -185,7 +185,7 @@ public:
 
     /**
      *  @brief Gets current state of connection.
-     *  @return State the state value coule be State::CONNECTING, State::OPEN, State::CLOSING or State::CLOSED
+     *  @return State the state value could be State::CONNECTING, State::OPEN, State::CLOSING or State::CLOSED
      */
     State getReadyState();
 

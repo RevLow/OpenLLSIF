@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "ui/UILayout.h"
 #include "ui/UIButton.h"
 #include "ui/UICheckBox.h"
+#include "ui/UIRadioButton.h"
 #include "ui/UIImageView.h"
 #include "ui/UIText.h"
 #include "ui/UITextAtlas.h"
@@ -56,6 +57,7 @@ THE SOFTWARE.
 #include "ui/UIScale9Sprite.h"
 #include "ui/UIEditBox/UIEditBox.h"
 #include "ui/UILayoutComponent.h"
+#include "editor-support/cocostudio/CocosStudioExtension.h"
 
 /**
  * @addtogroup ui

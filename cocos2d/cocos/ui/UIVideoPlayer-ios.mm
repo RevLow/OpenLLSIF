@@ -55,7 +55,6 @@ using namespace cocos2d::experimental::ui;
 -(void) videoFinished:(NSNotification*) notification;
 -(void) playStateChange;
 
-+(NSString*) fullPathFromRelativePath:(NSString*) relPath;
 
 @end
 
@@ -138,12 +137,11 @@ using namespace cocos2d::experimental::ui;
         self.moviePlayer.movieSourceType = MPMovieSourceTypeStreaming;
         [self.moviePlayer setContentURL:[NSURL URLWithString:@(videoUrl.c_str())]];
     } else {
-        NSString *path = [UIVideoViewWrapperIos fullPathFromRelativePath:@(videoUrl.c_str())];
-        self.moviePlayer = [[[MPMoviePlayerController alloc] initWithContentURL:[NSURL fileURLWithPath:path]] autorelease];
+        self.moviePlayer = [[[MPMoviePlayerController alloc] initWithContentURL:[NSURL fileURLWithPath:@(videoUrl.c_str())]] autorelease];
         self.moviePlayer.movieSourceType = MPMovieSourceTypeFile;
     }
     self.moviePlayer.allowsAirPlay = false;
-    self.moviePlayer.controlStyle = MPMovieControlStyleNone;
+    self.moviePlayer.controlStyle = MPMovieControlStyleNone;//ここをNoneに
     self.moviePlayer.view.userInteractionEnabled = true;
     
     auto clearColor = [UIColor clearColor];
@@ -163,6 +161,7 @@ using namespace cocos2d::experimental::ui;
     auto eaglview = (CCEAGLView *) view->getEAGLView();
     //[eaglview addSubview:self.moviePlayer.view];
     
+    //ここを変更
     [[eaglview superview] insertSubview:self.moviePlayer.view atIndex:0];
     glClearColor(0, 0, 0, 0);  // required to see the video behind the GLView
     
@@ -263,10 +262,6 @@ using namespace cocos2d::experimental::ui;
     }
 }
 
-+(NSString*) fullPathFromRelativePath:(NSString*) relPath
-{
-    return [NSString stringWithCString: cocos2d::FileUtils::getInstance()->fullPathForFilename(std::string([relPath UTF8String])).c_str() encoding: [NSString defaultCStringEncoding]];
-}
 @end
 //------------------------------------------------------------------------------------------------------------
 
@@ -296,7 +291,7 @@ VideoPlayer::~VideoPlayer()
 
 void VideoPlayer::setFileName(const std::string& fileName)
 {
-    _videoURL = fileName;
+    _videoURL = FileUtils::getInstance()->fullPathForFilename(fileName);
     _videoSource = VideoPlayer::Source::FILENAME;
     [((UIVideoViewWrapperIos*)_videoView) setURL:(int)_videoSource :_videoURL];
 }

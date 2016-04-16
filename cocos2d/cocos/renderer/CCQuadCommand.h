@@ -29,7 +29,7 @@
 #include "renderer/CCGLProgramState.h"
 
 /**
- * @addtogroup support
+ * @addtogroup renderer
  * @{
  */
 
@@ -60,6 +60,7 @@ public:
      */
     void init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
               const Mat4& mv, uint32_t flags);
+
     /**Deprecated function, the params is similar as the upper init function, with flags equals 0.*/
     CC_DEPRECATED_ATTRIBUTE void init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
               const Mat4& mv);
@@ -88,7 +89,7 @@ protected:
     uint32_t _materialID;
     /**OpenGL handle for texture.*/
     GLuint _textureID;
-    /**GLprogramstate for the commmand. encapsulate shaders and uniforms.*/
+    /**GLprogramstate for the command. encapsulate shaders and uniforms.*/
     GLProgramState* _glProgramState;
     /**Blend function when rendering the triangles.*/
     BlendFunc _blendType;

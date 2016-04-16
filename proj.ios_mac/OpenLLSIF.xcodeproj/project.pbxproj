@@ -33,6 +33,7 @@
 		2EC214741C523D6B005CED97 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC214731C523D6B005CED97 /* Security.framework */; };
 		2EC2147C1C524AD8005CED97 /* libcocos2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2147B1C524AD8005CED97 /* libcocos2d iOS.a */; };
 		2EEC01611B72932900FAEE4F /* Note.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EEC015F1B72932900FAEE4F /* Note.cpp */; };
+		2EF36A101CC1EF810003BA10 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EF36A0F1CC1EF810003BA10 /* libiconv.dylib */; };
 		46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8919C43A87006E1F66 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8419C43A87006E1F66 /* AppDelegate.cpp */; };
 		46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */; };
@@ -131,6 +132,7 @@
 		2EC2147B1C524AD8005CED97 /* libcocos2d iOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcocos2d iOS.a"; path = "../cocos2d/build/build/Debug-iphoneos/libcocos2d iOS.a"; sourceTree = "<group>"; };
 		2EEC015F1B72932900FAEE4F /* Note.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Note.cpp; sourceTree = "<group>"; };
 		2EEC01601B72932900FAEE4F /* Note.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
+		2EF36A0F1CC1EF810003BA10 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libiconv.dylib; sourceTree = DEVELOPER_DIR; };
 		46880B8419C43A87006E1F66 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		46880B8519C43A87006E1F66 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		46880B8619C43A87006E1F66 /* HelloWorldScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelloWorldScene.cpp; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2EF36A101CC1EF810003BA10 /* libiconv.dylib in Frameworks */,
 				2EC2147C1C524AD8005CED97 /* libcocos2d iOS.a in Frameworks */,
 				2EC214741C523D6B005CED97 /* Security.framework in Frameworks */,
 				2EC214721C523D5B005CED97 /* CoreMotion.framework in Frameworks */,
@@ -265,6 +268,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2EF36A0F1CC1EF810003BA10 /* libiconv.dylib */,
 				2EC2147B1C524AD8005CED97 /* libcocos2d iOS.a */,
 				2EC214791C5245ED005CED97 /* libfreetype.a */,
 				2EC214771C5245BB005CED97 /* libcocos2d iOS.a */,
