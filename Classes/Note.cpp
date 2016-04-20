@@ -52,93 +52,6 @@ DrawNode* Circle::getDrawNode(Color4F color)
     return draw;
 }
 
-
-bool Ellipse::init(const Point p, float xr, float yr)
-{
-    x_radius = xr;
-    y_radius = yr;
-    m_obPosition = p;
-    setPosition(p);
-    
-    return true;
-}
-
-void Ellipse::rotate(float theta)
-{
-    angle = theta;
-    setRotation(theta);
-}
-
-bool Ellipse::containsPoint(const Vec2 p)
-{
-    float Ofs_x = p.x - m_obPosition.x;
-    float Ofs_y = p.y - m_obPosition.y;
-    
-    float After_x = Ofs_x*cos(angle) + Ofs_y*sin(angle);
-    float After_y  = x_radius/y_radius * ( -Ofs_x*sin(angle) + Ofs_y*cos(angle) );
-    
-    // 原点から移動後点までの距離を算出
-    if( After_x*After_x + After_y*After_y <= x_radius*x_radius )
-        return true;   // 衝突
-    return false;
-}
-
-bool Ellipse::intersectCircle(Circle *circle)
-{
-    Ellipse *ellipse = Ellipse::create(circle->getPoint(), circle->getRadius(), circle->getRadius());
-    return intersectEllipse(ellipse);
-}
-
-//楕円同士の交差判定
-//http://marupeke296.sakura.ne.jp/COL_2D_No7_EllipseVsEllipse.html
-bool Ellipse::intersectEllipse(Ellipse *ellipse)
-{
-    float DefAng = angle - ellipse->getAngle();
-    float Cos = cos(DefAng);
-    float Sin = sin(DefAng);
-    
-    float nx = ellipse->getXRadius() * Cos;
-    float ny = -ellipse->getXRadius() * Sin;
-    float px = ellipse->getYRadius() * Sin;
-    float py = ellipse->getYRadius() * Cos;
-    float ox = cos(angle)*(ellipse->getPoint().x - m_obPosition.x) + sin(angle)*(ellipse->getPoint().y-m_obPosition.y);
-    float oy = -sin(angle)*(ellipse->getPoint().x - m_obPosition.x) + cos(angle)*(ellipse->getPoint().y - m_obPosition.y);
-    
-    //STEP2
-    float rx_pow2 = 1 / (x_radius*x_radius);
-    float ry_pow2 = 1 / (y_radius*y_radius);
-    float A = rx_pow2*nx*nx + ry_pow2*ny*ny;
-    float B = rx_pow2*px*px + ry_pow2*py*py;
-    float D = 2*rx_pow2*nx*px + 2*ry_pow2*ny*py;
-    float E = 2*rx_pow2*nx*ox + 2*ry_pow2*ny*oy;
-    float F = 2*rx_pow2*px*ox + 2*ry_pow2*py*oy;
-    float G = (ox/x_radius)*(ox/x_radius) + (oy/y_radius)*(oy/y_radius)-1;
-    
-    //STEP3
-    float tmp1 = 1/(D*D-4*A*B);
-    float h = (F*D-2*E*B)*tmp1;
-    float k = (E*D-2*A*F)*tmp1;
-    float Th = (B-A)==0 ? 0:atan(D/(B-A))*0.5f;
-    
-    // STEP4 : +1楕円を元に戻した式で当たり判定
-    float CosTh = cos(Th);
-    float SinTh = sin(Th);
-    float A_tt = A*CosTh*CosTh + B*SinTh*SinTh - D*CosTh*SinTh;
-    float B_tt = A*SinTh*SinTh + B*CosTh*CosTh + D*CosTh*SinTh;
-    float KK = A*h*h + B*k*k + D*h*k - E*h - F*k + G;
-    if(KK>0) KK = 0; // 念のため
-    float Rx_tt = 1+sqrt(-KK/A_tt);
-    float Ry_tt = 1+sqrt(-KK/B_tt);
-    float x_tt = CosTh*h-SinTh*k;
-    float y_tt = SinTh*h+CosTh*k;
-    float JudgeValue = x_tt*x_tt/(Rx_tt*Rx_tt) + y_tt*y_tt/(Ry_tt*Ry_tt);
-    
-    if( JudgeValue <= 1 )
-        return true; // 衝突
-    
-    return false;
-}
-
 bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
 {
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
@@ -267,6 +180,13 @@ NoteJudge Note::StartJudge()
     double offset = 5;
     double elapsed = fabs((_startTime-offset) - now);
     
+    //もしも判定外の場合はNONを返す
+    
+    if (elapsed >= _speed * 0.50) {
+        
+        return NoteJudge::NON;
+    }
+    
     NoteJudge rtn;
     if (elapsed < _speed*0.05)
     {
@@ -281,7 +201,7 @@ NoteJudge Note::StartJudge()
     {
         rtn = NoteJudge::GOOD;
     }
-    else
+    else if(elapsed >= _speed*0.20 && elapsed < _speed*0.50)
     {
         rtn = NoteJudge::BAD;
     }
@@ -332,7 +252,7 @@ NoteJudge Note::EndJudge()
     this->unscheduleUpdate();
     
     //もしコールバックが存在するなら
-    if(_callbackFunc) _callbackFunc();
+    //if(_callbackFunc) _callbackFunc();
     
     return rtn;
 }

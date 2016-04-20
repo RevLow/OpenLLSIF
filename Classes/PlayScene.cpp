@@ -218,6 +218,13 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
     Layer *notesLayer = Layer::create();
     notesLayer->setName("Notes_Layer");
     addChild(notesLayer);
+    
+    createdNotes.reserve(9);
+    for (int i=0; i<9; ++i) {
+        std::queue<Note*> notesQueue;
+        createdNotes.push_back(notesQueue);
+    }
+    
     return true;
 }
 
@@ -256,13 +263,13 @@ void PlayScene::Run()
         double alpha = 25.0;
        
         
-        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width/2 + alpha );
-        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + alpha );
+        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width/4 + areaSize.width/8 + alpha );
+        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + alpha  );
         
         expandedAreas.pushBack(circle);
         expandedAreas.pushBack(circle_2);
 #ifdef DEBUG
-        DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(0.0f, 0.0f, 1.0f, 1.0f));
+        DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
         nodes->setPosition(sp->getPosition() - offset);
         this->addChild(nodes);
         DrawNode *nodes_2 = circle_2->getDrawNode(Color4F::Color4F(0.0f, 0.0f, 1.0f, 1.0f));
@@ -270,53 +277,6 @@ void PlayScene::Run()
         this->addChild(nodes_2);
 #endif
     }
-//    for(int i=0;i<9;i++)
-//    {
-//        Vec2 offset = unitVector[i] / notesSpeed;
-//        offset *= 15 + 5;
-//        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
-//        double alpha = 25.0;
-//        std::stringstream ss;
-//        ss << (i+1);
-//        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
-//        auto areaSize = sp->getContentSize();
-//        Ellipse *ellipse = Ellipse::create(sp->getPosition() - offset, areaSize.width, areaSize.width/2 + alpha );
-//        Vec2 v1 = sp->getPosition() - playScene->getChildByName<Sprite*>("music_icon_7")->getPosition();
-//        Vec2 v2(-1, 0);
-//        float angle = v1.getAngle(v2);
-//        
-//        ellipse->rotate(angle);
-//        expandedAreas.pushBack(ellipse);
-//    }
-    //感知エリアの初期化
-    for(int i=0;i<9;i++)
-    {
-        Vec2 offset = unitVector[i] / notesSpeed;
-        offset *= 10;
-        
-        std::stringstream ss;
-        ss << (i+1);
-        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
-        auto areaSize = sp->getContentSize();
-//        Vec2 v1 = sp->getPosition() - playScene->getChildByName<Sprite*>("music_icon_7")->getPosition();
-//        Vec2 v2(-1, 0);
-//        float angle = v1.getAngle(v2);
-         Circle *circle = Circle::create(sp->getPosition()  - offset , areaSize.width/2 + 25);
-         Circle *circle_2 = Circle::create(sp->getPosition() + offset, areaSize.width/2 + 25);
-        //Ellipse *ellipse = Ellipse::create(sp->getPosition() -offset, areaSize.width + 20, areaSize.width / 2);
-        //ellipse->rotate(angle);
-        judgeAreas.pushBack(circle);
-        judgeAreas.pushBack(circle_2);
-#ifdef DEBUG
-        DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(1.0f, 0.0f, .0f, 1.0f));
-        nodes->setPosition(sp->getPosition() - offset);
-        this->addChild(nodes);
-        DrawNode *nodes_2 = circle_2->getDrawNode(Color4F::Color4F(1.0f, 0.0f, .0f, 1.0f));
-        nodes_2->setPosition(sp->getPosition() + offset);
-        this->addChild(nodes_2);
-#endif
-    }
-
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
 
     if (videoLayer != nullptr)
@@ -370,10 +330,12 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
         cocos2d::Vec2 v = unitVector[note->at("lane").asInt()];
         
         Note *n = Note::create(*note, v);
+        createdNotes[note->at("lane").asInt()].push(n);
         
         //画面の判定外に出た場合の処理
-        n->setOutDisplayedCallback([this]()
+        n->setOutDisplayedCallback([this, note]()
         {
+            
             Sprite *jSprite = this->getChildByName<Sprite*>("JudgeSprite");
             if(jSprite != nullptr)
                 removeChild(jSprite);
@@ -381,7 +343,9 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
             if(overSprite != nullptr) removeChild(overSprite);
             //Missの処理を行う
             this->CreateJudgeSprite(NoteJudge::MISS);
+            createdNotes[note->at("lane").asInt()].pop();
         });
+        
         notesLayer->addChild(n);
     }
 }
@@ -635,57 +599,57 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
             Circle *area2 = expandedAreas.at(i+1);
             if(area->containsPoint(loc) || area2->containsPoint(loc))
             {
-                for (auto child : children)
+                int index = i/2;
+                if(createdNotes[index].empty()) goto for_exit;
+                
+                Note* note = createdNotes[index].front();
+                NoteJudge judge = note->StartJudge();
+                
+                //もしもタップ可能区間に入っていないなら
+                if(judge == NoteJudge::NON)
                 {
-                    Note* note = dynamic_cast<Note*>(child);
-                    if(note!=nullptr)
+                    //別のレーンの探索に行く
+                    goto for_exit;
+                }
+                else
+                {
+                    if(note->isLongNotes())
                     {
-                        auto baseNotes = note->getChildByName<RenderTexture*>("BaseNotes");
-                        Circle *notes_area = Circle::create(baseNotes->getPosition(), 70.0f*baseNotes->getScale() / 2.0);
-                        Circle *judge_area = judgeAreas.at(i);
-                        Circle *judge_area_2 = judgeAreas.at(i+1);
-                        if(
-                           (judge_area->intersectCircle(notes_area)||judge_area_2->intersectCircle(notes_area))
-                           && note->getLane() == i/2)
-                        {
-                            if(note->isLongNotes())
-                            {
-                                _longNotes.insert(touches[j]->getID(), note);
-                            }
-                            NoteJudge j = note->StartJudge();
-                            
-                            std::string fullpath;
-                            switch (j)
-                            {
-                                case NoteJudge::PERFECT:
-                                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-                                    current_score += 100;
-                                    break;
-                                case NoteJudge::GREAT:
-                                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-                                    current_score += 50;
-                                    break;
-                                case NoteJudge::GOOD:
-                                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-                                    current_score += 10;
-                                    break;
-                                case NoteJudge::BAD:
-                                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-                                    current_score += 5;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-                            CreateJudgeSprite(j);
-                            CreateTapFx(baseNotes->getPosition());
-                            
-                            
-                            //今のレーンの判定はこれ以上行わない
-                            goto for_exit;
-                        }
+                        _longNotes.insert(touches[j]->getID(), note);
                     }
-                }//end of loop
+                    
+                    std::string fullpath;
+                    switch (judge)
+                    {
+                        case NoteJudge::PERFECT:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+                            current_score += 100;
+                            break;
+                        case NoteJudge::GREAT:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+                            current_score += 50;
+                            break;
+                        case NoteJudge::GOOD:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+                            current_score += 10;
+                            break;
+                        case NoteJudge::BAD:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+                            current_score += 5;
+                            break;
+                        default:
+                            break;
+                    }
+                    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+                    CreateJudgeSprite(judge);
+                    CreateTapFx(note->getChildByName<RenderTexture*>("BaseNotes")->getPosition());
+                    
+                    //先頭を取り出す
+                    createdNotes[index].pop();
+                    
+                    //今のレーンの判定はこれ以上行わない
+                    goto for_exit;
+                }
              }//end of area contain judge
         }
 for_exit:

@@ -57,7 +57,7 @@ bool HelloWorld::init()
 
     std::string filePath = "Sound/BGM/paradice_live.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    AudioManager::getInstance()->setBgmVolume(0.8);
+    AudioManager::getInstance()->setSeVolume(1.3);
     AudioManager::getInstance()->play(fullPath, AudioManager::BGM, true);
     //////////////////////////////
     //4, アニメーション読み込み
