@@ -407,8 +407,8 @@ void InstallLayer::installFile(Ref* sender)
                                       uuid_unparse(value, str);
                                       
                                       //この関数は標準ではなく、cocos2dxのコードを変更し、追加をしている
-                                      std::string cachePath = FileUtils::getInstance()->getCachedPath() +"Song/" + str + '/';
-                                      std::string writablePath(FileUtils::getInstance()->getWritablePath());
+                                      const std::string cachePath = FileUtils::getInstance()->getCachedPath() +"Song/" + str + '/';
+                                      const std::string writablePath(FileUtils::getInstance()->getWritablePath());
                                       
                                       ZipFile *zipFile = new ZipFile(writablePath+installTargetFile);
                                       FileUtils::getInstance()->createDirectory( cachePath );
@@ -464,11 +464,16 @@ void InstallLayer::installFile(Ref* sender)
                                       std::string fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/close.mp3");
                                       AudioManager::getInstance()->play(fullpath,AudioManager::SE);
                                       
-                                      //曲選択画面の選択を初期化
-                                      UserDefault::getInstance()->setIntegerForKey("SONG_SELECTION", 0);
-
-                                      auto tableView = this->getChildByName<TableView*>("SongTable");
-                                      tableView->reloadData();
+                                     //SongSelectionList.plistを修正
+                                      auto plistData = FileUtils::getInstance()->getValueVectorFromFile("SongSelectionList.plist");
+                                      plistData.push_back(Value(cachePath+"fileInfo.plist"));
+                                      FileUtils::getInstance()->writeValueVectorToFile(plistData, FileUtils::getInstance()->fullPathForFilename("SongSelectionList.plist"));
+                                      
+                                      Director::getInstance()->getScheduler()->performFunctionInCocosThread([this](){
+                                          auto tableView = this->getChildByName<TableView*>("SongTable");
+                                          tableView->reloadData();
+                                      });
+                                      
                                   }
     
     );

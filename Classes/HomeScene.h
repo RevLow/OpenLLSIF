@@ -42,16 +42,13 @@ protected:
     void previousAlbum_click(Ref *ref);
     bool jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e);
 private:
-    
-
+    std::vector<std::string> songStack;
     ViewScene _currentScene;
     
     /*
      ジャケットのタグ番号とファイルのパスの対応付けのためのMap
      */
     std::map<int, std::string> JacketInfoMap;
-    //ジャケット内の先頭のインデックス番号を保持する
-    int touchable_index;
 };
 
 #endif /* defined(__OpenLLSIF__HomeScene__) */

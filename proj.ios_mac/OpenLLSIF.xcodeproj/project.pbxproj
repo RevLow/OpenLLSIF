@@ -18,6 +18,7 @@
 		2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B81C72192B00DDF6AD /* particle_texture.plist */; };
 		2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3981331B5510ED001B096C /* PointWithDepth.cpp */; };
 		2E39813C1B5D27BD001B096C /* PlayScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E39813A1B5D27BD001B096C /* PlayScene.cpp */; };
+		2E4002C21CCBC8FE009901E1 /* UiSongList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002C11CCBC8FE009901E1 /* UiSongList.plist */; };
 		2E61137C1B64AA1C006C82F8 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137B1B64AA1C006C82F8 /* CoreVideo.framework */; };
 		2E61137E1B64AA24006C82F8 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137D1B64AA24006C82F8 /* ImageIO.framework */; };
 		2E6113801B64AA5F006C82F8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137F1B64AA5F006C82F8 /* CoreMedia.framework */; };
@@ -110,6 +111,8 @@
 		2E3981341B5510ED001B096C /* PointWithDepth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointWithDepth.h; sourceTree = "<group>"; };
 		2E39813A1B5D27BD001B096C /* PlayScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayScene.cpp; sourceTree = "<group>"; };
 		2E39813B1B5D27BD001B096C /* PlayScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayScene.h; sourceTree = "<group>"; };
+		2E4002BC1CCA628B009901E1 /* SongSelectionList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SongSelectionList.plist; sourceTree = "<group>"; };
+		2E4002C11CCBC8FE009901E1 /* UiSongList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = UiSongList.plist; sourceTree = "<group>"; };
 		2E61137B1B64AA1C006C82F8 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreVideo.framework; sourceTree = DEVELOPER_DIR; };
 		2E61137D1B64AA24006C82F8 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/ImageIO.framework; sourceTree = DEVELOPER_DIR; };
 		2E61137F1B64AA5F006C82F8 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreMedia.framework; sourceTree = DEVELOPER_DIR; };
@@ -341,6 +344,8 @@
 				2E9807EB1C654EBD00D33CC2 /* res */,
 				2E283CA81B52B250004EABDA /* Sound */,
 				521A8EA819F11F5000D177D7 /* fonts */,
+				2E4002BC1CCA628B009901E1 /* SongSelectionList.plist */,
+				2E4002C11CCBC8FE009901E1 /* UiSongList.plist */,
 			);
 			name = Resources;
 			path = ../Resources;
@@ -520,6 +525,7 @@
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
 				2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */,
+				2E4002C21CCBC8FE009901E1 /* UiSongList.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,8 +15,49 @@
 #include "PlayScene.h"
 #include "ConfigLayer.h"
 
-
 USING_NS_CC;
+
+
+/*!
+ * パスからファイル名を取り除いたパスを抽出
+ * @param[in] path パス
+ * @return フォルダパス
+ */
+inline std::string GetFolderPath(const std::string &path)
+{
+    size_t pos1;
+    
+    pos1 = path.rfind('\\');
+    if(pos1 != std::string::npos){
+        return path.substr(0, pos1+1);
+        
+    }
+    
+    pos1 = path.rfind('/');
+    if(pos1 != std::string::npos){
+        return path.substr(0, pos1+1);
+    }
+    
+    return "";
+}
+/*!
+ * パスからファイルの親フォルダ名を取り出す
+ * @param[in] path ファイルパス
+ * @return 親フォルダ名
+ */
+inline std::string GetParentFolderName(const std::string &path)
+{
+	std::string::size_type pos1, pos0;
+	pos1 = path.find_last_of("\\/");
+	pos0 = path.find_last_of("\\/", pos1-1);
+    
+	if(pos0 != std::string::npos && pos1 != std::string::npos){
+		return path.substr(pos0+1, pos1-pos0-1);
+	}
+	else{
+		return "";
+	}
+}
 
 Scene* HomeScene::createScene(ViewScene entryScene)
 {
@@ -36,7 +77,6 @@ Scene* HomeScene::createScene(ViewScene entryScene)
 bool HomeScene::init(ViewScene entryScene)
 {
     _currentScene = entryScene;
-    touchable_index = UserDefault::getInstance()->getIntegerForKey("SONG_SELECTION", 0);
     
     if (!Layer::init()) {
         return false;
@@ -159,8 +199,12 @@ void HomeScene::homeButton_action(Ref *ref)
  */
 void HomeScene::loadHomeScene()
 {
-    this->removeChildByName("backgroundLayer");
-    this->removeChildByName("jacketLayer");
+    auto backgroundLayer = this->getChildByName("backgroundLayer");
+    if(backgroundLayer != nullptr) this->removeChild(backgroundLayer);
+    auto jacketLayer = this->getChildByName("jacketLayer");
+    if (jacketLayer != nullptr) {
+        this->removeChild(jacketLayer);
+    }
     auto newLayer = CSLoader::getInstance()->createNode("res/home_background.csb");
     auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/home_background.csb");
     newLayer->setName("backgroundLayer");
@@ -209,129 +253,110 @@ void HomeScene::liveButton_action(Ref *ref)
     
     _currentScene = ViewScene::Live;
 }
+
 /*
  liveシーンを生成する
  */
 void HomeScene::loadLiveScene()
 {
     this->removeChildByName("backgroundLayer");
-  
+
     auto newLayer = CSLoader::getInstance()->createNode("res/song_selection.csb");
     auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/song_selection.csb");
     newLayer->setName("backgroundLayer");
-    
+
     newLayer->runAction(action);
     action->gotoFrameAndPlay(0,true);
     this->addChild(newLayer, 0);
-    
+
     //背景画像の作成
     Sprite* backgroundSprite = Sprite::create("background/background_expert.png");
     backgroundSprite->setName("backgroundImage");
     backgroundSprite->setPosition(480, 320);
     backgroundSprite->setLocalZOrder(-2);
     this->addChild(backgroundSprite);
+    auto songList = FileUtils::getInstance()->getValueVectorFromFile("SongSelectionList.plist");
+   
+    int songListSize = songList.size();
     
-    
-    //ボタンの設定
-    auto nextButton = newLayer->getChildByName<ui::Button*>("next_button");
-    nextButton->addClickEventListener(CC_CALLBACK_1(HomeScene::nextAlbum_click, this));
-    
-    auto previousButton = newLayer->getChildByName<ui::Button*>("previous_button");
-    previousButton->addClickEventListener(CC_CALLBACK_1(HomeScene::previousAlbum_click, this));
-    
-    std::string docDir = FileUtils::getInstance()->getCachedPath() + "Song/";
-    //インストールディレクトリからフォルダのリストを取得
-    auto fileList = getContentsList(docDir, true);
-    
-    //ファイルが存在している場合のみ
-    if(fileList.size() > 0)
+    if (songListSize > 0)
     {
-        //CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
-        AudioManager::getInstance()->stop(AudioManager::BGM);
-        //ジャケットを配置するノードの作成
-        //ジャケットサイズは500x500
+        //もし、保持しているスタックに何も入っていないなら
+        if(songStack.size() == 0)
+        {
+            for (int i=0;i<songList.size();i++)
+            {
+                songStack.push_back(songList[i].asString());
+            }
+        }
+        
+        auto jacketAttributes = FileUtils::getInstance()->getValueVectorFromFile("UiSongList.plist");
+        
         Node* jacketNode = Node::create();
         jacketNode->setName("jacketLayer");
         
-        
-        
-        float theta = 0;
-        float dTheta = 360 / fileList.size();
-        float z = 0;
-        
-        int index = touchable_index;
-        
-        for(int i=0; i < fileList.size();i++)
+        for (int i = 0; i < jacketAttributes.size(); ++i)
         {
-            auto songDir = fileList[index];
+            int index = 0;
+            if(i % 2 == 0) index = i/2;
+            else index = songList.size() - ((i/2) + 1);
             
-            auto plistData = FileUtils::getInstance()->getValueMapFromFile(docDir + songDir +"/fileInfo.plist");
-            std::string jacketCover = plistData.at("Cover").asString();
+            Vec2 position(jacketAttributes[i].asValueMap()["PositionX"].asFloat(),
+                          jacketAttributes[i].asValueMap()["PositionY"].asFloat());
+            float scale = jacketAttributes[i].asValueMap()["Scale"].asFloat();
+            int zOdr = jacketAttributes[i].asValueMap()["Z"].asInt();
             
-            Sprite *sp = Sprite::create(docDir + songDir + '/' + jacketCover);
+            if (i >= songList.size())
+            {
+                break;
+            }
+            
+            std::string filePath = songStack[index];
+            auto plist = FileUtils::getInstance()->getValueMapFromFile(filePath);
+            std::string fullPath = GetFolderPath(songStack[index]) + plist["Cover"].asString();
+            Sprite *sp = Sprite::create(fullPath);
             if(sp->getContentSize().width != 500)
             {
-                sp = Sprite::create(docDir + songDir + '/' + jacketCover, 500.0 / sp->getContentSize().width);
+                sp = Sprite::create(fullPath, 500.0 / sp->getContentSize().width);
             }
-            
-            //あらかじめタグ付けを行っておく事で回転のボタンを押したときの処理を行えるようにする
-            sp->setTag(index);
-            
-            //コンテナに登録を行う
-            //JacketInfoMap.push_back(songDir);
-            JacketInfoMap[index] = songDir;
-            
-            if(i==0)
-            {
-                std::string bgm = plistData.at("BGM").asString();
-                
-                std::string fullPath = FileUtils::getInstance()->fullPathForFilename((docDir + songDir + '/' + bgm).c_str());
 
-                AudioManager::getInstance()->play(fullPath, AudioManager::BGM, true);
+            int halfSize = songStack.size() / 2;
+            if (halfSize >= 2) {
+                halfSize = 2;
             }
-            
-            double rad = MATH_DEG_TO_RAD(theta);
-            Vec3 v(980*sin(rad), 0.0, 4.8*cos(rad));
-            PointWithDepth point;
-            point.SetWorldPosition(v.x, v.y, v.z);
-            double height = sp->getBoundingBox().size.height / 2.0;
-            
-            sp->setAnchorPoint(Vec2(sp->getAnchorPoint().x, 0.0));
-            sp->setPosition(point.x, point.y - height);
-
-            double scale = i==0?point.GetScale() + 0.15 : point.GetScale();
+            int tag = index + halfSize;
+            if(tag >= songStack.size()) tag -= songStack.size();
+            CCLOG("%d, %d", index, tag);
+            sp->setTag(tag);
+            sp->setPosition(position);
             sp->setScale(scale);
+            sp->setZOrder(zOdr);
             
-            jacketNode->addChild(sp,z);
+            jacketNode->addChild(sp);
             
-            
-            //次にaddChildする位置を決める
-            if(i < fileList.size() / 2) z--;
-            else if(i==fileList.size()/2) z = fileList.size()%2 ? z: z+1;
-            else z++;
-            
-            theta += dTheta;
-            
-            index++;
-            if(index >= fileList.size()) index = 0;
+            if (i == 0)
+            {
+                AudioManager::getInstance()->stop(AudioManager::BGM);
+                fullPath = GetFolderPath(songStack[index]) + plist["BGM"].asString();
+                AudioManager::getInstance()->play(fullPath, AudioManager::BGM);
+            }
         }
         
-        
-        jacketNode->setLocalZOrder(-1);
-        jacketNode->setScale(0.5f);
-        jacketNode->setPosition(480, 380);
-        this->addChild(jacketNode);
-        
+        addChild(jacketNode);
         
         //jacketNodeにイベントリスナーを追加する
         auto listener = EventListenerTouchOneByOne::create();
-        
+
         //listener->setSwallowTouches(true);
         listener->onTouchBegan = CC_CALLBACK_2(HomeScene::jacket_touch, this);
-        
+
         //重なりのPriorityにjacketNodeを利用する
         //これにより、jacketNodeより上にきたNodeのイベントが優先される(主にConfigのレイヤーのため)
         this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, jacketNode);
+        
+        
+        newLayer->getChildByName<ui::Button*>("next_button")->addClickEventListener(CC_CALLBACK_1(HomeScene::nextAlbum_click, this));
+        newLayer->getChildByName<ui::Button*>("previous_button")->addClickEventListener(CC_CALLBACK_1(HomeScene::previousAlbum_click, this));
     }
 }
 
@@ -342,7 +367,7 @@ void HomeScene::loadLiveScene()
  */
 void HomeScene::nextAlbum_click(Ref *ref)
 {
-    ui::Button* nstButton = (ui::Button*)ref;
+    ui::Button* nstButton = dynamic_cast<ui::Button*>(ref);
     nstButton->setEnabled(false);
     
 
@@ -351,8 +376,9 @@ void HomeScene::nextAlbum_click(Ref *ref)
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
     AudioManager::getInstance()->play(fullPath, AudioManager::SE);
     
-    auto jacketNode = this->getChildByName("jacketLayer");
+    Node* jacketNode = getChildByName("jacketLayer");
     
+
     //もしも、jacketNodeが存在しない場合
     //-> ひとつも楽曲が無い場合、ボタンを有効化し戻る
     if(jacketNode == NULL)
@@ -360,48 +386,101 @@ void HomeScene::nextAlbum_click(Ref *ref)
         nstButton->setEnabled(true);
         return;
     }
+
+    Sprite *node = jacketNode->getChildByTag<Sprite*>(0);
     
-    //クリック可能なスプライトを変更する
-    touchable_index = touchable_index == 0 ? jacketNode->getChildrenCount() - 1 : touchable_index-1;
+    Vec2 position(node->getPositionX(), node->getPositionY());
+    float scale = node->getScale();
+    int zOdr = node->getLocalZOrder();
+    int tag = node->getTag();
+    node->setLocalZOrder(zOdr - 1);
+    node->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, Vec2(Director::getInstance()->getVisibleSize().width / 2, Director::getInstance()->getVisibleSize().height/ 2)),
+                                                   ScaleTo::create(0.2f, scale*0.25f), NULL),
+                                   CallFunc::create([node, jacketNode]()
+                                                    {
+                                                        jacketNode->removeChild(node);
+                                                    })
+                                   , NULL));
     
-    
-    //ゲームで使うファイルを取得する
-    std::string zipFileName = JacketInfoMap.at(touchable_index);
-    std::string docPath = FileUtils::getInstance()->getCachedPath() + "Song/" + zipFileName;
-    
-    auto plistData = FileUtils::getInstance()->getValueMapFromFile(docPath+"/fileInfo.plist");
-    std::string songFileName = docPath + "/" + plistData.at("BGM").asString();
-    AudioManager::getInstance()->play(songFileName, AudioManager::BGM);
-    
-    //ループを行う事で最初の状態は変化してしまうためあらかじめ保持しておく
-    int zeroLocalZ = jacketNode->getChildByTag(0)->getLocalZOrder();
-    float zeroScale = jacketNode->getChildByTag(0)->getScale();
-    Point zeroPoint = jacketNode->getChildByTag(0)->getPosition();
-    
-    //ループは最後以外を行い、最後はループを抜けた後行う
-    for(int i=0;i<jacketNode->getChildrenCount() - 1;i++)
+    for(int i = 1;i < 5;i++)
     {
-        auto node = jacketNode->getChildByTag(i);
-        Node* nstNode = jacketNode->getChildByTag(i+1);
-        
-        node->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, nstNode->getPosition()), ScaleTo::create(0.2f, nstNode->getScale()), NULL),
-                                         CallFunc::create([node, nstNode]()
+        Sprite *currentSprite = jacketNode->getChildByTag<Sprite*>(i);
+        if (currentSprite == nullptr)
+        {
+            break;
+        }
+        currentSprite->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, position), ScaleTo::create(0.2f, scale), NULL),
+                                         CallFunc::create([currentSprite, zOdr, tag]()
                                                           {
-                                                              node->setLocalZOrder(nstNode->getLocalZOrder());
+                                                              currentSprite->setLocalZOrder(zOdr);
+                                                              currentSprite->setTag(tag);
                                                           })
-                                         , NULL)
-                        
-                        );
+                                                  , NULL));
+        position = currentSprite->getPosition();
+        scale = currentSprite->getScale();
+        zOdr = currentSprite->getLocalZOrder();
+        tag = currentSprite->getTag();
     }
-    //最後のノードは最初のノードの位置に行くため、保持しておいた情報をもとに変化させる
-    auto finalNode = jacketNode->getChildByTag(jacketNode->getChildrenCount()-1);
-    finalNode->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, zeroPoint), ScaleTo::create(0.2f, zeroScale), NULL),
-                                          CallFunc::create([finalNode, zeroLocalZ, nstButton]
-                                                           {
-                                                               nstButton->setEnabled(true);
-                                                               finalNode->setLocalZOrder(zeroLocalZ);
-                                                           })
-                                          , NULL));
+    
+    //スプライトを追加するindex番号を取得
+    int index;
+    switch (songStack.size())
+    {
+        case 0:
+            index = 0;
+            break;
+        case 1:
+            index = 0;
+            break;
+        case 2:
+            index = 1;
+            break;
+        case 3:
+            index = 2;
+            break;
+        case 4:
+            index = 2;
+            break;
+        default:
+            index = 3;
+            break;
+    }
+    
+    //空領域に追加
+    std::string songPlist = songStack[index];
+    auto plist = FileUtils::getInstance()->getValueMapFromFile(songPlist);
+    Sprite *sp = Sprite::create(GetFolderPath(songPlist) + plist["Cover"].asString());
+    if(sp->getContentSize().width != 500)
+    {
+        sp = Sprite::create(GetFolderPath(songPlist) + plist["Cover"].asString(), 500.0 / sp->getContentSize().width);
+    }
+    
+    sp->setPosition(Director::getInstance()->getVisibleSize().width / 2,
+                    Director::getInstance()->getVisibleSize().height / 2);
+    sp->setScale(scale * 0.25f);
+    sp->setLocalZOrder(zOdr - 1);
+    sp->setTag(tag);
+    sp->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, position), ScaleTo::create(0.2f, scale), NULL),
+                                   CallFunc::create([sp, zOdr, nstButton]()
+                                                    {
+                                                        sp->setLocalZOrder(zOdr);
+                                                        nstButton->setEnabled(true);
+                                                    })
+                                   , NULL));
+    jacketNode->addChild(sp);
+    
+    //スタックをずらす
+    songPlist = songStack[0];
+    for (int x = 0; x < songStack.size() - 1; x++)
+    {
+        songStack[x] = songStack[x+1];
+    }
+    songStack[songStack.size()-1] = songPlist;
+
+    //スタック変更後の先頭曲を鳴らす
+    plist = FileUtils::getInstance()->getValueMapFromFile(songStack[0]);
+    fullPath = GetFolderPath(songStack[0]) + plist["BGM"].asString();
+    AudioManager::getInstance()->play(fullPath, AudioManager::BGM);
 }
 
 /*
@@ -429,55 +508,113 @@ void HomeScene::previousAlbum_click(Ref *ref)
         return;
     }
     
-    //クリック可能なスプライトを変更する
-    touchable_index = touchable_index == jacketNode->getChildrenCount() - 1 ? 0 : touchable_index+1;
-    
-    //ゲームで使うファイルを取得する
-    std::string zipFileName = JacketInfoMap.at(touchable_index);
-    std::string docPath = FileUtils::getInstance()->getCachedPath() + "Song/" + zipFileName;
-    
-    auto plistData = FileUtils::getInstance()->getValueMapFromFile(docPath+"/fileInfo.plist");
-    auto songFileName = docPath + "/" + plistData.at("BGM").asString();
-    AudioManager::getInstance()->play(songFileName, AudioManager::BGM);
-    
-    
-    //ループを行う事で最初の状態は変化してしまうためあらかじめ保持しておく
-    int zeroLocalZ = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getLocalZOrder();
-    float zeroScale = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getScale();
-    Point zeroPoint = jacketNode->getChildByTag(jacketNode->getChildrenCount() - 1)->getPosition();
-    
-    //ループは最後以外を行い、最後はループを抜けた後行う
-    for(int i=jacketNode->getChildrenCount() - 1;i>0;i--)
-    {
-        auto node = jacketNode->getChildByTag(i);
-        Node* nstNode = jacketNode->getChildByTag(i-1);
-        
-        node->runAction(Sequence::create(
-                                         Spawn::create(MoveTo::create(0.2f, nstNode->getPosition()), ScaleTo::create(0.2f, nstNode->getScale()), NULL),
-                                         CallFunc::create([node, nstNode]()
-                                                        {
-                                                            node->setLocalZOrder(nstNode->getLocalZOrder());
-                                                        })
-                                         , NULL)
-                        );
+    int nodeIndex = 4;
+    Sprite* node =nullptr;
+    while (node == nullptr) {
+        node = jacketNode->getChildByTag<Sprite*>(nodeIndex);
+        nodeIndex--;
     }
-    //最後のノードは最初のノードの位置に行くため、保持しておいた情報をもとに変化させる
-    auto finalNode = jacketNode->getChildByTag(0);
-    finalNode->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, zeroPoint), ScaleTo::create(0.2f, zeroScale), NULL),
-                                          CallFunc::create([finalNode, zeroLocalZ, prevButton]
+    
+    
+    Vec2 position(node->getPositionX(), node->getPositionY());
+    float scale = node->getScale();
+    int zOdr = node->getLocalZOrder();
+    int tag = node->getTag();
+    node->setLocalZOrder(zOdr - 1);
+    node->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, Vec2(Director::getInstance()->getVisibleSize().width / 2, Director::getInstance()->getVisibleSize().height/ 2)),
+                                                   ScaleTo::create(0.2f, scale*0.25f), NULL),
+                                     CallFunc::create([node, jacketNode]()
+                                                      {
+                                                          jacketNode->removeChild(node);
+                                                      })
+                                     , NULL));
+    
+    
+    for(int i = nodeIndex;i >= 0;--i)
     {
-        finalNode->setLocalZOrder(zeroLocalZ);
-        prevButton->setEnabled(true);
-        
+        Sprite *currentSprite = jacketNode->getChildByTag<Sprite*>(i);
+        if (currentSprite == nullptr)
+        {
+            break;
+        }
+        currentSprite->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, position), ScaleTo::create(0.2f, scale), NULL),
+                                                  CallFunc::create([currentSprite, zOdr, tag]()
+                                                                   {
+                                                                       currentSprite->setLocalZOrder(zOdr);
+                                                                       currentSprite->setTag(tag);
+                                                                   })
+                                                  , NULL));
+        position = currentSprite->getPosition();
+        scale = currentSprite->getScale();
+        zOdr = currentSprite->getLocalZOrder();
+        tag = currentSprite->getTag();
+    }
+
+    int index;
+    switch (songStack.size())
+    {
+        case 0:
+            index = 0;
+            break;
+        case 1:
+            index = -1;
+            break;
+        case 2:
+            index = -2;
+            break;
+        case 3:
+            index = -2;
+            break;
+        case 4:
+            index = -3;
+            break;
+        default:
+            index = -3;
+            break;
+    }
     
-    })
-                                          , NULL));
+    index += songStack.size();
     
+    //空領域に追加
+    std::string songPlist = songStack[index];
+    auto plist = FileUtils::getInstance()->getValueMapFromFile(songPlist);
+    Sprite *sp = Sprite::create(GetFolderPath(songPlist) + plist["Cover"].asString());
+    if(sp->getContentSize().width != 500)
+    {
+        sp = Sprite::create(GetFolderPath(songPlist) + plist["Cover"].asString(), 500.0 / sp->getContentSize().width);
+    }
+    
+    sp->setPosition(Director::getInstance()->getVisibleSize().width / 2,
+                    Director::getInstance()->getVisibleSize().height / 2);
+    sp->setScale(scale * 0.25f);
+    sp->setLocalZOrder(zOdr - 1);
+    sp->setTag(tag);
+    sp->runAction(Sequence::create(Spawn::create(MoveTo::create(0.2f, position), ScaleTo::create(0.2f, scale), NULL),
+                                   CallFunc::create([sp, zOdr, prevButton]()
+                                                    {
+                                                        sp->setLocalZOrder(zOdr);
+                                                        prevButton->setEnabled(true);
+                                                    })
+                                   , NULL));
+    jacketNode->addChild(sp);
+    
+    //スタックをずらす
+    songPlist = songStack[songStack.size() - 1];
+    for (int x = songStack.size()-1; x > 0; x--)
+    {
+        songStack[x] = songStack[x-1];
+    }
+    songStack[0] = songPlist;
+    
+    //スタック変更後の先頭曲を鳴らす
+    plist = FileUtils::getInstance()->getValueMapFromFile(songStack[0]);
+    fullPath = GetFolderPath(songStack[0]) + plist["BGM"].asString();
+    AudioManager::getInstance()->play(fullPath, AudioManager::BGM);
 }
 
 /*
  ジャケットをクリックしたときの処理を行う
- touchable_indexとクリックされたスプライトのタグ番号を比較し、等しかったらゲームのシーンに移行する
+ songStackの先頭を次のシーンに渡す
  参考: http://ladywendy.com/lab/cocos2d-x-v3/170.html
  */
 bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
@@ -487,8 +624,13 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
     //クリックされたターゲットを取得する
     //auto target = (Sprite*)e->getCurrentTarget();
     
+    
     //クリックされたスプライトの領域
-    auto referenceSprite = (Sprite*)node->getChildByTag(touchable_index);
+    int halfSize = songStack.size() / 2;
+    if (halfSize >= 2) {
+        halfSize = 2;
+    }
+    auto referenceSprite = (Sprite*)node->getChildByTag(halfSize);
     
     Rect targetBox = referenceSprite->getBoundingBox();
     
@@ -497,9 +639,6 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
     
     if(targetBox.containsPoint(touchPoint))
     {
-        //現在のtouchable_indexをセーブ
-        UserDefault::getInstance()->setIntegerForKey("SONG_SELECTION", touchable_index);
-        
         //決定音を鳴らす
         std::string filePath = "Sound/SE/decide2.mp3";
         std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
@@ -519,9 +658,19 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
         }
         
         
+        //SongStackを書き出す
+        ValueVector plistVector;
+        for (std::string str : songStack)
+        {
+            Value v(str);
+            plistVector.push_back(v);
+        }
+        fullPath = FileUtils::getInstance()->fullPathForFilename("SongSelectionList.plist");
+        FileUtils::getInstance()->writeValueVectorToFile(plistVector, fullPath);
+        
         //選択項目をアニメーション
         auto seqAction = Sequence::create(Spawn::create(
-                                                        ScaleTo::create(0.5f, 1.5),
+                                                        ScaleTo::create(0.5f, 1.0),
                                                         FadeTo::create(0.5f, 0)
                                                         , NULL),
                                           CallFunc::create([node,referenceSprite, this]()
@@ -532,14 +681,13 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
                                                                 //CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
                                                                 AudioManager::getInstance()->stop(AudioManager::BGM);
                                                                 //ゲームで使うファイルを取得する
-                                                                std::string zipFileName = JacketInfoMap.at(touchable_index);
+                                                                std::string zipFileName = GetParentFolderName(songStack[0]);
                                                                 std::string docPath = FileUtils::getInstance()->getCachedPath() + "Song/" + zipFileName;
                                                                 //zipファイルの情報をもとにシーンを作成する
                                                                 Scene* scene = PlayScene::createScene(docPath, GameLevel::EXPERT);
                                                                 Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
                                                             }), NULL);
-        referenceSprite->setAnchorPoint(Vec2(0.5,0.5));
-        referenceSprite->setPositionY(referenceSprite->getPositionY()+referenceSprite->getBoundingBox().size.height/2);
+
         referenceSprite->runAction(seqAction);
         
         
