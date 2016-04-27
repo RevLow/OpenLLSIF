@@ -275,7 +275,9 @@ void HomeScene::loadLiveScene()
     backgroundSprite->setPosition(480, 320);
     backgroundSprite->setLocalZOrder(-2);
     this->addChild(backgroundSprite);
-    auto songList = FileUtils::getInstance()->getValueVectorFromFile("SongSelectionList.plist");
+    auto fullpath = FileUtils::getInstance()->getCachedPath() + "SongSelectionList.plist";
+    CCLOG(fullpath.c_str());
+    auto songList = FileUtils::getInstance()->getValueVectorFromFile(fullpath);
    
     int songListSize = songList.size();
     
@@ -665,7 +667,7 @@ bool HomeScene::jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e)
             Value v(str);
             plistVector.push_back(v);
         }
-        fullPath = FileUtils::getInstance()->fullPathForFilename("SongSelectionList.plist");
+        fullPath = FileUtils::getInstance()->getCachedPath() + "SongSelectionList.plist";
         FileUtils::getInstance()->writeValueVectorToFile(plistVector, fullPath);
         
         //選択項目をアニメーション
