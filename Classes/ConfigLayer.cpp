@@ -11,7 +11,7 @@
 #include "cocostudio/CocoStudio.h"
 #include <uuid/uuid.h>
 #include "AudioManager.h"
-
+#include "RhythmAdjustScene.h"
 #import "external/unzip/unzip.h"
 
 
@@ -19,10 +19,10 @@ using namespace Config;
 
 //作成するボタンの配列をあらかじめ作成しておく
 //配列には使う画像へのファイルのパスを代入しておく
-const int MAX_BUTTON_COUNT=1;
+const int MAX_BUTTON_COUNT=2;
 
-const std::string ButtonArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button.png"};
-const std::string ButtonOverArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button_Click.png"};
+const std::string ButtonArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button.png", "res/Image/Config/Adjust_Rhythm.png"};
+const std::string ButtonOverArray[MAX_BUTTON_COUNT] = {"res/Image/Config/Install_Button_Click.png", "res/Image/Config/Adjust_Rhythm_click.png"};
 
 
 //ボタンのクリックを制御する
@@ -134,7 +134,7 @@ TableViewCell* ConfigLayer::tableCellAtIndex(TableView* table, ssize_t idx)
         btn->addClickEventListener(CC_CALLBACK_1(ConfigLayer::ButtonClick,this));
         
         cell->addChild(btn);
-  
+        x += (10+btn->getContentSize().width / 2);
     }
     
     return cell;
@@ -164,6 +164,7 @@ void ConfigLayer::ButtonClick(Ref* sender)
     switch (tag)
     {
         case 0:
+        {
             //Installボタンを押した場合はInstallレイヤーを作成し、のせる
             auto installLayer = InstallLayer::create();
             this->addChild(installLayer);
@@ -178,6 +179,14 @@ void ConfigLayer::ButtonClick(Ref* sender)
             this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, installLayer);
             installLayer->setAnchorPoint(Vec2(0.0,0.0));
             break;
+        }
+        case 1:
+        {
+            CCLOG("ここでリズム調整シーンに移動させる");
+            Scene* scene = RhythmAdjustScene::createScene();
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
+            break;
+        }
     }
 }
 
