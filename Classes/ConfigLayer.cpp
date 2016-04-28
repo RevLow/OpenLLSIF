@@ -465,9 +465,10 @@ void InstallLayer::installFile(Ref* sender)
                                       AudioManager::getInstance()->play(fullpath,AudioManager::SE);
                                       
                                      //SongSelectionList.plistを修正
-                                      auto plistData = FileUtils::getInstance()->getValueVectorFromFile("SongSelectionList.plist");
+                                      fullpath = FileUtils::getInstance()->getCachedPath() + "SongSelectionList.plist";
+                                      auto plistData = FileUtils::getInstance()->getValueVectorFromFile(fullpath);
                                       plistData.push_back(Value(cachePath+"fileInfo.plist"));
-                                      FileUtils::getInstance()->writeValueVectorToFile(plistData, FileUtils::getInstance()->fullPathForFilename("SongSelectionList.plist"));
+                                      FileUtils::getInstance()->writeValueVectorToFile(plistData, fullpath);
                                       
                                       Director::getInstance()->getScheduler()->performFunctionInCocosThread([this](){
                                           auto tableView = this->getChildByName<TableView*>("SongTable");

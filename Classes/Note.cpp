@@ -56,7 +56,7 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
 {
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
 
-    limitArea = Director::getInstance()->getWinSizeInPixels();
+    
 
     //ノーツの基本画像からサイズを指定して初期化
     RenderTexture* note = RenderTexture::create(70.0f, 70.0f, Texture2D::PixelFormat::RGBA8888);
@@ -72,6 +72,8 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     _speed = jsonInfo.at("speed").asDouble();
     
     int type = jsonInfo.at("type").asInt();
+    
+    limitArea = Director::getInstance()->getWinSizeInPixels();
     
     Vec2 norm = unitVec;
     //Vec2 initVec(479.75, 476.34);
@@ -182,26 +184,26 @@ NoteJudge Note::StartJudge()
     
     //もしも判定外の場合はNONを返す
     
-    if (elapsed >= _speed * 0.50) {
+    if (elapsed >= _speed * 0.45) {
         
         return NoteJudge::NON;
     }
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.05)
+    if (elapsed < _speed*0.043)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.05 && elapsed < _speed*0.15)
+    else if(elapsed >=_speed*0.043 && elapsed < _speed*0.132)
     {
         rtn = NoteJudge::GREAT;
 
     }
-    else if(elapsed >= _speed*0.15 && fabs(elapsed) < _speed*0.20)
+    else if(elapsed >= _speed*0.132 && fabs(elapsed) < _speed*0.221)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.20 && elapsed < _speed*0.50)
+    else if(elapsed >= _speed*0.287 && elapsed < _speed*0.45)
     {
         rtn = NoteJudge::BAD;
     }
@@ -228,20 +230,20 @@ NoteJudge Note::EndJudge()
     double elapsed = fabs((_endTime-offset) - now);
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.05)
+    if (elapsed < _speed*0.043)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.05 && elapsed < _speed*0.15)
+    else if(elapsed >=_speed*0.043 && elapsed < _speed*0.132)
     {
         rtn = NoteJudge::GREAT;
         
     }
-    else if(elapsed >= _speed*0.15 && fabs(elapsed) < _speed*0.20)
+    else if(elapsed >= _speed*0.132 && fabs(elapsed) < _speed*0.221)
     {
         rtn = NoteJudge::GOOD;
     }
-    else
+    else if(elapsed >= _speed*0.287 && elapsed < _speed*0.45)
     {
         rtn = NoteJudge::BAD;
     }
@@ -403,7 +405,9 @@ void Note::update(float frame)
     
     if(!_longnotesHold)
     {
-        if(currentPos.x < 0 || currentPos.x > limitArea.width || currentPos.y < 0 || currentPos.y > limitArea.height)
+        double time = _startTime - now;
+        //if(currentPos.x < 0 || currentPos.x > limitArea.width || currentPos.y < 0 || currentPos.y > limitArea.height)
+        if(time < -_speed * 0.20)
         {
             if (_callbackFunc != nullptr)
             {

@@ -258,19 +258,21 @@ void PlayScene::Run()
         auto areaSize = sp->getContentSize();
         
         Vec2 offset = unitVector[i] / notesSpeed;
+        Vec2 offset2 = offset * areaSize.width;
         offset *= areaSize.width / 2;
+        
         //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
         double alpha = 25.0;
        
         
-        Circle *circle = Circle::create(sp->getPosition() - offset, areaSize.width/4 + areaSize.width/8 + alpha );
-        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + alpha  );
+        Circle *circle = Circle::create(sp->getPosition() - offset2, areaSize.width/4 + alpha );
+        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + areaSize.width/8 + alpha  );
         
         expandedAreas.pushBack(circle);
         expandedAreas.pushBack(circle_2);
 #ifdef DEBUG
         DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
-        nodes->setPosition(sp->getPosition() - offset);
+        nodes->setPosition(sp->getPosition() - offset2);
         this->addChild(nodes);
         DrawNode *nodes_2 = circle_2->getDrawNode(Color4F::Color4F(0.0f, 0.0f, 1.0f, 1.0f));
         nodes_2->setPosition(sp->getPosition() + offset);
