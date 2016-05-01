@@ -22,7 +22,7 @@ public:
     static AudioManager* getInstance();
     void init();
     
-    void play(std::string &filePath,AudioType type, bool loop = false);
+    void play(const std::string &filePath,AudioType type, bool loop = false);
     void stop(AudioType type);
     void pause(AudioType type);
     void resume(AudioType type);

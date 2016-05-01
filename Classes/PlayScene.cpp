@@ -80,7 +80,8 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
             break;
     }
     
-    
+    //レイテンシーの値を取得する
+    latency = UserDefault::getInstance()->getFloatForKey("LATENCY", 0.0f);
     
     //譜面情報を取得
     ValueMap modes = info.at("MODE").asValueMap();
@@ -108,6 +109,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
             (*notes)["lane"]=laneItems["lane"].number_value();
             (*notes)["longnote"]=laneItems["longnote"].bool_value();
             if((*notes)["endtime"].asDouble() >= BGM_TIME) BGM_TIME = (*notes)["endtime"].asDouble();
+            (*notes)["latency"] = latency;
             
             //ノーツのタイプを取得、
             (*notes)["type"] = info["Type"].isNull()? 0 : info.at("Type").asInt();
@@ -225,6 +227,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
         createdNotes.push_back(notesQueue);
     }
     
+    
     return true;
 }
 
@@ -248,37 +251,61 @@ void PlayScene::Run()
     //背景画像を設定
     
     Vec2 v = unitVector[0];
+    auto plist = FileUtils::getInstance()->getValueVectorFromFile("TapAreaList.plist");
     
-    //タップ判定のエリアの作成
-    for(int i=0;i<9;i++)
+    for (int i=0; i < plist.size(); i++)
     {
-        std::stringstream ss;
-        ss << (i+1);
-        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
-        auto areaSize = sp->getContentSize();
-        
-        Vec2 offset = unitVector[i] / notesSpeed;
-        Vec2 offset2 = offset * areaSize.width;
-        offset *= areaSize.width / 2;
-        
-        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
-        double alpha = 25.0;
-       
-        
-        Circle *circle = Circle::create(sp->getPosition() - offset2, areaSize.width/4 + alpha );
-        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + areaSize.width/8 + alpha  );
-        
-        expandedAreas.pushBack(circle);
-        expandedAreas.pushBack(circle_2);
+        auto lane = plist[i].asValueVector();
+        Vector<Circle*> areas;
+        for (int j=0; j <lane.size(); j++)
+        {
+            auto circleData = lane[j].asValueMap();
+            
+            float x = circleData["X"].asFloat();
+            float y = circleData["Y"].asFloat();
+            float r = circleData["R"].asFloat();
+            
+            Circle* c = Circle::create(Point(x, y), r);
+            areas.pushBack(c);
 #ifdef DEBUG
-        DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
-        nodes->setPosition(sp->getPosition() - offset2);
-        this->addChild(nodes);
-        DrawNode *nodes_2 = circle_2->getDrawNode(Color4F::Color4F(0.0f, 0.0f, 1.0f, 1.0f));
-        nodes_2->setPosition(sp->getPosition() + offset);
-        this->addChild(nodes_2);
+            DrawNode *node = c->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
+            node->setPosition(c->getPosition());
+            addChild(node);
 #endif
+        }
+        expandedAreas.push_back(areas);
     }
+    
+//    //タップ判定のエリアの作成
+//    for(int i=0;i<9;i++)
+//    {
+//        std::stringstream ss;
+//        ss << (i+1);
+//        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
+//        auto areaSize = sp->getContentSize();
+//        
+//        Vec2 offset = unitVector[i] / notesSpeed;
+//        Vec2 offset2 = offset * areaSize.width;
+//        offset *= areaSize.width / 2;
+//        
+//        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
+//        double alpha = 20.0;
+//       
+//        
+//        Circle *circle = Circle::create(sp->getPosition() - offset2, areaSize.width/4 + alpha );
+//        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + alpha  );
+//        
+//        expandedAreas.pushBack(circle);
+//        expandedAreas.pushBack(circle_2);
+//#ifdef DEBUG
+//        DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
+//        nodes->setPosition(sp->getPosition() - offset2);
+//        this->addChild(nodes);
+//        DrawNode *nodes_2 = circle_2->getDrawNode(Color4F::Color4F(0.0f, 0.0f, 1.0f, 1.0f));
+//        nodes_2->setPosition(sp->getPosition() + offset);
+//        this->addChild(nodes_2);
+//#endif
+//    }
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
 
     if (videoLayer != nullptr)
@@ -562,7 +589,7 @@ void PlayScene::update(float dt)
         //if(*it == nullptr) break;
         
         std::shared_ptr<cocos2d::ValueMap> map = (**it).front();
-        if(map->at("starttime").asDouble() - notesSpeed < elapse)
+        if(map->at("starttime").asDouble() - notesSpeed - latency < elapse)
         {
             //CCLOG("Disparity: %lf", elapsed - map->at("starttime").asDouble());
             notes.push_back(map);
@@ -592,67 +619,69 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
     Vector<Node*> children = notesLayer->getChildren();
     
     //クリックされた位置を取得
-    for(int i=0;i<18;i+=2)
+    for(int i=0;i<9;i++)
     {
         for (int j=0; j < touches.size(); j++)
         {
             auto loc = touches[j]->getLocation();
-            Circle *area = expandedAreas.at(i);
-            Circle *area2 = expandedAreas.at(i+1);
-            if(area->containsPoint(loc) || area2->containsPoint(loc))
+            for(int k=0;k < expandedAreas[i].size();k++)
             {
-                int index = i/2;
-                if(createdNotes[index].empty()) goto for_exit;
-                
-                Note* note = createdNotes[index].front();
-                NoteJudge judge = note->StartJudge();
-                
-                //もしもタップ可能区間に入っていないなら
-                if(judge == NoteJudge::NON)
+                Circle *area = expandedAreas[i].at(k);
+                if(area->containsPoint(loc))
                 {
-                    //別のレーンの探索に行く
-                    goto for_exit;
-                }
-                else
-                {
-                    if(note->isLongNotes())
+                    if(createdNotes[i].empty()) goto for_exit;
+                    
+                    Note* note = createdNotes[i].front();
+                    NoteJudge judge = note->StartJudge();
+                    
+                    //もしもタップ可能区間に入っていないなら
+                    if(judge == NoteJudge::NON)
                     {
-                        _longNotes.insert(touches[j]->getID(), note);
+                        //別のレーンの探索に行く
+                        goto for_exit;
                     }
-                    
-                    std::string fullpath;
-                    switch (judge)
+                    else
                     {
-                        case NoteJudge::PERFECT:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-                            current_score += 100;
-                            break;
-                        case NoteJudge::GREAT:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-                            current_score += 50;
-                            break;
-                        case NoteJudge::GOOD:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-                            current_score += 10;
-                            break;
-                        case NoteJudge::BAD:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-                            current_score += 5;
-                            break;
-                        default:
-                            break;
+                        if(note->isLongNotes())
+                        {
+                            _longNotes.insert(touches[j]->getID(), note);
+                        }
+                        
+                        std::string fullpath;
+                        switch (judge)
+                        {
+                            case NoteJudge::PERFECT:
+                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+                                current_score += 100;
+                                break;
+                            case NoteJudge::GREAT:
+                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+                                current_score += 50;
+                                break;
+                            case NoteJudge::GOOD:
+                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+                                current_score += 10;
+                                break;
+                            case NoteJudge::BAD:
+                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+                                current_score += 5;
+                                break;
+                            default:
+                                break;
+                        }
+                        AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+                        CreateJudgeSprite(judge);
+                        CreateTapFx(note->getChildByName<RenderTexture*>("BaseNotes")->getPosition());
+                        
+                        //先頭を取り出す
+                        createdNotes[i].pop();
+                        
+                        //今のレーンの判定はこれ以上行わない
+                        goto for_exit;
                     }
-                    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-                    CreateJudgeSprite(judge);
-                    CreateTapFx(note->getChildByName<RenderTexture*>("BaseNotes")->getPosition());
-                    
-                    //先頭を取り出す
-                    createdNotes[index].pop();
-                    
-                    //今のレーンの判定はこれ以上行わない
-                    goto for_exit;
+
                 }
-             }//end of area contain judge
+            }
         }
 for_exit:
         continue;

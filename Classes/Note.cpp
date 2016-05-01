@@ -70,6 +70,7 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     _endTime = jsonInfo.at("endtime").asDouble();
     _isLongnote = jsonInfo.at("longnote").asBool();
     _speed = jsonInfo.at("speed").asDouble();
+    latency = jsonInfo.at("latency").asFloat();
     
     int type = jsonInfo.at("type").asInt();
     
@@ -179,31 +180,31 @@ void Note::setOutDisplayedCallback(const std::function<void()> &f)
 NoteJudge Note::StartJudge()
 {
     double now = StopWatch::getInstance()->currentTime();
-    double offset = 5;
-    double elapsed = fabs((_startTime-offset) - now);
+
+    double elapsed = fabs((_startTime-latency) - now);
     
     //もしも判定外の場合はNONを返す
     
-    if (elapsed >= _speed * 0.45) {
+    if (elapsed >= _speed * 0.3) {
         
         return NoteJudge::NON;
     }
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.043)
+    if (elapsed < _speed*0.05)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.043 && elapsed < _speed*0.132)
+    else if(elapsed >=_speed*0.05 && elapsed < _speed*0.15)
     {
         rtn = NoteJudge::GREAT;
 
     }
-    else if(elapsed >= _speed*0.132 && fabs(elapsed) < _speed*0.221)
+    else if(elapsed >= _speed*0.15 && fabs(elapsed) < _speed*0.2)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.287 && elapsed < _speed*0.45)
+    else if(elapsed >= _speed*0.2 && elapsed < _speed*0.3)
     {
         rtn = NoteJudge::BAD;
     }
@@ -226,24 +227,24 @@ NoteJudge Note::StartJudge()
 NoteJudge Note::EndJudge()
 {
     double now = StopWatch::getInstance()->currentTime();
-    double offset = 5;
-    double elapsed = fabs((_endTime-offset) - now);
+
+    double elapsed = fabs((_endTime-latency) - now);
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.043)
+    if (elapsed < _speed*0.05)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.043 && elapsed < _speed*0.132)
+    else if(elapsed >=_speed*0.05 && elapsed < _speed*0.15)
     {
         rtn = NoteJudge::GREAT;
         
     }
-    else if(elapsed >= _speed*0.132 && fabs(elapsed) < _speed*0.221)
+    else if(elapsed >= _speed*0.15 && fabs(elapsed) < _speed*0.2)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.287 && elapsed < _speed*0.45)
+    else if(elapsed >= _speed*0.2 && elapsed < _speed*0.3)
     {
         rtn = NoteJudge::BAD;
     }
@@ -272,7 +273,7 @@ void Note::update(float frame)
     if(_isLongnote)
     {
         Sprite* sp = this->getChildByName<Sprite*>("EndNotes");
-        if (now + _speed > _endTime)
+        if (now + _speed + latency > _endTime)
         {
             _endOfPoint += _unitVec*(now - endTimeCount);
             sp->setPosition(_endOfPoint);

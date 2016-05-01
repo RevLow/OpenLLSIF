@@ -39,7 +39,7 @@ void AudioManager::init()
     
 }
 
-void AudioManager::play(std::string &filePath,AudioManager::AudioType type, bool loop)
+void AudioManager::play(const std::string &filePath,AudioManager::AudioType type, bool loop)
 {
     if (AudioManager::BGM == type)
     {

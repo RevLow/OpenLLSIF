@@ -65,13 +65,16 @@ private:
     //ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> unitVector;
     //タップ判定用のエリア
-    Vector<Circle*> expandedAreas;
+    std::vector< Vector<Circle*> > expandedAreas;
     
     //各レーンごとに生成されているノーツキュー
     std::vector< std::queue<Note*> > createdNotes;
     
     //タップされたロングノーツと押している指の対応付け
     cocos2d::Map<int, Note*> _longNotes;
+    
+    //レイテンシーの値
+    float latency = 0.0f;
     
     /**
      *@fn Run

@@ -12,6 +12,7 @@
 		2E1AF9801C4FAEA900BDD1B2 /* StopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1AF97E1C4FAEA900BDD1B2 /* StopWatch.cpp */; };
 		2E283CA91B52B250004EABDA /* Sound in Resources */ = {isa = PBXBuildFile; fileRef = 2E283CA81B52B250004EABDA /* Sound */; };
 		2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E283CAA1B5325A0004EABDA /* HomeScene.cpp */; };
+		2E2E91291CD4E86600F6AE78 /* TapAreaList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002BC1CCA628B009901E1 /* TapAreaList.plist */; };
 		2E2EBDD01C493E33009AF4E6 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDCE1C493E33009AF4E6 /* json11.cpp */; };
 		2E2EBDD31C4B7EDD009AF4E6 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDD11C4B7EDD009AF4E6 /* AudioManager.cpp */; };
 		2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B61C72191F00DDF6AD /* longNotesSpark.png */; };
@@ -112,7 +113,7 @@
 		2E3981341B5510ED001B096C /* PointWithDepth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointWithDepth.h; sourceTree = "<group>"; };
 		2E39813A1B5D27BD001B096C /* PlayScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayScene.cpp; sourceTree = "<group>"; };
 		2E39813B1B5D27BD001B096C /* PlayScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayScene.h; sourceTree = "<group>"; };
-		2E4002BC1CCA628B009901E1 /* SongSelectionList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SongSelectionList.plist; sourceTree = "<group>"; };
+		2E4002BC1CCA628B009901E1 /* TapAreaList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TapAreaList.plist; sourceTree = "<group>"; };
 		2E4002C11CCBC8FE009901E1 /* UiSongList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = UiSongList.plist; sourceTree = "<group>"; };
 		2E44AB831CD0FAF000682069 /* RhythmAdjustScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RhythmAdjustScene.cpp; sourceTree = "<group>"; };
 		2E44AB841CD0FAF000682069 /* RhythmAdjustScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RhythmAdjustScene.h; sourceTree = "<group>"; };
@@ -362,7 +363,7 @@
 				2E9807EB1C654EBD00D33CC2 /* res */,
 				2E283CA81B52B250004EABDA /* Sound */,
 				521A8EA819F11F5000D177D7 /* fonts */,
-				2E4002BC1CCA628B009901E1 /* SongSelectionList.plist */,
+				2E4002BC1CCA628B009901E1 /* TapAreaList.plist */,
 				2E4002C11CCBC8FE009901E1 /* UiSongList.plist */,
 			);
 			name = Resources;
@@ -514,6 +515,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E2E91291CD4E86600F6AE78 /* TapAreaList.plist in Resources */,
 				5087E78117EB970100C73F5D /* Icon-120.png in Resources */,
 				5087E78617EB970100C73F5D /* Icon-76.png in Resources */,
 				5087E77F17EB970100C73F5D /* Default@2x.png in Resources */,

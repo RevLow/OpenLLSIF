@@ -86,6 +86,8 @@ private:
     double _endTime = 0.0;
     double startTimeCount;
     double endTimeCount;
+    
+    float latency = 0.0f;
     std::function<void()> _callbackFunc;
 };
 
