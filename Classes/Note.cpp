@@ -59,7 +59,7 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     
 
     //ノーツの基本画像からサイズを指定して初期化
-    RenderTexture* note = RenderTexture::create(70.0f, 70.0f, Texture2D::PixelFormat::RGBA8888);
+    //RenderTexture* note = RenderTexture::create(70.0f, 70.0f, Texture2D::PixelFormat::RGBA8888);
 
     
     //jsonの情報からノーツの情報を初期化する
@@ -89,50 +89,52 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     _unitVec = unitVec / _speed;
     
     //ノーツ画像の作成
-    note->begin();
-    Sprite* baseNote;
+    //note->begin();
+    Sprite* note;
     switch (type)
     {
         case 0:
-            baseNote = Sprite::createWithSpriteFrameName("Image/notes/smile_03.png");
+            note = Sprite::createWithSpriteFrameName("Image/notes/smile_03.png");
             break;
         case 1:
-            baseNote = Sprite::createWithSpriteFrameName("Image/notes/cool_03.png");
+            note = Sprite::createWithSpriteFrameName("Image/notes/cool_03.png");
             break;
         case 2:
-            baseNote = Sprite::createWithSpriteFrameName("Image/notes/pure_03.png");
+            note = Sprite::createWithSpriteFrameName("Image/notes/pure_03.png");
             break;
         default:
             break;
     }
     
 
-     baseNote->retain();
-     baseNote->setPosition(35.0, 35.0f);
+     //baseNote->retain();
+     //baseNote->setPosition(35.0, 35.0f);
      //ノーツ画像を書き込み
-     baseNote->visit();
+     //baseNote->visit();
     
      if(_isParallel)
      {
          Sprite* parallel = Sprite::createWithSpriteFrameName("Image/notes/longbar_03.png");
-         parallel->retain();
+         //parallel->retain();
          parallel->setPosition(35.0f, 35.0f);
          //スター画像を書き込み
-         parallel->visit();
-         CC_SAFE_RELEASE(parallel);
+         note->addChild(parallel);
+         //parallel->visit();
+         //CC_SAFE_RELEASE(parallel);
      }
     
      if(_isStar)
      {
          Sprite* star = Sprite::createWithSpriteFrameName("Image/notes/star_03.png");
-         star->retain();
+         //star->retain();
          star->setPosition(35.0f, 35.0f);
+         note->addChild(star);
          //スター画像を書き込み
-         star->visit();
-         CC_SAFE_RELEASE(star);
+         //star->visit();
+         //CC_SAFE_RELEASE(star);
      }
-    note->end();
-    CC_SAFE_RELEASE(baseNote);
+    //note->end();
+    //CC_SAFE_RELEASE(baseNote);
 
     
     note->setName("BaseNotes");
@@ -266,8 +268,8 @@ void Note::update(float frame)
 
     double now = StopWatch::getInstance()->currentTime();
     double elapsed = now - startTimeCount;
-    RenderTexture* note = this->getChildByName<RenderTexture*>("BaseNotes");
-
+    //RenderTexture* note = this->getChildByName<RenderTexture*>("BaseNotes");
+    Sprite* note = this->getChildByName<Sprite*>("BaseNotes");
     cocos2d::Vec2 currentPos = note->getPosition();
 
     if(_isLongnote)

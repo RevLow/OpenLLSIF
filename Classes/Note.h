@@ -41,7 +41,6 @@ public:
 };
 
 
-
 class Note : public Layer, create_func<Note>
 {
     
