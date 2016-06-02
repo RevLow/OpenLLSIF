@@ -227,6 +227,28 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
         createdNotes.push_back(notesQueue);
     }
     
+    //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
+    //playScene->removeChildByName("ScoreLabel");
+    //playScene->removeChildByName("life_text");
+    ui::TextAtlas* scoreLabel = playScene->getChildByName<ui::TextAtlas *>("ScoreLabel");
+    auto cloneLabel = scoreLabel->clone();
+    cloneLabel->setGlobalZOrder(1);
+    cloneLabel->setLocalZOrder(2);
+    cloneLabel->setOpacity(0);
+    addChild(cloneLabel);
+    
+    playScene->removeChild(scoreLabel);
+    
+    
+    ui::TextAtlas* life = playScene->getChildByName<ui::TextAtlas *>("life_text");
+    auto clonelife = life->clone();
+    clonelife->setGlobalZOrder(1);
+    clonelife->setLocalZOrder(2);
+    clonelife->setOpacity(0);
+    addChild(clonelife);
+    
+    playScene->removeChild(life);
+
     
     return true;
 }
@@ -276,36 +298,6 @@ void PlayScene::Run()
         expandedAreas.push_back(areas);
     }
     
-//    //タップ判定のエリアの作成
-//    for(int i=0;i<9;i++)
-//    {
-//        std::stringstream ss;
-//        ss << (i+1);
-//        Sprite *sp = playScene->getChildByName<Sprite*>(ss.str());
-//        auto areaSize = sp->getContentSize();
-//        
-//        Vec2 offset = unitVector[i] / notesSpeed;
-//        Vec2 offset2 = offset * areaSize.width;
-//        offset *= areaSize.width / 2;
-//        
-//        //double theta = MATH_DEG_TO_RAD((double)(i*180)/8.0);
-//        double alpha = 20.0;
-//       
-//        
-//        Circle *circle = Circle::create(sp->getPosition() - offset2, areaSize.width/4 + alpha );
-//        Circle *circle_2 =Circle::create(sp->getPosition() + offset, areaSize.width/2 + alpha  );
-//        
-//        expandedAreas.pushBack(circle);
-//        expandedAreas.pushBack(circle_2);
-//#ifdef DEBUG
-//        DrawNode *nodes = circle->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
-//        nodes->setPosition(sp->getPosition() - offset2);
-//        this->addChild(nodes);
-//        DrawNode *nodes_2 = circle_2->getDrawNode(Color4F::Color4F(0.0f, 0.0f, 1.0f, 1.0f));
-//        nodes_2->setPosition(sp->getPosition() + offset);
-//        this->addChild(nodes_2);
-//#endif
-//    }
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
 
     if (videoLayer != nullptr)
@@ -334,6 +326,10 @@ void PlayScene::Run()
                                                             listener->onTouchesBegan = CC_CALLBACK_2(PlayScene::onTouchesBegan, this);
                                                             listener->onTouchesEnded = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
                                                             this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+                                                            
+                                                            //スコアとライフの透明度を変更
+                                                            this->getChildByName("ScoreLabel")->setOpacity(255);
+                                                            this->getChildByName("life_text")->setOpacity(255);
                                                             
                                                             //動画再生の開始
                                                             if(videoLayer != nullptr)
@@ -387,7 +383,7 @@ void PlayScene::CreateJudgeSprite(NoteJudge j)
     auto overSprite = getChildByName<Sprite*>("OverPerfect");
     if(overSprite != nullptr) removeChild(overSprite);
 
-    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/JudgeAtlas.plist");
+    //SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/JudgeAtlas.plist");
 
     std::string spritePath;
     switch (j)
@@ -418,6 +414,7 @@ void PlayScene::CreateJudgeSprite(NoteJudge j)
     jSprite->setPosition(rect.width / 2, rect.height / 2);
     jSprite->setScale(0.42f);
     jSprite->setOpacity(0);
+    jSprite->setLocalZOrder(1);
     auto *action1 = Spawn::create(ScaleTo::create(0.06f, 2.0f), FadeTo::create(0.06f, 255), NULL);
     auto *action2 = FadeOut::create(0.3f);
     addChild(jSprite);
@@ -432,6 +429,7 @@ void PlayScene::CreateJudgeSprite(NoteJudge j)
         overSprite->setName("OverPerfect");
         overSprite->setPosition(jSprite->getPosition());
         overSprite->cocos2d::Node::setScale(0.5);
+        overSprite->setLocalZOrder(1);
         overSprite->setOpacity(0);
         overSprite->setBlendFunc(BlendFunc::ADDITIVE);
         addChild(overSprite);
@@ -567,7 +565,7 @@ void PlayScene::update(float dt)
 {
     //スコアの設定
     auto playScene = this->getChildByName("PlayLayer");
-    auto *score = playScene->getChildByName<ui::TextAtlas*>("ScoreLabel");
+    auto *score = this->getChildByName<ui::TextAtlas*>("ScoreLabel");
     std::stringstream ss;
     ss << current_score;
 

@@ -30,6 +30,7 @@
 		2E9807611C63B03800D33CC2 /* triangulate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E98075E1C63B03800D33CC2 /* triangulate.cpp */; };
 		2E9807EC1C654EBD00D33CC2 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807EB1C654EBD00D33CC2 /* res */; };
 		2E9807F41C679A8700D33CC2 /* background in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807F31C679A8700D33CC2 /* background */; };
+		2EBD46C71CFC6D7800300BF8 /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */; };
 		2EC2146E1C523D37005CED97 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146D1C523D37005CED97 /* OpenGLES.framework */; };
 		2EC214701C523D52005CED97 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146F1C523D52005CED97 /* UIKit.framework */; };
 		2EC214721C523D5B005CED97 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC214711C523D5B005CED97 /* CoreMotion.framework */; };
@@ -129,6 +130,7 @@
 		2E98075F1C63B03800D33CC2 /* triangulate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangulate.h; sourceTree = "<group>"; };
 		2E9807EB1C654EBD00D33CC2 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		2E9807F31C679A8700D33CC2 /* background */ = {isa = PBXFileReference; lastKnownFileType = folder; path = background; sourceTree = "<group>"; };
+		2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		2EC2146D1C523D37005CED97 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		2EC2146F1C523D52005CED97 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		2EC214711C523D5B005CED97 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreMotion.framework; sourceTree = DEVELOPER_DIR; };
@@ -262,6 +264,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */,
 				46880B8319C43A87006E1F66 /* Classes */,
 				46880B7519C43A67006E1F66 /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -536,6 +539,7 @@
 				5087E78417EB970100C73F5D /* Icon-57.png in Resources */,
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
 				2E9807EC1C654EBD00D33CC2 /* res in Resources */,
+				2EBD46C71CFC6D7800300BF8 /* Entitlements.plist in Resources */,
 				2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */,
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
@@ -614,7 +618,8 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
+				CODE_SIGN_IDENTITY = "-";
 				COMPRESS_PNG_FILES = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -623,7 +628,7 @@
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ios/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -671,7 +676,8 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
+				CODE_SIGN_IDENTITY = "-";
 				COMPRESS_PNG_FILES = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -679,7 +685,7 @@
 					/devLibrary,
 				);
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ios/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
