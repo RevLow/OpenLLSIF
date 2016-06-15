@@ -71,7 +71,7 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     _isLongnote = jsonInfo.at("longnote").asBool();
     _speed = jsonInfo.at("speed").asDouble();
     latency = jsonInfo.at("latency").asFloat();
-    
+    _destination = Vec2(jsonInfo.at("destinationX").asFloat(),jsonInfo.at("destinationY").asFloat());
     int type = jsonInfo.at("type").asInt();
     
     limitArea = Director::getInstance()->getWinSizeInPixels();
@@ -246,7 +246,7 @@ NoteJudge Note::EndJudge()
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.2 && elapsed < _speed*0.3)
+    else if(elapsed >= _speed*0.2)
     {
         rtn = NoteJudge::BAD;
     }
@@ -293,8 +293,7 @@ void Note::update(float frame)
                 
             }
         }
-
-
+        
         Vec2 v1 = currentPos - Vec2(480,480);
         Vec2 v2(0, -1);
         
@@ -345,15 +344,6 @@ void Note::update(float frame)
         {
             poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
             poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
-//            DrawNode *innerPoly = getChildByName<DrawNode*>("innerLongnotesLine");
-//            if(innerPoly == nullptr)
-//            {
-//                innerPoly = DrawNode::create();
-//                innerPoly->setName("innerLongnotesLine");
-//                poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-//                innerPoly->setPositionZ(poly->getPositionZ() - 3);
-//                addChild(innerPoly);
-//            }
 //
             //単純なsin関数での透明度
             static float x = MATH_DEG_TO_RAD(0);
@@ -376,13 +366,7 @@ void Note::update(float frame)
                 x += MATH_DEG_TO_RAD(8.0);                 //数値はよしなに
                 time = 0.0f;
             }
-            
-//            innerPoly->clear();
-//            innerPoly->drawPolygon(&vList[0], 4, Color4F(0.9,0.9, 0.5, opacity/1.2f),0, Color4F::BLACK);
-//
-//            innerPoly->setRotation(angle);
-//            innerPoly->setPosition(_endOfPoint);
-            
+            /*
             auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
             if(particle == nullptr)
             {
@@ -395,10 +379,8 @@ void Note::update(float frame)
                 particle->setScale(0.7);
                 particle->setName("longNotesParticle");
                 this->addChild(particle);
-            }
+            }*/
         }
-        
-        
 
 
 
@@ -424,6 +406,16 @@ void Note::update(float frame)
         else
         {
             currentPos += _unitVec*elapsed;
+            note->setPosition(currentPos);
+        }
+    }
+    else
+    {
+        //もし押しても目的地に着いてない場合はそのまま進める
+        if(now < _startTime)
+        {
+            currentPos += _unitVec*elapsed;
+            if(currentPos.getDistance(Vec2(480,480)) > _destination.getDistance(Vec2(480,480))) currentPos = _destination;
             note->setPosition(currentPos);
         }
 

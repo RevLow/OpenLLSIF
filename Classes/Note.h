@@ -16,6 +16,8 @@
 
 USING_NS_CC;
 
+
+
 enum NoteJudge
 {
     PERFECT = 0,
@@ -25,6 +27,7 @@ enum NoteJudge
     MISS,
     NON
 };
+
 //円を作るクラス 判定のために使用
 class Circle : public Node, create_func<Circle>
 {
@@ -79,6 +82,7 @@ private:
     cocos2d::Vec2 _unitVec;//1フレームあたりの増加量
     cocos2d::Vec2 _endOfPoint;
     cocos2d::Size limitArea;//画面範囲
+    cocos2d::Vec2 _destination;//目的地
     //double _scaleTick;//msあたりのロングノーツの拡大スケール
     //double _totalStopTime = 0.0;
     double _startTime = 0.0;
@@ -89,5 +93,4 @@ private:
     float latency = 0.0f;
     std::function<void()> _callbackFunc;
 };
-
 #endif /* defined(__OpenLLSIF__Note__) */

@@ -18,7 +18,6 @@
 
 
 
-
 Scene* PlayScene::createScene(std::string playSongFile, GameLevel level)
 {
     // 'scene' is an autorelease object
@@ -161,17 +160,18 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
     playScene->setLocalZOrder(0);
     playScene->setOpacity(0);
     this->addChild(playScene);
+
     
     auto startPoint = playScene->getChildByName<Sprite*>("music_icon_7");
 
+    
+    //SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
     for(int i=1;i<=9;i++)
     {
         std::stringstream ss;
         ss << i;
         auto targetPoint = playScene->getChildByName<Sprite*>(ss.str());
-        
         cocos2d::Vec2 v = targetPoint->getPosition() - startPoint->getPosition();
-        
       
         
         unitVector.push_back(v);
@@ -227,6 +227,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
         createdNotes.push_back(notesQueue);
     }
     
+        
     //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
     //playScene->removeChildByName("ScoreLabel");
     //playScene->removeChildByName("life_text");
@@ -270,6 +271,11 @@ void PlayScene::Run()
     music_notes->runAction(action);
     action->gotoFrameAndPlay(0, true);
     
+    action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/songCircle.csb");
+    Layer* songCircleLayer = playScene->getChildByName<Layer*>("songCircle");
+    songCircleLayer->runAction(action);
+    action->gotoFrameAndPlay(0, true);
+    
     //背景画像を設定
     
     Vec2 v = unitVector[0];
@@ -289,11 +295,6 @@ void PlayScene::Run()
             
             Circle* c = Circle::create(Point(x, y), r);
             areas.pushBack(c);
-#ifdef DEBUG
-            DrawNode *node = c->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
-            node->setPosition(c->getPosition());
-            addChild(node);
-#endif
         }
         expandedAreas.push_back(areas);
     }
@@ -352,7 +353,13 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
     
     for(auto note : maps)
     {
-        cocos2d::Vec2 v = unitVector[note->at("lane").asInt()];
+        Vec2 v = unitVector[note->at("lane").asInt()];
+        
+        //ちょっと長いけど対象の方向を
+        std::string numStr = std::to_string(note->at("lane").asInt() + 1);
+        Sprite* destinationSprite = this->getChildByName("PlayLayer")->getChildByName<Sprite*>(numStr);
+        (*note)["destinationX"] = destinationSprite->getPosition().x;
+        (*note)["destinationY"] = destinationSprite->getPosition().y;
         
         Note *n = Note::create(*note, v);
         createdNotes[note->at("lane").asInt()].push(n);
@@ -443,66 +450,20 @@ void PlayScene::CreateJudgeSprite(NoteJudge j)
 
 void PlayScene::CreateTapFx(Vec2 position)
 {
-    std::vector<Sprite*> fx_array, inner_fx;
-    
-    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx1.png"));
-    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx2.png"));
-    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx3.png"));
-    
-    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx1.png"));
-    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx2.png"));
-    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx3.png"));
-    
-    for (auto it = fx_array.begin(); it != fx_array.end();it++)
-    {
-        (*it)->setOpacity(0);
-        (*it)->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-        //(*it)->setScale(0.5f);
-        (*it)->setPosition(position);
-        
-        addChild(*it);
-    }
-    //削除
-    auto remove = RemoveSelf::create(true);
-    auto action = Spawn::create(FadeOut::create(0.1), ScaleTo::create(0.1, 2.5f),NULL);
-
-    fx_array[0]->runAction(Sequence::create(FadeIn::create(0.05),
-                                            EaseOut::create(action, 2.0),remove, NULL));
-    
-    action = Spawn::create(ScaleTo::create(0.1, 2.8f), FadeOut::create(0.184), NULL);
-    fx_array[1]->runAction(Sequence::create(FadeIn::create(0),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    action = Spawn::create(ScaleTo::create(0.1, 3.0f), FadeOut::create(0.184), NULL);
-    fx_array[2]->runAction(Sequence::create(FadeIn::create(0.0184),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    
-    //iner_fxに対する処理
-    for (auto it = inner_fx.begin(); it != inner_fx.end();it++)
-    {
-        (*it)->setOpacity(0);
-        //(*it)->setBlendFunc(BlendFunc::ADDITIVE);
-        //(*it)->setScale(0.5f);
-        (*it)->setPosition(position);
-        
-        addChild(*it);
-    }
-    //削除
-    action = Spawn::create(FadeOut::create(0.1), ScaleTo::create(0.1, 2.5f),NULL);
-    
-    inner_fx[0]->runAction(Sequence::create(FadeIn::create(0.05),
-                                            EaseOut::create(action, 2.0),remove, NULL));
-    
-    action = Spawn::create(ScaleTo::create(0.1, 2.8f), FadeOut::create(0.184), NULL);
-    inner_fx[1]->runAction(Sequence::create(FadeIn::create(0),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    action = Spawn::create(ScaleTo::create(0.1, 3.0f), FadeOut::create(0.184), NULL);
-    inner_fx[2]->runAction(Sequence::create(FadeIn::create(0.0184),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    
+    auto tapFx = CSLoader::getInstance()->createNode("res/tapFx.csb");
+    tapFx->setLocalZOrder(0);
+    /*座標変換*/
+    Vec2 rePosition = position;
+    rePosition.x -= tapFx->getContentSize().width / 2;
+    rePosition.y -= tapFx->getContentSize().height / 2;
+    tapFx->setPosition(rePosition);
+    this->addChild(tapFx);
+    cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/tapFx.csb");
+    action->setLastFrameCallFunc([tapFx, this](){
+        this->removeChild(tapFx);
+    });
+    tapFx->runAction(action);
+    action->gotoFrameAndPlay(0, false);
 }
 
 /**
