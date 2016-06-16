@@ -12,6 +12,15 @@
 #include "HomeScene.h"
 #include "StopWatch.h"
 #include "AudioManager.h"
+#include <algorithm>
+
+template <typename T>
+T median(std::vector<T>& c)
+{
+    size_t n = c.size() / 2;
+    std::nth_element(c.begin(), c.begin() + n, c.end());
+    return c[n];
+}
 
 Scene* RhythmAdjustScene::createScene()
 {
@@ -90,7 +99,7 @@ void RhythmAdjustScene::onEnterTransitionDidFinish()
 
 void RhythmAdjustScene::finishCallBack(int audioID, std::string fileName)
 {
-    float medianValue = medianCalculation();
+    float medianValue = median(delta_times);
     tapArea->release();
     CCLOG("%lf", medianValue);
     UserDefault::getInstance()->setFloatForKey("LATENCY", medianValue);
@@ -104,65 +113,20 @@ void RhythmAdjustScene::finishCallBack(int audioID, std::string fileName)
 
 void RhythmAdjustScene::CreateTapFx(Vec2 position)
 {
-    std::vector<Sprite*> fx_array, inner_fx;
-    
-    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx1.png"));
-    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx2.png"));
-    fx_array.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx3.png"));
-    
-    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx1.png"));
-    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx2.png"));
-    inner_fx.push_back(Sprite::createWithSpriteFrameName("Image/PlayUI/TapFx3.png"));
-    
-    for (auto it = fx_array.begin(); it != fx_array.end();it++)
-    {
-        (*it)->setOpacity(0);
-        (*it)->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-        //(*it)->setScale(0.5f);
-        (*it)->setPosition(position);
-        
-        addChild(*it);
-    }
-    //削除
-    auto remove = RemoveSelf::create(true);
-    auto action = Spawn::create(FadeOut::create(0.1), ScaleTo::create(0.1, 2.5f),NULL);
-    
-    fx_array[0]->runAction(Sequence::create(FadeIn::create(0.05),
-                                            EaseOut::create(action, 2.0),remove, NULL));
-    
-    action = Spawn::create(ScaleTo::create(0.1, 2.8f), FadeOut::create(0.184), NULL);
-    fx_array[1]->runAction(Sequence::create(FadeIn::create(0),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    action = Spawn::create(ScaleTo::create(0.1, 3.0f), FadeOut::create(0.184), NULL);
-    fx_array[2]->runAction(Sequence::create(FadeIn::create(0.0184),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    
-    //iner_fxに対する処理
-    for (auto it = inner_fx.begin(); it != inner_fx.end();it++)
-    {
-        (*it)->setOpacity(0);
-        //(*it)->setBlendFunc(BlendFunc::ADDITIVE);
-        //(*it)->setScale(0.5f);
-        (*it)->setPosition(position);
-        
-        addChild(*it);
-    }
-    //削除
-    action = Spawn::create(FadeOut::create(0.1), ScaleTo::create(0.1, 2.5f),NULL);
-    
-    inner_fx[0]->runAction(Sequence::create(FadeIn::create(0.05),
-                                            EaseOut::create(action, 2.0),remove, NULL));
-    
-    action = Spawn::create(ScaleTo::create(0.1, 2.8f), FadeOut::create(0.184), NULL);
-    inner_fx[1]->runAction(Sequence::create(FadeIn::create(0),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
-    action = Spawn::create(ScaleTo::create(0.1, 3.0f), FadeOut::create(0.184), NULL);
-    inner_fx[2]->runAction(Sequence::create(FadeIn::create(0.0184),
-                                            EaseOut::create(action, 2.0),
-                                            remove, NULL));
+    auto tapFx = CSLoader::getInstance()->createNode("res/tapFx.csb");
+    tapFx->setLocalZOrder(0);
+    /*座標変換*/
+    Vec2 rePosition = position;
+    rePosition.x -= tapFx->getContentSize().width / 2;
+    rePosition.y -= tapFx->getContentSize().height / 2;
+    tapFx->setPosition(rePosition);
+    this->addChild(tapFx);
+    cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/tapFx.csb");
+    action->setLastFrameCallFunc([tapFx, this](){
+        this->removeChild(tapFx);
+    });
+    tapFx->runAction(action);
+    action->gotoFrameAndPlay(0, false);
     
 }
 
@@ -172,21 +136,20 @@ void RhythmAdjustScene::onTouchesBegan(const std::vector<Touch *> &touches, coco
     if(tapArea->containsPoint(touches[0]->getLocation()))
     {
         double now = StopWatch::getInstance()->currentTime();
+        double delta = 0;
         if(index < 8)
         {
             double correctTime = TAP_MILLI_SEC[index];
             
-            double delta = correctTime - now;
+            delta = correctTime - now;
             delta_times.push_back(delta);
             Vec2 v = tapArea->getPosition();
             CreateTapFx(v);
             index++;
         }
         
-        float val = medianCalculation();
-        
-        auto *score = this->getChildByName("PlayLayer")->getChildByName<ui::TextAtlas*>("ScoreLabel");
-        score->setString(std::to_string(val));
+        double val = median(delta_times);
+        CCLOG("NOW: %lf, MEDIAN: %lf", delta, val);
     }
 }
 

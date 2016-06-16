@@ -378,8 +378,8 @@
 			children = (
 				2E44AB861CD0FAFB00682069 /* Scenes */,
 				2E2EBDCD1C493E0A009AF4E6 /* Modules */,
-				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
+				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
 				2E3981331B5510ED001B096C /* PointWithDepth.cpp */,
 				2E3981341B5510ED001B096C /* PointWithDepth.h */,
 				2E94E07B1B6CB30F003A4136 /* ConfigLayer.cpp */,

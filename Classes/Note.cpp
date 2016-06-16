@@ -223,6 +223,8 @@ NoteJudge Note::StartJudge()
         this->unscheduleUpdate();
     }
     
+    result = rtn;
+    
     return rtn;
 }
 

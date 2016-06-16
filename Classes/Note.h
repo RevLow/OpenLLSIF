@@ -91,6 +91,7 @@ private:
     double endTimeCount;
     
     float latency = 0.0f;
+    NoteJudge result = NoteJudge::NON;
     std::function<void()> _callbackFunc;
 };
 #endif /* defined(__OpenLLSIF__Note__) */

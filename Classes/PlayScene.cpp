@@ -601,11 +601,6 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
                     }
                     else
                     {
-                        if(note->isLongNotes())
-                        {
-                            _longNotes.insert(touches[j]->getID(), note);
-                        }
-                        
                         std::string fullpath;
                         switch (judge)
                         {
@@ -630,7 +625,15 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
                         }
                         AudioManager::getInstance()->play(fullpath, AudioManager::SE);
                         CreateJudgeSprite(judge);
-                        CreateTapFx(note->getChildByName<RenderTexture*>("BaseNotes")->getPosition());
+                        
+                        if(note->isLongNotes())
+                        {
+                            _longNotes.insert(touches[j]->getID(), note);
+                        }
+                        else
+                        {
+                            CreateTapFx(note->getChildByName<RenderTexture*>("BaseNotes")->getPosition());
+                        }
                         
                         //先頭を取り出す
                         createdNotes[i].pop();
@@ -649,6 +652,9 @@ for_exit:
 }
 void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
 {
+    //もしもなにもつかんでいない場合は処理を行わない
+    if(_longNotes.empty()) return;
+    
         for(Touch* t : touches)
         {
             Note* n = _longNotes.at(t->getID());
