@@ -568,7 +568,7 @@ void PlayScene::update(float dt)
         CreateNotes(notes);
     }
 }
-
+/*
 void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
 {
     
@@ -650,6 +650,88 @@ for_exit:
     }
     
 }
+ */
+
+
+void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
+{
+
+    
+    for(auto t : touches)
+    {
+        auto location = t->getLocation();
+        
+        Circle* area = Circle::create(Vec2(480, 480), 300);
+        if(area->containsPoint(location))
+        {
+            //もし、タップ不可能のエリアに入っている場合は次の指の探索を行う
+            continue;
+        }
+        
+        Circle* c = Circle::create(location, 100);
+        
+        for(int i=0;i < 9;i++)
+        {
+            if(createdNotes[i].empty()) continue;
+            
+            Note* note = createdNotes[i].front();
+            Circle* noteCircle = Circle::create(note->getChildByName<Sprite*>("BaseNotes")->getPosition(),
+                                                note->getChildByName<Sprite*>("BaseNotes")->getContentSize().width / 2);
+            if(c->intersectCircle(noteCircle))
+            {
+                NoteJudge judge = note->StartJudge();
+                
+                //もしもタップ可能区間に入っていないなら
+                if(judge == NoteJudge::NON)
+                {
+                    //別のレーンの探索に行く
+                    continue;
+                }
+                else
+                {
+                    std::string fullpath;
+                    switch (judge)
+                    {
+                        case NoteJudge::PERFECT:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+                            current_score += 100;
+                            break;
+                        case NoteJudge::GREAT:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+                            current_score += 50;
+                            break;
+                        case NoteJudge::GOOD:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+                            current_score += 10;
+                            break;
+                        case NoteJudge::BAD:
+                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+                            current_score += 5;
+                            break;
+                        default:
+                            break;
+                    }
+                    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+                    CreateJudgeSprite(judge);
+                    
+                    if(note->isLongNotes())
+                    {
+                        _longNotes.insert(t->getID(), note);
+                    }
+                    else
+                    {
+                        CreateTapFx(note->getChildByName<Sprite*>("BaseNotes")->getPosition());
+                        Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+                        notesLayer->removeChild(note);
+                    }
+                    
+                    //先頭を取り出す
+                    createdNotes[i].pop();
+                }
+            }
+        }
+    }
+}
 void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
 {
     //もしもなにもつかんでいない場合は処理を行わない
@@ -687,7 +769,8 @@ void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Eve
                 AudioManager::getInstance()->play(fullpath, AudioManager::SE);
                 CreateJudgeSprite(j);
                 CreateTapFx(n->getChildByName("BaseNotes")->getPosition());
-                
+                Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+                notesLayer->removeChild(n);
                 _longNotes.erase(t->getID());
             }
         }

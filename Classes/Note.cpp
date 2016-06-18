@@ -219,7 +219,6 @@ NoteJudge Note::StartJudge()
     }
     else
     {
-        removeFromParentAndCleanup(true);
         this->unscheduleUpdate();
     }
     
@@ -254,7 +253,6 @@ NoteJudge Note::EndJudge()
     }
     
 
-    removeFromParentAndCleanup(true);
     //Director::getInstance()->purgeCachedData();//無駄なテクスチャキャッシュは消去してメモリを押さえる
     this->unscheduleUpdate();
     
