@@ -64,8 +64,6 @@ private:
     
     //ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> unitVector;
-    //タップ判定用のエリア
-    std::vector< Vector<Circle*> > expandedAreas;
     
     //各レーンごとに生成されているノーツキュー
     std::vector< std::queue<Note*> > createdNotes;

@@ -277,28 +277,6 @@ void PlayScene::Run()
     action->gotoFrameAndPlay(0, true);
     
     //背景画像を設定
-    
-    Vec2 v = unitVector[0];
-    auto plist = FileUtils::getInstance()->getValueVectorFromFile("TapAreaList.plist");
-    
-    for (int i=0; i < plist.size(); i++)
-    {
-        auto lane = plist[i].asValueVector();
-        Vector<Circle*> areas;
-        for (int j=0; j <lane.size(); j++)
-        {
-            auto circleData = lane[j].asValueMap();
-            
-            float x = circleData["X"].asFloat();
-            float y = circleData["Y"].asFloat();
-            float r = circleData["R"].asFloat();
-            
-            Circle* c = Circle::create(Point(x, y), r);
-            areas.pushBack(c);
-        }
-        expandedAreas.push_back(areas);
-    }
-    
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
 
     if (videoLayer != nullptr)
@@ -568,89 +546,6 @@ void PlayScene::update(float dt)
         CreateNotes(notes);
     }
 }
-/*
-void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
-{
-    
-    //auto playScene = this->getChildByName("PlayLayer");
-    //auto target = unused_event->getCurrentTarget();
-    Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
-    Vector<Node*> children = notesLayer->getChildren();
-    
-    //クリックされた位置を取得
-    for(int i=0;i<9;i++)
-    {
-        for (int j=0; j < touches.size(); j++)
-        {
-            auto loc = touches[j]->getLocation();
-            for(int k=0;k < expandedAreas[i].size();k++)
-            {
-                Circle *area = expandedAreas[i].at(k);
-                if(area->containsPoint(loc))
-                {
-                    if(createdNotes[i].empty()) goto for_exit;
-                    
-                    Note* note = createdNotes[i].front();
-                    NoteJudge judge = note->StartJudge();
-                    
-                    //もしもタップ可能区間に入っていないなら
-                    if(judge == NoteJudge::NON)
-                    {
-                        //別のレーンの探索に行く
-                        goto for_exit;
-                    }
-                    else
-                    {
-                        std::string fullpath;
-                        switch (judge)
-                        {
-                            case NoteJudge::PERFECT:
-                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-                                current_score += 100;
-                                break;
-                            case NoteJudge::GREAT:
-                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-                                current_score += 50;
-                                break;
-                            case NoteJudge::GOOD:
-                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-                                current_score += 10;
-                                break;
-                            case NoteJudge::BAD:
-                                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-                                current_score += 5;
-                                break;
-                            default:
-                                break;
-                        }
-                        AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-                        CreateJudgeSprite(judge);
-                        
-                        if(note->isLongNotes())
-                        {
-                            _longNotes.insert(touches[j]->getID(), note);
-                        }
-                        else
-                        {
-                            CreateTapFx(note->getChildByName<RenderTexture*>("BaseNotes")->getPosition());
-                        }
-                        
-                        //先頭を取り出す
-                        createdNotes[i].pop();
-                        
-                        //今のレーンの判定はこれ以上行わない
-                        goto for_exit;
-                    }
-
-                }
-            }
-        }
-for_exit:
-        continue;
-    }
-    
-}
- */
 
 
 void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
@@ -661,6 +556,8 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
     {
         auto location = t->getLocation();
         
+        
+        
         Circle* area = Circle::create(Vec2(480, 480), 300);
         if(area->containsPoint(location))
         {
@@ -668,17 +565,37 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Eve
             continue;
         }
         
-        Circle* c = Circle::create(location, 100);
+        //中心とタップした場所でのベクトルを計算
+        Vec2 v1(location - Vec2(480, 480));
+        
+        auto playScene = this->getChildByName("PlayLayer");
+      
+        Sprite* baseSprite = playScene->getChildByName<Sprite*>(std::to_string(1));
+        
+        Vec2 baseVec = baseSprite->getPosition() - Vec2(480, 480);
+        
         
         for(int i=0;i < 9;i++)
         {
             if(createdNotes[i].empty()) continue;
             
-            Note* note = createdNotes[i].front();
-            Circle* noteCircle = Circle::create(note->getChildByName<Sprite*>("BaseNotes")->getPosition(),
-                                                note->getChildByName<Sprite*>("BaseNotes")->getContentSize().width / 2);
-            if(c->intersectCircle(noteCircle))
+            
+            float theta = v1.getAngle(baseVec);
+            float crossTheta = v1.cross(baseVec);
+            //弧度法から度数法へ
+            theta = MATH_RAD_TO_DEG(theta);
+            
+            //8の場合、正の方向に見てしまうことがあるため対処
+            if( crossTheta >= 0 && i == 8 )
             {
+                theta = theta - 360;
+            }
+            
+            if(-22.5*i + 11.25 >=theta && -22.5*i - 11.25 < theta)
+            {
+                if(i == 8 )CCLOG("--theta: %lf", theta);
+                Note* note = createdNotes[i].front();
+                
                 NoteJudge judge = note->StartJudge();
                 
                 //もしもタップ可能区間に入っていないなら
