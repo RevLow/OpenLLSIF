@@ -218,9 +218,8 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
 //    Layer *notesLayer = Layer::create();
 //    notesLayer->setName("Notes_Layer");
 //    addChild(notesLayer);
-    
-    createdNotes.reserve(9);
-    
+
+    createdNotes = std::vector< std::queue<Note*> >(9);
         
     //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
     //playScene->removeChildByName("ScoreLabel");
@@ -339,6 +338,16 @@ void PlayScene::createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
             if(overSprite != nullptr) removeChild(overSprite);
             //Missの処理を行う
             createJudgeSprite(NoteJudge::MISS);
+            
+            this->createdNotes[note.getLane()].pop();
+            
+            //もし、次のノートが存在するのならば、それが先頭になる
+            if(!this->createdNotes[note.getLane()].empty())
+            {
+                Note* next_note = this->createdNotes[note.getLane()].front();
+                next_note->setIsFront(true);
+            }
+            
         });
         
         //タップ判定を行った後の処理
@@ -355,12 +364,15 @@ void PlayScene::createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
                                 //タッチ判定を実行するのはLongnotesじゃない場合のみ
                                 if(!note.isLongNotes())
                                 {
-                                    createTapFx(note.getPosition());
+                                    createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
                                     this->createdNotes[note.getLane()].pop();
                                     
                                     //もし、次のノートが存在するのならば、それが先頭になる
-                                    auto next_note = this->createdNotes[note.getLane()].front();
-                                    if(next_note != nullptr) next_note->setIsFront(true);
+                                    if(!this->createdNotes[note.getLane()].empty())
+                                    {
+                                        Note* next_note = this->createdNotes[note.getLane()].front();
+                                        next_note->setIsFront(true);
+                                    }
                                 }
                             });
         
@@ -376,12 +388,15 @@ void PlayScene::createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
                                   
                                   //判定とタッチのエフェクトを表示する
                                   createJudgeSprite(note.getResult());
-                                  createTapFx(note.getPosition());
+                                  createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
                                   this->createdNotes[note.getLane()].pop();
                                   
                                   //もし、次のノートが存在するのならば、それが先頭になる
-                                  auto next_note = this->createdNotes[note.getLane()].front();
-                                  if(next_note != nullptr) next_note->setIsFront(true);
+                                  if(!this->createdNotes[note.getLane()].empty())
+                                  {
+                                      Note* next_note = this->createdNotes[note.getLane()].front();
+                                      next_note->setIsFront(true);
+                                  }
                               });
         
         

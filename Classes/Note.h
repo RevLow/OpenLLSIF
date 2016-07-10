@@ -105,6 +105,7 @@ private:
     double endTimeCount;
     
     float latency = 0.0f;
+    int _longNotesHoldId = -1;
     std::function<void(const Note&)> _callbackFunc;
     std::function<void(const Note&)> _touchCallbackFunc;
     std::function<void(const Note&)> _releaseCallbackFunc;

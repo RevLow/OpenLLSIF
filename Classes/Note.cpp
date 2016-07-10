@@ -263,6 +263,7 @@ void Note::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *u
             //8. ロングノーツかの判定
             if(_isLongnote)
             {
+                _longNotesHoldId = t->getID();
                 _longnotesHold = true;
             }
             else
@@ -288,8 +289,19 @@ void Note::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *u
  */
 void Note::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
 {
-    if (_isLongnote && _longnotesHold)
+    if (!_isLongnote || !_longnotesHold)
     {
+        return;
+    }
+    
+    for(Touch *t : touches)
+    {
+        //もともとつかんでいた指のIDと異なる場合
+        if(t->getID() != _longNotesHoldId)
+        {
+            continue;
+        }
+        
         //4. タッチの判定を行う
         NoteJudge j = endJudge();
         
@@ -328,7 +340,9 @@ void Note::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *u
         
         //そうじゃない場合は親から削除
         removeFromParentAndCleanup(true);
+        
     }
+    
     
 }
 
