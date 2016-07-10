@@ -79,8 +79,9 @@ public:
     }
     
     //タップイベント
-    void onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
-    void onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
+    bool onTouchBegan(Touch *touch, Event *event);
+    void onTouchEnded(Touch *touch, Event *event);
+    
     CC_SYNTHESIZE_READONLY(NoteJudge, result, Result);
     
     //このノーツがレーン上の先頭要素かの判定フラグ

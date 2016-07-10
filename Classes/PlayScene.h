@@ -68,8 +68,6 @@ private:
     //各レーンごとに生成されているノーツキュー
     std::vector< std::queue<Note*> > createdNotes;
     
-//    //タップされたロングノーツと押している指の対応付け
-//    cocos2d::Map<int, Note*> _longNotes;
     
     //レイテンシーの値
     float latency = 0.0f;
@@ -81,7 +79,7 @@ private:
     void run();
     
     /**
-     *@fn CreateNotes
+     *@fn createNotes
      *ノーツ生成のための関数
      *@brief メインスレッドで指定レーンへのノーツを生成するメソッド
      *@param (notesNum) 生成するノーツ番号を格納したベクター
@@ -102,6 +100,10 @@ private:
      */
     void createTapFx(Vec2 position);
     
+    /**
+     * 毎フレーム呼ばれるメソッド
+     * @param dt 前のフレームから今のフレームまでにかかった時間
+     */
     void update(float dt);
 };
 
