@@ -198,7 +198,7 @@ void FilledPolygon::calculateTextureCoordinates()
         for (int j = 0; j < _verticesCount; j++) {
             _textureTriangles[j].x = _positionTriangles[j].x * 1.0f / _texture->getPixelsWide() * CC_CONTENT_SCALE_FACTOR();
             _textureTriangles[j].y = 1.0f - _positionTriangles[j].y * 1.0f / _texture->getPixelsHigh() * CC_CONTENT_SCALE_FACTOR();
-            CCLOG("(%lf, %lf)", _textureTriangles[j].x, _textureTriangles[j].y);
+            //CCLOG("(%lf, %lf)", _textureTriangles[j].x, _textureTriangles[j].y);
         }
     }
 }

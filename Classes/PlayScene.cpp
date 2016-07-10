@@ -207,25 +207,19 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
                                                                                                     //playSplashはいらないので消去
                                                                                                     this->removeChild(playSplash);
                                                                                                     //ゲームを開始する
-                                                                                                    this->Run();
+                                                                                                    this->run();
                                                                                                 }), NULL));
     
                                 });
     playSplash->runAction(action);
     action->gotoFrameAndPlay(0, false);
     
-    _longNotes = cocos2d::Map<int, Note*>();
-    
     //Note型を格納するためのレイヤー
-    Layer *notesLayer = Layer::create();
-    notesLayer->setName("Notes_Layer");
-    addChild(notesLayer);
+//    Layer *notesLayer = Layer::create();
+//    notesLayer->setName("Notes_Layer");
+//    addChild(notesLayer);
     
     createdNotes.reserve(9);
-    for (int i=0; i<9; ++i) {
-        std::queue<Note*> notesQueue;
-        createdNotes.push_back(notesQueue);
-    }
     
         
     //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
@@ -263,7 +257,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel level)
 /*
 ゲームを開始する
  */
-void PlayScene::Run()
+void PlayScene::run()
 {
     auto playScene = this->getChildByName("PlayLayer");
     auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/PlayScene.csb");
@@ -299,13 +293,6 @@ void PlayScene::Run()
                                           FadeTo::create(0.5f, 255),
                                           CallFunc::create([this, videoLayer]()
                                                         {
-                                                            //タッチイベントリスナーを作成
-                                                            auto listener = cocos2d::EventListenerTouchAllAtOnce::create();
-                                                            listener->setEnabled(true);
-                                                            listener->onTouchesBegan = CC_CALLBACK_2(PlayScene::onTouchesBegan, this);
-                                                            listener->onTouchesEnded = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
-                                                            this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-                                                            
                                                             //スコアとライフの透明度を変更
                                                             this->getChildByName("ScoreLabel")->setOpacity(255);
                                                             this->getChildByName("life_text")->setOpacity(255);
@@ -325,9 +312,9 @@ void PlayScene::Run()
 }
 
 
-void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps)
+void PlayScene::createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps)
 {
-    Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+    //Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
     
     for(auto note : maps)
     {
@@ -340,10 +327,9 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
         (*note)["destinationY"] = destinationSprite->getPosition().y;
         
         Note *n = Note::create(*note, v);
-        createdNotes[note->at("lane").asInt()].push(n);
         
         //画面の判定外に出た場合の処理
-        n->setOutDisplayedCallback([this, note]()
+        n->setOutDisplayedCallback([this](const Note& note)
         {
             
             Sprite *jSprite = this->getChildByName<Sprite*>("JudgeSprite");
@@ -352,15 +338,61 @@ void PlayScene::CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > ma
             auto overSprite = getChildByName<Sprite*>("OverPerfect");
             if(overSprite != nullptr) removeChild(overSprite);
             //Missの処理を行う
-            this->CreateJudgeSprite(NoteJudge::MISS);
-            createdNotes[note->at("lane").asInt()].pop();
+            createJudgeSprite(NoteJudge::MISS);
         });
         
-        notesLayer->addChild(n);
+        //タップ判定を行った後の処理
+        n->setTouchCallback([this](const Note& note)
+                            {
+                                Sprite *jSprite = this->getChildByName<Sprite*>("JudgeSprite");
+                                if(jSprite != nullptr)
+                                    removeChild(jSprite);
+                                auto overSprite = getChildByName<Sprite*>("OverPerfect");
+                                if(overSprite != nullptr) removeChild(overSprite);
+                                
+                                //判定とタッチのエフェクトを表示する
+                                createJudgeSprite(note.getResult());
+                                //タッチ判定を実行するのはLongnotesじゃない場合のみ
+                                if(!note.isLongNotes())
+                                {
+                                    createTapFx(note.getPosition());
+                                    this->createdNotes[note.getLane()].pop();
+                                    
+                                    //もし、次のノートが存在するのならば、それが先頭になる
+                                    auto next_note = this->createdNotes[note.getLane()].front();
+                                    if(next_note != nullptr) next_note->setIsFront(true);
+                                }
+                            });
+        
+        
+        //ロングノーツを離したときの処理
+        n->setReleaseCallback([this](const Note& note)
+                              {
+                                  Sprite *jSprite = this->getChildByName<Sprite*>("JudgeSprite");
+                                  if(jSprite != nullptr)
+                                      removeChild(jSprite);
+                                  auto overSprite = getChildByName<Sprite*>("OverPerfect");
+                                  if(overSprite != nullptr) removeChild(overSprite);
+                                  
+                                  //判定とタッチのエフェクトを表示する
+                                  createJudgeSprite(note.getResult());
+                                  createTapFx(note.getPosition());
+                                  this->createdNotes[note.getLane()].pop();
+                                  
+                                  //もし、次のノートが存在するのならば、それが先頭になる
+                                  auto next_note = this->createdNotes[note.getLane()].front();
+                                  if(next_note != nullptr) next_note->setIsFront(true);
+                              });
+        
+        
+        n->setIsFront(createdNotes[n->getLane()].empty() ? true : false);
+        createdNotes[n->getLane()].push(n);
+        
+        addChild(n);
     }
 }
 
-void PlayScene::CreateJudgeSprite(NoteJudge j)
+void PlayScene::createJudgeSprite(NoteJudge j)
 {
     Sprite *jSprite = this->getChildByName<Sprite*>("JudgeSprite");
     if(jSprite != nullptr)
@@ -426,7 +458,7 @@ void PlayScene::CreateJudgeSprite(NoteJudge j)
     
 }
 
-void PlayScene::CreateTapFx(Vec2 position)
+void PlayScene::createTapFx(Vec2 position)
 {
     auto tapFx = CSLoader::getInstance()->createNode("res/tapFx.csb");
     tapFx->setLocalZOrder(0);
@@ -472,15 +504,15 @@ void PlayScene::finishCallBack(int audioId, std::string fileName)
 
 void PlayScene::applicationDidEnterBackground()
 {
+    AudioManager::getInstance()->pause(AudioManager::BGM);
     unscheduleUpdate();
     StopWatch::getInstance()->pause();
 
-    AudioManager::getInstance()->pause(AudioManager::BGM);
+
     this->pause();
     //Director::getInstance()->pause();
     auto videoLayer =  this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
     videoLayer->pause();
-
 }
 
 
@@ -490,14 +522,15 @@ void PlayScene::applicationDidEnterBackground()
  */
 void PlayScene::applicationWillEnterForeground()
 {
+    scheduleUpdate();
  //   Director::getInstance()->resume();
     auto videoLayer =  this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
     videoLayer->resume();
-    
     this->resume();
+
+
     AudioManager::getInstance()->resume(AudioManager::BGM);
     StopWatch::getInstance()->resume();
-    scheduleUpdate();
 }
 
 void PlayScene::update(float dt)
@@ -543,155 +576,165 @@ void PlayScene::update(float dt)
     
     if(!notes.empty())
     {
-        CreateNotes(notes);
+        createNotes(notes);
     }
 }
 
-
-void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
-{
-
-    
-    for(auto t : touches)
-    {
-        auto location = t->getLocation();
-        
-        
-        
-        Circle* area = Circle::create(Vec2(480, 480), 300);
-        if(area->containsPoint(location))
-        {
-            //もし、タップ不可能のエリアに入っている場合は次の指の探索を行う
-            continue;
-        }
-        
-        //中心とタップした場所でのベクトルを計算
-        Vec2 v1(location - Vec2(480, 480));
-        
-        auto playScene = this->getChildByName("PlayLayer");
-      
-        Sprite* baseSprite = playScene->getChildByName<Sprite*>(std::to_string(1));
-        
-        Vec2 baseVec = baseSprite->getPosition() - Vec2(480, 480);
-        
-        
-        for(int i=0;i < 9;i++)
-        {
-            if(createdNotes[i].empty()) continue;
-            
-            
-            float theta = v1.getAngle(baseVec);
-            float crossTheta = v1.cross(baseVec);
-            //弧度法から度数法へ
-            theta = MATH_RAD_TO_DEG(theta);
-            
-            //8の場合、正の方向に見てしまうことがあるため対処
-            if( crossTheta >= 0 && i == 8 )
-            {
-                theta = theta - 360;
-            }
-            
-            if(-22.5*i + 11.25 >=theta && -22.5*i - 11.25 < theta)
-            {
-                if(i == 8 )CCLOG("--theta: %lf", theta);
-                Note* note = createdNotes[i].front();
-                
-                NoteJudge judge = note->StartJudge();
-                
-                //もしもタップ可能区間に入っていないなら
-                if(judge == NoteJudge::NON)
-                {
-                    //別のレーンの探索に行く
-                    continue;
-                }
-                else
-                {
-                    std::string fullpath;
-                    switch (judge)
-                    {
-                        case NoteJudge::PERFECT:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-                            current_score += 100;
-                            break;
-                        case NoteJudge::GREAT:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-                            current_score += 50;
-                            break;
-                        case NoteJudge::GOOD:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-                            current_score += 10;
-                            break;
-                        case NoteJudge::BAD:
-                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-                            current_score += 5;
-                            break;
-                        default:
-                            break;
-                    }
-                    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-                    CreateJudgeSprite(judge);
-                    
-                    if(note->isLongNotes())
-                    {
-                        _longNotes.insert(t->getID(), note);
-                    }
-                    else
-                    {
-                        CreateTapFx(note->getChildByName<Sprite*>("BaseNotes")->getPosition());
-                        Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
-                        notesLayer->removeChild(note);
-                    }
-                    
-                    //先頭を取り出す
-                    createdNotes[i].pop();
-                }
-            }
-        }
-    }
-}
-void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
-{
-    //もしもなにもつかんでいない場合は処理を行わない
-    if(_longNotes.empty()) return;
-    
-        for(Touch* t : touches)
-        {
-            Note* n = _longNotes.at(t->getID());
-            if(n != nullptr)
-            {
-                NoteJudge j = n->EndJudge();
-                
-                std::string fullpath;
-                switch (j)
-                {
-                    case NoteJudge::PERFECT:
-                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-                        current_score += 100;
-                        break;
-                    case NoteJudge::GREAT:
-                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-                        current_score += 50;
-                        break;
-                    case NoteJudge::GOOD:
-                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-                        current_score += 10;
-                        break;
-                    case NoteJudge::BAD:
-                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-                        current_score += 5;
-                        break;
-                    default:
-                        break;
-                }
-                AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-                CreateJudgeSprite(j);
-                CreateTapFx(n->getChildByName("BaseNotes")->getPosition());
-                Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
-                notesLayer->removeChild(n);
-                _longNotes.erase(t->getID());
-            }
-        }
-}
+//
+//void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
+//{
+//
+//    auto playScene = this->getChildByName("PlayLayer");
+//    Vec2 center = playScene->getChildByName("music_icon_7")->getPosition();
+//    for(auto t : touches)
+//    {
+//        auto location = t->getLocation();
+//        
+//        
+//        
+//        Circle* area = Circle::create(center, 300);
+//        if(area->containsPoint(location))
+//        {
+//            //もし、タップ不可能のエリアに入っている場合は次の指の探索を行う
+//            continue;
+//        }
+//        
+//        //中心とタップした場所でのベクトルを計算
+//        Vec2 v1(location - center);
+//        
+//        
+//      
+//        Sprite* baseSprite = playScene->getChildByName<Sprite*>(std::to_string(1));
+//        
+//        Vec2 baseVec = baseSprite->getPosition() - center;
+//        
+//        
+//        for(int i=0;i < 9;i++)
+//        {
+//            if(createdNotes[i].empty()) continue;
+//            
+//            
+//            float theta = v1.getAngle(baseVec);
+//            float crossTheta = v1.cross(baseVec);
+//            //弧度法から度数法へ
+//            theta = MATH_RAD_TO_DEG(theta);
+//            
+//            //8の場合、正の方向に見てしまうことがあるため対処
+//            if( crossTheta >= 0 && i == 8 )
+//            {
+//                theta = theta - 360;
+//            }
+//            
+//            if(-22.5*i + 11.25 >=theta && -22.5*i - 11.25 < theta)
+//            {
+//                //if(i == 8 )CCLOG("--theta: %lf", theta);
+//                Note* note = createdNotes[i].front();
+//                
+//                NoteJudge judge = note->StartJudge();
+//                
+//                //もしもタップ可能区間に入っていないなら
+//                if(judge == NoteJudge::NON)
+//                {
+//                    //別のレーンの探索に行く
+//                    continue;
+//                }
+//                else
+//                {
+//                    std::string fullpath;
+//                    switch (judge)
+//                    {
+//                        case NoteJudge::PERFECT:
+//                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+//                            current_score += 100;
+//                            break;
+//                        case NoteJudge::GREAT:
+//                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+//                            current_score += 50;
+//                            break;
+//                        case NoteJudge::GOOD:
+//                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+//                            current_score += 10;
+//                            break;
+//                        case NoteJudge::BAD:
+//                            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+//                            current_score += 5;
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+//                    CreateJudgeSprite(judge);
+//                    
+//                    if(note->isLongNotes())
+//                    {
+//                        _longNotes.insert(t->getID(), note);
+//                        CCLOG("Push(%d): %d", t->getID(), note->getLane());
+//                    }
+//                    else
+//                    {
+//                        CreateTapFx(note->getChildByName<Sprite*>("BaseNotes")->getPosition());
+//                        Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+//                        notesLayer->removeChild(note);
+//                    }
+//                    
+//                    //先頭を取り出す
+//                    createdNotes[i].pop();
+//                }
+//            }
+//        }
+//    }
+//}
+//void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
+//{
+//    //もしもなにもつかんでいない場合は処理を行わない
+//    if(_longNotes.empty()) return;
+//
+//    
+//        for(Touch* t : touches)
+//        {
+//            for(Map<int, Note*>::iterator it = _longNotes.begin(); it != _longNotes.end();it++)
+//            {
+//                std::cout << "|(" << t->getID() << ", " << it->first << ") " << it->second->getLane()  << " ";
+//            }
+//            std::cout << std::endl;
+//            Note* n = _longNotes.at(t->getID());
+//            if(n != nullptr)
+//            {
+//                NoteJudge j = n->EndJudge();
+//                
+//                std::string fullpath;
+//                switch (j)
+//                {
+//                    case NoteJudge::PERFECT:
+//                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+//                        current_score += 100;
+//                        break;
+//                    case NoteJudge::GREAT:
+//                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+//                        current_score += 50;
+//                        break;
+//                    case NoteJudge::GOOD:
+//                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+//                        current_score += 10;
+//                        break;
+//                    case NoteJudge::BAD:
+//                        fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+//                        current_score += 5;
+//                        break;
+//                    default:
+//                        break;
+//                }
+//                AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+//                CreateJudgeSprite(j);
+//                CreateTapFx(n->getChildByName("BaseNotes")->getPosition());
+//                //Layer *notesLayer = getChildByName<Layer*>("Notes_Layer");
+//                //notesLayer->removeChild(n);
+//                _longNotes.erase(t->getID());
+//                CCLOG("Pop(%d): %d", t->getID(), n->getLane());
+//
+//            }
+//        }
+//}
 
 
 

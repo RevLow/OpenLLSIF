@@ -161,25 +161,181 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
         //_scaleTick = (2.0-0.1) / _speed;
     }
     
+    //タッチイベントリスナーを作成
+    auto listener = cocos2d::EventListenerTouchAllAtOnce::create();
+    listener->setEnabled(true);
+    listener->onTouchesBegan = CC_CALLBACK_2(Note::onTouchesBegan, this);
+    listener->onTouchesEnded = CC_CALLBACK_2(Note::onTouchesEnded, this);
+    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+    
     //時間計測開始
     startTimeCount = endTimeCount = StopWatch::getInstance()->currentTime();
     this->scheduleUpdate();
     
+    result = NoteJudge::NON;
     
     return true;
 }
 
 //ノーツが消えるときに呼ばれるコールバック
-void Note::setOutDisplayedCallback(const std::function<void()> &f)
+void Note::setOutDisplayedCallback(const std::function<void(const Note&)> &f)
 {
     this->_callbackFunc = f;
 }
 
+void Note::setTouchCallback(const std::function<void (const Note &)> &f)
+{
+    this->_touchCallbackFunc = f;
+}
+
+void Note::setReleaseCallback(const std::function<void (const Note &)> &f)
+{
+    this->_releaseCallbackFunc = f;
+}
+
+/**
+ *  このノートをタッチしたときに呼ばれるイベント
+ *
+ *  @param touches      タッチした指のベクター一覧
+ *  @param unused_event
+ */
+void Note::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
+{
+    Sprite* baseNote = getChildByName<Sprite*>("BaseNotes");
+    
+    //もしも先頭要素でない場合は何もしないよ
+    if (!isFrontOfLane)
+    {
+        return;
+    }
+    
+   //1, 指を一つずつ見ていく
+    for(Touch *t : touches)
+    {
+        //2. 位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
+        Vec2 pos = t->getLocation();
+        
+        //3. その位置がタッチ可能な範囲内に収まっている場合
+        CCLOG("(x, y): (%lf, %lf)", pos.x, pos.y);
+        Circle *c = Circle::create(_destination, baseNote->getContentSize().width);
+        
+        if(c->containsPoint(pos))
+        {
+            //4. タッチの判定を行う
+            NoteJudge j = startJudge();
+            if(j == NON)
+            {
+                //下の処理を行わずそのままcontinue
+                
+                continue;
+            }
+            
+            //5. タッチの判定により処理を変える
+            std::string fullpath;
+            switch (j)
+            {
+                case NoteJudge::PERFECT:
+                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+                    break;
+                case NoteJudge::GREAT:
+                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+                    break;
+                case NoteJudge::GOOD:
+                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+                    break;
+                case NoteJudge::BAD:
+                    fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+                    break;
+                default:
+                    break;
+            }
+            
+            //6. 音の再生
+            AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+            
+            //7. タップ判定のコールバック関数実行
+            if (_touchCallbackFunc != nullptr)
+            {
+                if(this->getResult() == NON) CCLOG("This has NON value!!!");
+                _touchCallbackFunc(*this);
+            }
+            
+            //8. ロングノーツかの判定
+            if(_isLongnote)
+            {
+                _longnotesHold = true;
+            }
+            else
+            {
+                this->unscheduleUpdate();
+                //そうじゃない場合は親から削除
+                removeFromParentAndCleanup(true);
+            }
+            
+            break;
+        }
+        
+    }
+    
+    
+}
+
+/**
+ *  このノートを離したときに呼ばれるイベント
+ *
+ *  @param touches      <#touches description#>
+ *  @param unused_event <#unused_event description#>
+ */
+void Note::onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
+{
+    if (_isLongnote && _longnotesHold)
+    {
+        //4. タッチの判定を行う
+        NoteJudge j = endJudge();
+        
+        //5. タッチの判定により処理を変える
+        std::string fullpath;
+        switch (j)
+        {
+            case NoteJudge::PERFECT:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+                break;
+            case NoteJudge::GREAT:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+                break;
+            case NoteJudge::GOOD:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+                break;
+            case NoteJudge::NON:
+            case NoteJudge::BAD:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+                break;
+            default:
+                break;
+        }
+        
+        //6. 音の再生
+        AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+        
+        //7. タップ判定のコールバック関数実行
+        if (_releaseCallbackFunc != nullptr)
+        {
+            _releaseCallbackFunc(*this);
+        }
+        
+        //8. ロングノーツかの判定
+        this->unscheduleUpdate();
+        
+        //そうじゃない場合は親から削除
+        removeFromParentAndCleanup(true);
+    }
+    
+}
 
 /*
  タップしたときの判定を行う関数
  */
-NoteJudge Note::StartJudge()
+NoteJudge Note::startJudge()
 {
     double now = StopWatch::getInstance()->currentTime();
 
@@ -211,23 +367,12 @@ NoteJudge Note::StartJudge()
         rtn = NoteJudge::BAD;
     }
     
-    
-    
-    if(_isLongnote)
-    {
-        _longnotesHold = true;
-    }
-    else
-    {
-        this->unscheduleUpdate();
-    }
-    
     result = rtn;
     
     return rtn;
 }
 
-NoteJudge Note::EndJudge()
+NoteJudge Note::endJudge()
 {
     double now = StopWatch::getInstance()->currentTime();
 
@@ -254,10 +399,10 @@ NoteJudge Note::EndJudge()
     
 
     //Director::getInstance()->purgeCachedData();//無駄なテクスチャキャッシュは消去してメモリを押さえる
-    this->unscheduleUpdate();
-    
     //もしコールバックが存在するなら
     //if(_callbackFunc) _callbackFunc();
+    
+    result = rtn;
     
     return rtn;
 }
@@ -396,7 +541,7 @@ void Note::update(float frame)
         {
             if (_callbackFunc != nullptr)
             {
-                _callbackFunc();
+                _callbackFunc(*this);
             }
             
             //もし画面判定外にでたら
