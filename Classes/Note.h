@@ -50,27 +50,41 @@ class Note : public Layer, create_func<Note>
 public:
     using create_func::create;
     virtual bool init(ValueMap jsonInfo, cocos2d::Vec2 unitVec);
-    NoteJudge StartJudge();
-    NoteJudge EndJudge();
+    NoteJudge startJudge();
+    NoteJudge endJudge();
     
     void update(float flame);
     
-    bool isLongNotes()
+    const bool isLongNotes() const
     {
         return _isLongnote;
     }
-    bool isParallel()
+    const bool isParallel() const
     {
         return _isParallel;
     }
     //ノーツが消えるときに呼ばれるコールバック
-    void setOutDisplayedCallback(const std::function<void()> &f);
+    void setOutDisplayedCallback(const std::function<void(const Note&)> &f);
+    
+    //ノーツをタップしたときのコールバック
+    void setTouchCallback(const std::function<void(const Note&)> &f);
+
+    //ノーツを離したときのコールバック
+    void setReleaseCallback(const std::function<void(const Note&)> &f);
     
     // 第何番目のレーンか
-    unsigned int getLane()
+    const unsigned int getLane() const
     {
         return _lane;
     }
+    
+    //タップイベント
+    void onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
+    void onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
+    CC_SYNTHESIZE_READONLY(NoteJudge, result, Result);
+    
+    //このノーツがレーン上の先頭要素かの判定フラグ
+    CC_SYNTHESIZE(bool, isFrontOfLane, IsFront);
 private:
     double _speed;
     bool _isStar = false;//星付きか
@@ -91,7 +105,9 @@ private:
     double endTimeCount;
     
     float latency = 0.0f;
-    NoteJudge result = NoteJudge::NON;
-    std::function<void()> _callbackFunc;
+    int _longNotesHoldId = -1;
+    std::function<void(const Note&)> _callbackFunc;
+    std::function<void(const Note&)> _touchCallbackFunc;
+    std::function<void(const Note&)> _releaseCallbackFunc;
 };
 #endif /* defined(__OpenLLSIF__Note__) */

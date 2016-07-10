@@ -68,8 +68,8 @@ private:
     //各レーンごとに生成されているノーツキュー
     std::vector< std::queue<Note*> > createdNotes;
     
-    //タップされたロングノーツと押している指の対応付け
-    cocos2d::Map<int, Note*> _longNotes;
+//    //タップされたロングノーツと押している指の対応付け
+//    cocos2d::Map<int, Note*> _longNotes;
     
     //レイテンシーの値
     float latency = 0.0f;
@@ -78,7 +78,7 @@ private:
      *@fn Run
      *@brief ゲームを開始するメソッド
      */
-    void Run();
+    void run();
     
     /**
      *@fn CreateNotes
@@ -86,14 +86,22 @@ private:
      *@brief メインスレッドで指定レーンへのノーツを生成するメソッド
      *@param (notesNum) 生成するノーツ番号を格納したベクター
      */
-    void CreateNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps);
+    void createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps);
     
-    void CreateJudgeSprite(NoteJudge j);
+    /**
+     *  判定のスプライトを作成する
+     *
+     *  @param j 判定結果
+     */
+    void createJudgeSprite(NoteJudge j);
     
-    void CreateTapFx(Vec2 position);
-    //タップイベント
-    void onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
-    void onTouchesEnded(const std::vector<Touch *> &touches, cocos2d::Event *unused_event);
+    /**
+     *  タップのエフェクトを作成する
+     *
+     *  @param position 作成する起点となる場所
+     */
+    void createTapFx(Vec2 position);
+    
     void update(float dt);
 };
 
