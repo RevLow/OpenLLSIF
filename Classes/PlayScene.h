@@ -30,7 +30,7 @@ class PlayScene : public Layer, create_func<PlayScene>
 {
 public:
     static cocos2d::Scene* createScene(std::string playSongFile, GameLevel level);
-    bool init(std::string playSongFile, GameLevel level);
+    bool init(std::string playSongFile, GameLevel gameLevel);
     using create_func::create;
     
     /**
@@ -38,40 +38,45 @@ public:
      *@brief バックグラウンドに入るときに呼ばれるメソッド
      */
     virtual void applicationDidEnterBackground();
+    
     /**
      *@fn applicationWillEnterForeground
      *@brief バックグラウンドから復帰したときに呼ばれるメソッド
      */
     virtual void applicationWillEnterForeground();
+    
+    /**
+     *  BGMの再生が終了したときに呼ばれるコールバック
+     *
+     *  @param audioID
+     *  @param fileName
+     */
     void finishCallBack(int audioID, std::string fileName);
+    
+    //ノーツに関するコールバック関数
+    
+    /**
+     *  ノーツが画面判定外に出たときに呼ばれるコールバック関数
+     *
+     *  @param note
+     */
+    void noteOutDisplayedCallback(const Note& note);
+    
+    /**
+     *  ノーツがタップされたときに呼ばれるコールバック関数
+     *
+     *  @param note
+     */
+    void noteTouchCallback(const Note& note);
+    
+    /**
+     *  ノーツを離したときに呼ばれるコールバック関数
+     *
+     *  @param note 
+     */
+    void noteReleaseCallback(const Note& note);
+    
 private:
-    int BGM_TIME;
-    
-    //! 全ノートの数
-    int note_count;
-    
-    //
-    int current_score;
-    int max_score;
-    //! ノーツのスピード
-    int notesSpeed = 0;
-    
-    //! 楽曲のファイルパス
-    std::string songFilePath;
-    
-    //! 楽曲譜面のデータを格納するためのベクター
-    std::list< std::shared_ptr< std::queue<std::shared_ptr<cocos2d::ValueMap> > > > notesVector;
-    
-    //ノーツが進む方向の単位ベクトル
-    std::vector<cocos2d::Vec2> unitVector;
-    
-    //各レーンごとに生成されているノーツキュー
-    std::vector< std::queue<Note*> > createdNotes;
-    
-    
-    //レイテンシーの値
-    float latency = 0.0f;
-    
     /**
      *@fn Run
      *@brief ゲームを開始するメソッド
@@ -91,7 +96,7 @@ private:
      *
      *  @param j 判定結果
      */
-    void createJudgeSprite(NoteJudge j);
+    void createJudgeSprite(NoteJudge judge);
     
     /**
      *  タップのエフェクトを作成する
@@ -101,10 +106,42 @@ private:
     void createTapFx(Vec2 position);
     
     /**
+     *  ゲーム開始前に音声のプリロード処理などを行うためのメソッド
+     */
+    void prepareGameRun();
+    
+    
+    /**
      * 毎フレーム呼ばれるメソッド
      * @param dt 前のフレームから今のフレームまでにかかった時間
      */
     void update(float dt);
+    
+private:
+    //! 現在のスコア
+    int _current_score;
+    
+    //! 計算で算出される最大スコア
+    int _max_score;
+    
+    //! ノーツのスピード
+    int _notes_speed_ms = 0;
+    
+    //! 楽曲のファイルパス
+    std::string _song_file_path;
+    
+    //! 楽曲譜面のデータを格納するためのベクター
+    std::list< std::shared_ptr< std::queue<std::shared_ptr<cocos2d::ValueMap> > > > _notes_vector;
+    
+    //! ノーツが進む方向の単位ベクトル
+    std::vector<cocos2d::Vec2> _direction_unit_vector;
+    
+    //! 各レーンごとに生成されているノーツキュー
+    std::vector< std::queue<Note*> > _displayed_notes;
+    
+    
+    //! レイテンシーの値
+    float _latency_ms = 0.0f;
 };
 
 #endif /* defined(__OpenLLSIF__PlayScene__) */
