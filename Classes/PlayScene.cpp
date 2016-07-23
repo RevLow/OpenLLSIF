@@ -279,6 +279,9 @@ void PlayScene::prepareGameRun()
     AudioManager::getInstance()->preload("Sound/SE/good.mp3");
     AudioManager::getInstance()->preload("Sound/SE/bad.mp3");
     
+    //ゲーム開始前にキャッシュを消去しておく
+    Director::getInstance()->purgeCachedData();
+    
     //透明度を戻した後、実行を行う
     play_scene->runAction(Sequence::create(FadeTo::create(0.5f, 255),
                                            CallFunc::create(CC_CALLBACK_0(PlayScene::run, this)), NULL));
@@ -293,15 +296,34 @@ void PlayScene::run()
     
     //動画再生の開始
     if(video_layer != nullptr)
+    {
+        video_layer->addEventListener([this](Ref*,cocos2d::experimental::ui::VideoPlayer::EventType e)
+                                      {
+                                          if(e == cocos2d::experimental::ui::VideoPlayer::EventType::PLAYING && !AudioManager::getInstance()->isPlaying())
+                                          {
+                                              //音楽の再生
+                                              AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
+                                              AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
+                                              
+                                              //StopWatchを稼働
+                                              StopWatch::getInstance()->start();
+                                              this->scheduleUpdate();
+                                          }
+                                      });
         video_layer->play();
-    
-    //音楽の再生
-    AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
-    AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
-    
-    //StopWatchを稼働
-    StopWatch::getInstance()->start();
-    this->scheduleUpdate();
+
+    }
+    else
+    {
+        //音楽の再生
+        AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
+        AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
+        
+        //StopWatchを稼働
+        StopWatch::getInstance()->start();
+        this->scheduleUpdate();
+    }
+
 }
 
 void PlayScene::update(float dt)

@@ -167,6 +167,8 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     auto listener = cocos2d::EventListenerTouchOneByOne::create();
     listener->setEnabled(true);
     listener->onTouchBegan = CC_CALLBACK_2(Note::onTouchBegan, this);
+    listener->onTouchMoved = CC_CALLBACK_2(Note::onTouchMoved, this);
+    listener->onTouchCancelled = CC_CALLBACK_2(Note::onTouchEnded, this);
     listener->onTouchEnded = CC_CALLBACK_2(Note::onTouchEnded, this);
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
     
@@ -175,7 +177,7 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     this->scheduleUpdate();
     
     result = NoteJudge::NON;
-    
+    _longNotesHoldId = -1;
     return true;
 }
 
@@ -209,6 +211,7 @@ void Note::setReleaseCallback(const std::function<void (const Note &)> &f)
     this->_releaseCallbackFunc = f;
 }
 
+
 /**
  *  シングルタップを検出したときに呼ばれるメソッド
  *
@@ -219,41 +222,19 @@ void Note::setReleaseCallback(const std::function<void (const Note &)> &f)
  */
 bool Note::onTouchBegan(Touch *touch, Event *event)
 {
+    
     //もしも先頭要素でない場合は何もしないよ
     if (!isFrontOfLane)
     {
         return false;
     }
 
+
     //2. 位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
     Vec2 pos = touch->getLocation();
-
-    //3. その位置がタッチ可能な範囲内に収まっている場合
-    //ベクトルで指定範囲内かを計算する
-
-    Vec2 center(480,480);
-    Circle *c = Circle::create(this->convertToWorldSpace(center), 300);
-    if(c->containsPoint(pos))
-    {
-        return false;
-    }
-
-    Vec2 v1(pos - center);
-
-    //親レイヤーから基準となるベクトルを見つける
-    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(1))->getPosition() - center;
-
-    float theta = v1.getAngle(baseVec);
-    float crossTheta = v1.cross(baseVec);
-    theta = MATH_RAD_TO_DEG(theta);
-
-    if(crossTheta >= 0 && _lane == 8)
-    {
-        theta = theta - 360;
-    }
-
+    
     //タップした点と基準ベクトルの角度が、タップ可能の角度内に入っている場合処理を行う
-    if(-22.5*_lane + 11.25 >=theta && -22.5*_lane - 11.25 < theta)
+    if(isPointContain(pos))
     {
         //4. タッチの判定を行う
         NoteJudge j = startJudge();
@@ -295,7 +276,6 @@ bool Note::onTouchBegan(Touch *touch, Event *event)
         //8. ロングノーツかの判定
         if(_isLongnote)
         {
-            CCLOG("TAP_LANE: %d", _lane);
             _longNotesHoldId = touch->getID();
             _longnotesHold = true;
         }
@@ -307,9 +287,78 @@ bool Note::onTouchBegan(Touch *touch, Event *event)
         }
     }
     
+
     return true;
 
 }
+
+/**
+ *  タップ中に指が動いたときに呼ばれる
+ *
+ *  @param touch <#touch description#>
+ *  @param event <#event description#>
+ */
+void Note::onTouchMoved(Touch *touch, Event *event)
+{
+    if (!_isLongnote || !_longnotesHold)
+    {
+        return;
+    }
+    
+    //もともとつかんでいた指のIDと異なる場合
+    if(touch->getID() != _longNotesHoldId)
+    {
+        return;
+    }
+    
+    //2. 位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
+    Vec2 pos = touch->getLocation();
+    
+    //タップした点と基準ベクトルの角度が、タップ可能の角度内に入っている場合は何も行わない
+    if(isPointContain(pos))
+    {
+        return;
+    }
+    
+    //4. タッチの判定を行う
+    NoteJudge j = endJudge();
+    //5. タッチの判定により処理を変える
+    std::string fullpath;
+    switch (j)
+    {
+        case NoteJudge::PERFECT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+            break;
+        case NoteJudge::GREAT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+            break;
+        case NoteJudge::GOOD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+            break;
+        case NoteJudge::NON:
+        case NoteJudge::BAD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+            break;
+        default:
+            break;
+    }
+    
+    //6. 音の再生
+    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+    
+    //7. タップ判定のコールバック関数実行
+    if (_releaseCallbackFunc != nullptr)
+    {
+        _releaseCallbackFunc(*this);
+    }
+    
+    this->unscheduleUpdate();
+    
+    
+    //親から削除
+    removeFromParentAndCleanup(true);
+}
+
 
 /**
  *  シングルタップを離したときに呼ばれるメソッド
@@ -329,7 +378,7 @@ void Note::onTouchEnded(Touch *touch, Event *event)
     {
         return;
     }
-
+    
     //4. タッチの判定を行う
     NoteJudge j = endJudge();
 
@@ -362,15 +411,52 @@ void Note::onTouchEnded(Touch *touch, Event *event)
     {
         _releaseCallbackFunc(*this);
     }
-
-    CCLOG("RELEASE_LANE: %d", _lane);
     
-    //8. ロングノーツかの判定
     this->unscheduleUpdate();
+    
     
     //そうじゃない場合は親から削除
     removeFromParentAndCleanup(true);
 
+}
+
+/**
+ *  ある点がタップ可能な範囲内に入っているかを判定する
+ *
+ *  @param pos <#pos description#>
+ *
+ *  @return <#return value description#>
+ */
+bool Note::isPointContain(Vec2 pos)
+{
+    //3. その位置がタッチ可能な範囲内に収まっている場合
+    //ベクトルで指定範囲内かを計算する
+    
+    Vec2 center(480,480);
+    Circle *c = Circle::create(this->convertToWorldSpace(center), 300);
+    if(c->containsPoint(pos))
+    {
+        return false;
+    }
+    
+    Vec2 v1(pos - center);
+    
+    //親レイヤーから基準となるベクトルを見つける
+    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(1))->getPosition() - center;
+    
+    float theta = v1.getAngle(baseVec);
+    float crossTheta = v1.cross(baseVec);
+    theta = MATH_RAD_TO_DEG(theta);
+    
+    if(crossTheta >= 0 && _lane == 8)
+    {
+        theta = theta - 360;
+    }
+    
+    float max_theta = -22.5*_lane + 11.25;
+    float min_theta = -22.5*_lane - 11.25;
+    
+    return theta > min_theta && theta <= max_theta;
 }
 
 /**
@@ -386,26 +472,26 @@ NoteJudge Note::startJudge()
     
     //もしも判定外の場合はNONを返す
     
-    if (elapsed >= _speed * 0.3) {
+    if (elapsed >= _speed * 0.28) {
         
         return NoteJudge::NON;
     }
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.05)
+    if (elapsed < _speed*0.04)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.05 && elapsed < _speed*0.15)
+    else if(elapsed >=_speed*0.04 && elapsed < _speed*0.10)
     {
         rtn = NoteJudge::GREAT;
 
     }
-    else if(elapsed >= _speed*0.15 && fabs(elapsed) < _speed*0.2)
+    else if(elapsed >= _speed*0.10 && fabs(elapsed) < _speed*0.16)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.2 && elapsed < _speed*0.3)
+    else if(elapsed >= _speed*0.16 && elapsed < _speed*0.28)
     {
         rtn = NoteJudge::BAD;
     }
@@ -426,20 +512,20 @@ NoteJudge Note::endJudge()
     double elapsed = fabs((_endTime-latency) - now);
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.05)
+    if (elapsed < _speed*0.04)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.05 && elapsed < _speed*0.15)
+    else if(elapsed >=_speed*0.04 && elapsed < _speed*0.10)
     {
         rtn = NoteJudge::GREAT;
         
     }
-    else if(elapsed >= _speed*0.15 && fabs(elapsed) < _speed*0.2)
+    else if(elapsed >= _speed*0.10 && fabs(elapsed) < _speed*0.16)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.2)
+    else if(elapsed >= _speed*0.16)
     {
         rtn = NoteJudge::BAD;
     }
@@ -584,7 +670,7 @@ void Note::update(float frame)
     {
         double time = _startTime - now;
         //if(currentPos.x < 0 || currentPos.x > limitArea.width || currentPos.y < 0 || currentPos.y > limitArea.height)
-        if(time < -_speed * 0.20)
+        if(time < -_speed * 0.30)
         {
             if (_callbackFunc != nullptr)
             {

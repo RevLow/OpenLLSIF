@@ -50,9 +50,7 @@ class Note : public Layer, create_func<Note>
 public:
     using create_func::create;
     virtual bool init(ValueMap jsonInfo, cocos2d::Vec2 unitVec);
-    NoteJudge startJudge();
-    NoteJudge endJudge();
-    
+
     void update(float flame);
     
     const bool isLongNotes() const
@@ -81,11 +79,17 @@ public:
     //タップイベント
     bool onTouchBegan(Touch *touch, Event *event);
     void onTouchEnded(Touch *touch, Event *event);
+    void onTouchMoved(Touch *touch, Event *event);
     
     CC_SYNTHESIZE_READONLY(NoteJudge, result, Result);
     
     //このノーツがレーン上の先頭要素かの判定フラグ
     CC_SYNTHESIZE(bool, isFrontOfLane, IsFront);
+    
+private:
+    bool isPointContain(Vec2 pos);
+    NoteJudge startJudge();
+    NoteJudge endJudge();
 private:
     double _speed;
     bool _isStar = false;//星付きか
@@ -106,7 +110,7 @@ private:
     double endTimeCount;
     
     float latency = 0.0f;
-    int _longNotesHoldId = -1;
+    int _longNotesHoldId;
     std::function<void(const Note&)> _callbackFunc;
     std::function<void(const Note&)> _touchCallbackFunc;
     std::function<void(const Note&)> _releaseCallbackFunc;
