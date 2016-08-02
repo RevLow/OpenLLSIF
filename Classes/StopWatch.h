@@ -12,6 +12,13 @@
 #include <iostream>
 #include <chrono>
 
+enum StopWatchStatus
+{
+    PLAYING,
+    STOPPED,
+    PAUSED
+};
+
 class StopWatch
 {
 public:
@@ -23,6 +30,7 @@ public:
     void pause();//一時停止
     void resume();//再開
     double currentTime();
+    CC_SYNTHESIZE_READONLY(StopWatchStatus, _status, Status);
 private:
     StopWatch();
     ~StopWatch();

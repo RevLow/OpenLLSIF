@@ -89,7 +89,7 @@ private:
      *@brief メインスレッドで指定レーンへのノーツを生成するメソッド
      *@param (notesNum) 生成するノーツ番号を格納したベクター
      */
-    void createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps);
+    void createNotes(const ValueMap& maps);
     
     /**
      *  判定のスプライトを作成する
@@ -116,7 +116,6 @@ private:
      * @param dt 前のフレームから今のフレームまでにかかった時間
      */
     void update(float dt);
-    
 private:
     //! 現在のスコア
     int _current_score;
@@ -130,8 +129,11 @@ private:
     //! 楽曲のファイルパス
     std::string _song_file_path;
     
+    
+    typedef std::shared_ptr<ValueMap> ValueMapPtr;
+    
     //! 楽曲譜面のデータを格納するためのベクター
-    std::list< std::shared_ptr< std::queue<std::shared_ptr<cocos2d::ValueMap> > > > _notes_vector;
+    std::list< std::queue<ValueMapPtr>  > _notes_vector;
     
     //! ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> _direction_unit_vector;

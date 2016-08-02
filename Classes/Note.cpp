@@ -167,9 +167,12 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     auto listener = cocos2d::EventListenerTouchOneByOne::create();
     listener->setEnabled(true);
     listener->onTouchBegan = CC_CALLBACK_2(Note::onTouchBegan, this);
-    listener->onTouchMoved = CC_CALLBACK_2(Note::onTouchMoved, this);
-    listener->onTouchCancelled = CC_CALLBACK_2(Note::onTouchEnded, this);
-    listener->onTouchEnded = CC_CALLBACK_2(Note::onTouchEnded, this);
+    if(_isLongnote)
+    {
+        listener->onTouchMoved = CC_CALLBACK_2(Note::onTouchMoved, this);
+        listener->onTouchCancelled = CC_CALLBACK_2(Note::onTouchEnded, this);
+        listener->onTouchEnded = CC_CALLBACK_2(Note::onTouchEnded, this);
+    }
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
     
     //時間計測開始
@@ -300,7 +303,7 @@ bool Note::onTouchBegan(Touch *touch, Event *event)
  */
 void Note::onTouchMoved(Touch *touch, Event *event)
 {
-    if (!_isLongnote || !_longnotesHold)
+    if ( !_longnotesHold)
     {
         return;
     }
@@ -373,6 +376,7 @@ void Note::onTouchEnded(Touch *touch, Event *event)
         return;
     }
     
+
     //もともとつかんでいた指のIDと異なる場合
     if(touch->getID() != _longNotesHoldId)
     {
@@ -433,7 +437,7 @@ bool Note::isPointContain(Vec2 pos)
     //ベクトルで指定範囲内かを計算する
     
     Vec2 center(480,480);
-    Circle *c = Circle::create(this->convertToWorldSpace(center), 300);
+    Circle *c = Circle::create(this->convertToWorldSpace(center), 250);
     if(c->containsPoint(pos))
     {
         return false;

@@ -172,7 +172,11 @@ namespace experimental{
             virtual void onPlayEvent(int event);
             virtual void setVisible(bool visible) override;
             virtual void draw(Renderer *renderer, const Mat4& transform, uint32_t flags) override;
-
+            
+            /**
+             *  Videoを準備する
+             */
+            void prepareVideo();
         protected:
             virtual cocos2d::ui::Widget* createCloneInstance() override;
             virtual void copySpecialProperties(Widget* model) override;

@@ -6,7 +6,6 @@
 //
 //
 #include "AudioManager.h"
-#include "audio/include/AudioEngine.h"
 
 USING_NS_CC;
 using namespace experimental;
@@ -54,17 +53,10 @@ void AudioManager::play(const std::string &filePath,AudioManager::AudioType type
     }
     else
     {
-//        if(_seList.size()!=0&&_seList.size()>3)
-//        {
-//            AudioEngine::stop(_seList[0]);
-//            _seList.erase(_seList.begin());
-//        }
-        
         AudioProfile *profile = AudioEngine::getDefaultProfile();
         //profile->maxInstances = 2;
         //AudioEngine::setMaxAudioInstance(4);
         int id = AudioEngine::play2d(filePath, loop, getMuteSeVolume(), profile);
-        
         _seList.push_back(id);
     }
     
@@ -165,7 +157,13 @@ void AudioManager::saveParams()
 
 bool AudioManager::isPlaying()
 {
-    return _bgmData.playing;
+    AudioEngine::AudioState state = AudioEngine::getState(_bgmData.bgmId);
+    if(state == AudioEngine::AudioState::PLAYING)
+    {
+        return true;
+    }
+    
+    return false;
 }
 
 float AudioManager::getCurrentTime()

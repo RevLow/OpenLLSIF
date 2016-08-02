@@ -961,3 +961,45 @@ cocos2d/build/build/cocos2d_libs.build/Release-iphonesimulator/libcocos2d iOS.bu
 cocos2d/build/build/cocos2d_libs.build/Release-iphonesimulator/libcocos2d iOS.build/Objects-normal/x86_64/idl_gen_general.o
 cocos2d/build/build/cocos2d_libs.build/Release-iphonesimulator/libcocos2d iOS.build/Objects-normal/x86_64/LocalStorage.o
 cocos2d/build/build/cocos2d_libs.build/Release-iphonesimulator/libcocos2d iOS.build/Objects-normal/x86_64/ZipUtils.o
+
+android-studio
+frameworks/cocos2d-x/cocos/platform/android/libcocos2dx/build/
+frameworks/runtime-src/proj.android-studio/app/assets/
+frameworks/runtime-src/proj.android-studio/app/libs/
+frameworks/runtime-src/proj.android-studio/app/obj/
+frameworks/runtime-src/proj.android-studio/app/gradle.properties
+
+# android
+frameworks/cocos2d-x/cocos/platform/android/java/bin/
+frameworks/cocos2d-x/cocos/platform/android/java/gen/
+frameworks/runtime-src/proj.android/assets/
+frameworks/runtime-src/proj.android/bin/
+frameworks/runtime-src/proj.android/gen/
+frameworks/runtime-src/proj.android/libs/
+frameworks/runtime-src/proj.android/obj/
+frameworks/runtime-src/proj.android/ant.properties
+
+
+# ios
+frameworks/cocos2d-x/build/build/
+frameworks/cocos2d-x/cocos/scripting/lua-bindings/proj.ios_mac/build/
+frameworks/runtime-src/proj.ios_mac/build/
+
+
+# cocos build
+simulator/
+publish/
+
+# android studio ide
+*.iml
+.idea
+
+
+# xcode
+xcuserdata/
+
+# local
+local.properties
+
+# keystore
+*.keystore

@@ -9,6 +9,7 @@
 #ifndef __OpenLLSIF__AudioManager__
 #define __OpenLLSIF__AudioManager__
 #include "cocos2d.h"
+#include "audio/include/AudioEngine.h"
 
 class AudioManager
 {

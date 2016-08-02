@@ -89,47 +89,9 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     
     //レイテンシーの値を取得する
     _latency_ms = UserDefault::getInstance()->getFloatForKey("LATENCY", 0.0f);
-    
-    //譜面情報を取得
-    ValueMap modes = file_info.at("MODE").asValueMap();
-    std::string json_file_name = modes.at(mode_name_text).asString();
-    std::string json_file_data = FileUtils::getInstance()->getStringFromFile(playSongFile + "/" + json_file_name);
-    std::string err;
-    json11::Json json_info = json11::Json::parse(json_file_data, err);
-    
-    
-    int notes_count = 0;
-    _current_score = 0;
-    for(auto &lanes : json_info["lane"].array_items())
-    {
-        std::shared_ptr< std::queue<std::shared_ptr<cocos2d::ValueMap>>> tmp_notes_vec =std::make_shared<std::queue<std::shared_ptr<cocos2d::ValueMap>>>();
-        
-        for (auto &notes_info : lanes.array_items())
-        {
-            notes_count++;
-            std::shared_ptr<cocos2d::ValueMap> notes(new cocos2d::ValueMap());
-            (*notes)["starttime"]= notes_info["starttime"].number_value();
-            (*notes)["endtime"]= notes_info["endtime"].number_value();
-            (*notes)["parallel"]= notes_info["parallel"].bool_value();
-            (*notes)["hold"]= notes_info["hold"].bool_value();
-            (*notes)["lane"]= notes_info["lane"].number_value();
-            (*notes)["longnote"]= notes_info["longnote"].bool_value();
-            (*notes)["latency"] = _latency_ms;
-            
-            //ノーツのタイプを取得、
-            (*notes)["type"] = file_info["Type"].isNull()? 0 : file_info.at("Type").asInt();
-            (*notes)["speed"]=_notes_speed_ms;
-            tmp_notes_vec->push(notes);
-            
-            //ロングノーツの場合、終点の分も数える
-            if((*notes)["longnote"].asBool()) notes_count++;
-        }
-        _notes_vector.push_back(tmp_notes_vec);
-    }
-    
-    //すべてパーフェクトを出したときのスコアを設定
-    _max_score = 100 * notes_count;
-    
+ 
+/*===============UI関係の処理========================*/
+
     //画面サイズを取得
     auto screen_size = Director::getInstance()->getVisibleSize();
 
@@ -147,6 +109,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
         this->addChild(video_player, -1);
         video_player->setName("VideoLayer");
         video_player->setFileName(playSongFile + '/' + video_file_path);
+        video_player->prepareVideo();
     }
     
     LayerColor *black_layer = LayerColor::create(Color4B::BLACK, screen_size.width, screen_size.height);
@@ -173,14 +136,64 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     //PlaySceneからそれぞれのボタンの位置を取得して、ノーツが進む方向を算出
     for(int i=1;i<=9;i++)
     {
-        std::stringstream ss;
-        ss << i;
-        auto destination_position = play_scene->getChildByName<Sprite*>(ss.str());
+        auto destination_position = play_scene->getChildByName<Sprite*>(std::to_string(i));
         cocos2d::Vec2 v = destination_position->getPosition() - start_position->getPosition();
       
         
         _direction_unit_vector.push_back(v);
     }
+    
+/*===============譜面関係の処理========================*/
+
+    
+    //譜面情報を取得
+    ValueMap modes = file_info.at("MODE").asValueMap();
+    std::string json_file_name = modes.at(mode_name_text).asString();
+    std::string json_file_data = FileUtils::getInstance()->getStringFromFile(playSongFile + "/" + json_file_name);
+    std::string err;
+    json11::Json json_info = json11::Json::parse(json_file_data, err);
+    
+    
+    int notes_count = 0;
+    _current_score = 0;
+    for(auto &lanes : json_info["lane"].array_items())
+    {
+        std::queue<ValueMapPtr> tmp_notes_vec;
+        
+        for (auto &notes_info : lanes.array_items())
+        {
+            notes_count++;
+            ValueMapPtr notes(new ValueMap);
+            (*notes)["starttime"]= notes_info["starttime"].number_value();
+            (*notes)["endtime"]= notes_info["endtime"].number_value();
+            (*notes)["parallel"]= notes_info["parallel"].bool_value();
+            (*notes)["hold"]= notes_info["hold"].bool_value();
+            (*notes)["lane"]= notes_info["lane"].number_value();
+            (*notes)["longnote"]= notes_info["longnote"].bool_value();
+            (*notes)["latency"] = _latency_ms;
+            
+            //ノーツのタイプを取得、
+            (*notes)["type"] = file_info["Type"].isNull()? 0 : file_info.at("Type").asInt();
+            (*notes)["speed"]=_notes_speed_ms;
+            
+            //ノーツが最終的に到達すべき位置を取得する
+            std::string laneStr = std::to_string(notes_info["lane"].int_value()+1);
+            Sprite* destinationSprite =play_scene->getChildByName<Sprite*>(laneStr);
+            (*notes)["destinationX"] = destinationSprite->getPosition().x;
+            (*notes)["destinationY"] = destinationSprite->getPosition().y;
+            
+            //ロングノーツの場合、終点の分も数える
+            if((*notes)["longnote"].asBool()) notes_count++;
+            
+            tmp_notes_vec.push(notes);
+        }
+        _notes_vector.push_back(tmp_notes_vec);
+    }
+    
+    //すべてパーフェクトを出したときのスコアを設定
+    _max_score = 100 * notes_count;
+
+/*===============アニメーション関係の処理========================*/
     
     //ゲーム開始時のアニメーション用のレイヤーを重ねる
     auto play_splash_layer = CSLoader::getInstance()->createNode("res/splash_layer.csb");
@@ -246,6 +259,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
  *
  */
 
+
 void PlayScene::prepareGameRun()
 {
     auto play_scene = this->getChildByName("PlayLayer");
@@ -279,9 +293,6 @@ void PlayScene::prepareGameRun()
     AudioManager::getInstance()->preload("Sound/SE/good.mp3");
     AudioManager::getInstance()->preload("Sound/SE/bad.mp3");
     
-    //ゲーム開始前にキャッシュを消去しておく
-    Director::getInstance()->purgeCachedData();
-    
     //透明度を戻した後、実行を行う
     play_scene->runAction(Sequence::create(FadeTo::create(0.5f, 255),
                                            CallFunc::create(CC_CALLBACK_0(PlayScene::run, this)), NULL));
@@ -294,47 +305,28 @@ void PlayScene::run()
     this->getChildByName("ScoreLabel")->setOpacity(255);
     this->getChildByName("life_text")->setOpacity(255);
     
+    
     //動画再生の開始
-    if(video_layer != nullptr)
-    {
-        video_layer->addEventListener([this](Ref*,cocos2d::experimental::ui::VideoPlayer::EventType e)
-                                      {
-                                          if(e == cocos2d::experimental::ui::VideoPlayer::EventType::PLAYING && !AudioManager::getInstance()->isPlaying())
-                                          {
-                                              //音楽の再生
-                                              AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
-                                              AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
-                                              
-                                              //StopWatchを稼働
-                                              StopWatch::getInstance()->start();
-                                              this->scheduleUpdate();
-                                          }
-                                      });
-        video_layer->play();
-
-    }
-    else
-    {
-        //音楽の再生
-        AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
-        AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
-        
-        //StopWatchを稼働
-        StopWatch::getInstance()->start();
-        this->scheduleUpdate();
-    }
-
+    video_layer->play();
+    //音楽の再生
+    AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
+    AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
+    StopWatch::getInstance()->start();
+    this->scheduleUpdate();
 }
 
 void PlayScene::update(float dt)
 {
+    if(StopWatch::getInstance()->getStatus() != PLAYING)
+    {
+        return;
+    }
+    
     //スコアの設定
     auto play_scene_layer = this->getChildByName("PlayLayer");
     auto *score = this->getChildByName<ui::TextAtlas*>("ScoreLabel");
-    std::stringstream ss;
-    ss << _current_score;
     
-    score->setString(ss.str());
+    score->setString(std::to_string(_current_score));
     
     auto loading_bar = play_scene_layer->getChildByName<ui::LoadingBar*>("LoadingBar_1");
     loading_bar->setPercent(100.0f * ((double)_current_score / (double)_max_score) + 5.0f);
@@ -342,20 +334,20 @@ void PlayScene::update(float dt)
     
     //Millisec単位で計測開始からの時間を取得
     double elapse = StopWatch::getInstance()->currentTime();
+    double music_elapse = 1000.0 *AudioManager::getInstance()->getCurrentTime();
     
+    CCLOG("StopWatch: %lf, Music: %lf", elapse, music_elapse);
     
     //イテレータで_notes_vectorを最初から最後まで探索
     //そして、今の時間(ms)を超えたノーツが存在する場合、新しいノーツを生成する
-    std::vector< std::shared_ptr<cocos2d::ValueMap> > notes;
-    for (auto it = _notes_vector.begin(); it != _notes_vector.end();)
+    for (std::list<std::queue<ValueMapPtr>>::iterator it = _notes_vector.begin(); it != _notes_vector.end();)
     {
-        std::shared_ptr<cocos2d::ValueMap> map = (**it).front();
-        if(map->at("starttime").asDouble() - _notes_speed_ms - _latency_ms < elapse)
+        if(it->front()->at("starttime").asDouble() - _notes_speed_ms - _latency_ms < elapse)
         {
-            notes.push_back(map);
-            (**it).pop();
+            createNotes(*(it->front()));
+            it->pop();
             
-            if((**it).empty())
+            if(it->empty())
             {
                 it = _notes_vector.erase(it);
                 continue;
@@ -363,44 +355,30 @@ void PlayScene::update(float dt)
         }
         it++;
     }
-    
-    if(!notes.empty())
-    {
-        createNotes(notes);
-    }
 }
 
 
-void PlayScene::createNotes(std::vector< std::shared_ptr<cocos2d::ValueMap> > maps)
+void PlayScene::createNotes(const ValueMap& map)
 {
-    for(auto notes_map_ptr : maps)
-    {
-        Vec2 direction = _direction_unit_vector[notes_map_ptr->at("lane").asInt()];
-        
-        //ノーツが最終的に到達すべき位置を取得する
-        std::string numStr = std::to_string(notes_map_ptr->at("lane").asInt() + 1);
-        Sprite* destinationSprite = this->getChildByName("PlayLayer")->getChildByName<Sprite*>(numStr);
-        (*notes_map_ptr)["destinationX"] = destinationSprite->getPosition().x;
-        (*notes_map_ptr)["destinationY"] = destinationSprite->getPosition().y;
-        
-        Note *note = Note::create(*notes_map_ptr, direction);
-        
-        //画面の判定外に出た場合の処理
-        note->setOutDisplayedCallback(CC_CALLBACK_1(PlayScene::noteOutDisplayedCallback, this));
-        
-        //タップ判定を行った後の処理
-        note->setTouchCallback(CC_CALLBACK_1(PlayScene::noteTouchCallback, this));
-        
-        
-        //ロングノーツを離したときの処理
-        note->setReleaseCallback(CC_CALLBACK_1(PlayScene::noteReleaseCallback, this));
-        
-        
-        note->setIsFront(_displayed_notes[note->getLane()].empty() ? true : false);
-        _displayed_notes[note->getLane()].push(note);
-        
-        addChild(note);
-    }
+    Vec2 direction = _direction_unit_vector[map.at("lane").asInt()];
+
+    Note *note = Note::create(map, direction);
+
+    //画面の判定外に出た場合の処理
+    note->setOutDisplayedCallback(CC_CALLBACK_1(PlayScene::noteOutDisplayedCallback, this));
+
+    //タップ判定を行った後の処理
+    note->setTouchCallback(CC_CALLBACK_1(PlayScene::noteTouchCallback, this));
+
+
+    //ロングノーツを離したときの処理
+    note->setReleaseCallback(CC_CALLBACK_1(PlayScene::noteReleaseCallback, this));
+
+
+    note->setIsFront(_displayed_notes[note->getLane()].empty() ? true : false);
+    _displayed_notes[note->getLane()].push(note);
+
+    addChild(note);
 }
 
 void PlayScene::applicationDidEnterBackground()
@@ -432,7 +410,7 @@ void PlayScene::applicationWillEnterForeground()
 void PlayScene::finishCallBack(int audioId, std::string fileName)
 {
     Director::getInstance()->purgeCachedData();
-    
+    cocos2d::experimental::AudioEngine::uncacheAll();
     Scene* home_scene = HomeScene::createScene(ViewScene::Live);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, home_scene, Color3B::BLACK));
     StopWatch::getInstance()->stop();

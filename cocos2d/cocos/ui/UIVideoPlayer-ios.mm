@@ -40,6 +40,7 @@ using namespace cocos2d::experimental::ui;
 
 - (void) setFrame:(int) left :(int) top :(int) width :(int) height;
 - (void) setURL:(int) videoSource :(std::string&) videoUrl;
+- (void) prepare;
 - (void) play;
 - (void) pause;
 - (void) resume;
@@ -230,6 +231,15 @@ using namespace cocos2d::experimental::ui;
     }
 }
 
+- (void) prepare
+{
+    if(self.moviePlayer != NULL)
+    {
+        [self.moviePlayer prepareToPlay];
+        [self.moviePlayer pause];
+    }
+}
+
 -(void) play
 {
     if (self.moviePlayer != NULL) {
@@ -357,6 +367,14 @@ void VideoPlayer::setKeepAspectRatioEnabled(bool enable)
     {
         _keepAspectRatioEnabled = enable;
         [((UIVideoViewWrapperIos*)_videoView) setKeepRatioEnabled:enable];
+    }
+}
+
+void VideoPlayer::prepareVideo()
+{
+    if (! _videoURL.empty())
+    {
+        [((UIVideoViewWrapperIos*)_videoView) prepare];
     }
 }
 
