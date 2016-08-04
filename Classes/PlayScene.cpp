@@ -284,8 +284,13 @@ void PlayScene::prepareGameRun()
     }
     
     auto black_back_layer = this->getChildByName<LayerColor*>("BlackLayer");
-    black_back_layer->runAction(FadeTo::create(0.5f,
-                                               video_layer != nullptr ? 200 : 100));
+    auto fade_out_action =FadeTo::create(0.5f, 180);
+    auto run_game_action = CallFunc::create([this, play_scene](){
+        play_scene->setOpacity(255);
+        this->run();
+    });
+    
+    black_back_layer->runAction(Sequence::create(fade_out_action, run_game_action, NULL));
     
     //音声のプリロード
     AudioManager::getInstance()->preload("Sound/SE/perfect.mp3");
@@ -294,8 +299,8 @@ void PlayScene::prepareGameRun()
     AudioManager::getInstance()->preload("Sound/SE/bad.mp3");
     
     //透明度を戻した後、実行を行う
-    play_scene->runAction(Sequence::create(FadeTo::create(0.5f, 255),
-                                           CallFunc::create(CC_CALLBACK_0(PlayScene::run, this)), NULL));
+//    play_scene->runAction(Sequence::create(FadeTo::create(0.5f, 255),
+//                                           CallFunc::create(CC_CALLBACK_0(PlayScene::run, this)), NULL));
 }
 
 void PlayScene::run()
@@ -307,7 +312,7 @@ void PlayScene::run()
     
     
     //動画再生の開始
-    video_layer->play();
+    if(video_layer != nullptr) video_layer->play();
     //音楽の再生
     AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
     AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
@@ -317,11 +322,6 @@ void PlayScene::run()
 
 void PlayScene::update(float dt)
 {
-    if(StopWatch::getInstance()->getStatus() != PLAYING)
-    {
-        return;
-    }
-    
     //スコアの設定
     auto play_scene_layer = this->getChildByName("PlayLayer");
     auto *score = this->getChildByName<ui::TextAtlas*>("ScoreLabel");
@@ -334,9 +334,6 @@ void PlayScene::update(float dt)
     
     //Millisec単位で計測開始からの時間を取得
     double elapse = StopWatch::getInstance()->currentTime();
-    double music_elapse = 1000.0 *AudioManager::getInstance()->getCurrentTime();
-    
-    CCLOG("StopWatch: %lf, Music: %lf", elapse, music_elapse);
     
     //イテレータで_notes_vectorを最初から最後まで探索
     //そして、今の時間(ms)を超えたノーツが存在する場合、新しいノーツを生成する

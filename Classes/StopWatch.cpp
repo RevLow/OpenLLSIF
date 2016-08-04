@@ -53,13 +53,13 @@ StopWatch::~StopWatch()
 void StopWatch::start()
 {
     _start = std::chrono::system_clock::now();
-    if(AudioManager::getInstance()->isPlaying())
-    {
-        float time = AudioManager::getInstance()->getCurrentTime() * 1000.0;
-        std::chrono::milliseconds ms((long)time);
-        std::chrono::time_point<std::chrono::system_clock> dt(ms);
-        _start = dt;
-    }
+//    if(AudioManager::getInstance()->isPlaying())
+//    {
+//        float time = AudioManager::getInstance()->getCurrentTime() * 1000.0;
+//        std::chrono::milliseconds ms((long)time);
+//        std::chrono::time_point<std::chrono::system_clock> dt(ms);
+//        _start = dt;
+//    }
     _status = PLAYING;
 }
 void StopWatch::stop()
