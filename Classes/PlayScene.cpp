@@ -99,7 +99,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     //BGVが設定されている場合、ビデオを再生するためのレイヤーを追加
     //ただし、cocos2dのコードそのままだと最前面にビデオが来てしまうため
     //http://discuss.cocos2d-x.org/t/enhancement-request-for-videoplayer/16024
-    //を参考にコードを変更する
+    //を参考にエンジン本体のコードを変更する
     if(video_file_path != "")
     {
         auto video_player = cocos2d::experimental::ui::VideoPlayer::create();
@@ -109,11 +109,11 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
         this->addChild(video_player, -1);
         video_player->setName("VideoLayer");
         video_player->setFileName(playSongFile + '/' + video_file_path);
-        video_player->prepareVideo();
+        video_player->prepareVideo(); //ビデオファイルをあらかじめロードしておくため、エンジンのビデオプレイヤーに処理を追加する
     }
     
     LayerColor *black_layer = LayerColor::create(Color4B::BLACK, screen_size.width, screen_size.height);
-    black_layer->setOpacity(0);
+    black_layer->setOpacity(80);
     black_layer->setName("BlackLayer");
     this->addChild(black_layer);
 
@@ -374,7 +374,7 @@ void PlayScene::createNotes(const ValueMap& map)
 
     note->setIsFront(_displayed_notes[note->getLane()].empty() ? true : false);
     _displayed_notes[note->getLane()].push(note);
-
+    
     addChild(note);
 }
 

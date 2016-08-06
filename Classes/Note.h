@@ -85,8 +85,9 @@ public:
     
     //このノーツがレーン上の先頭要素かの判定フラグ
     CC_SYNTHESIZE(bool, isFrontOfLane, IsFront);
-    
+    CC_SYNTHESIZE(EventListenerTouchOneByOne* , listener, Listener);
 private:
+    void createNotesSprite(Vec2 &initVec, int type);
     bool isPointContain(Vec2 pos);
     NoteJudge startJudge();
     NoteJudge endJudge();

@@ -57,12 +57,6 @@ DrawNode* Circle::getDrawNode(Color4F color)
 bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
 {
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
-
-    
-
-    //ノーツの基本画像からサイズを指定して初期化
-    //RenderTexture* note = RenderTexture::create(70.0f, 70.0f, Texture2D::PixelFormat::RGBA8888);
-
     
     //jsonの情報からノーツの情報を初期化する
     _isStar = jsonInfo.at("hold").asBool();
@@ -79,89 +73,17 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     limitArea = Director::getInstance()->getWinSizeInPixels();
     
     Vec2 norm = unitVec;
-    //Vec2 initVec(479.75, 476.34);
     Vec2 initVec(480, 480);
 
+    // 1msごとの進行速度を減らし、
+    // 開始地点を1ms分目的地方向に進めておく
+    // 最初にでてきた瞬間を中心から離すことが出来る
     norm.normalize();
-    //norm *= 10     ;
     initVec += norm;
     unitVec -= norm;
-    
-    
     _unitVec = unitVec / _speed;
     
-    //ノーツ画像の作成
-    //note->begin();
-    Sprite* note;
-    switch (type)
-    {
-        case 0:
-            note = Sprite::createWithSpriteFrameName("Image/notes/smile_03.png");
-            break;
-        case 1:
-            note = Sprite::createWithSpriteFrameName("Image/notes/cool_03.png");
-            break;
-        case 2:
-            note = Sprite::createWithSpriteFrameName("Image/notes/pure_03.png");
-            break;
-        default:
-            break;
-    }
-    
-
-     //baseNote->retain();
-     //baseNote->setPosition(35.0, 35.0f);
-     //ノーツ画像を書き込み
-     //baseNote->visit();
-    
-     if(_isParallel)
-     {
-         Sprite* parallel = Sprite::createWithSpriteFrameName("Image/notes/longbar_03.png");
-         //parallel->retain();
-         parallel->setPosition(35.0f, 35.0f);
-         //スター画像を書き込み
-         note->addChild(parallel);
-         //parallel->visit();
-         //CC_SAFE_RELEASE(parallel);
-     }
-    
-     if(_isStar)
-     {
-         Sprite* star = Sprite::createWithSpriteFrameName("Image/notes/star_03.png");
-         //star->retain();
-         star->setPosition(35.0f, 35.0f);
-         note->addChild(star);
-         //スター画像を書き込み
-         //star->visit();
-         //CC_SAFE_RELEASE(star);
-     }
-    //note->end();
-    //CC_SAFE_RELEASE(baseNote);
-
-    
-    note->setName("BaseNotes");
-    addChild(note);
-    note->setVisible(false);
-    note->setPosition(initVec);
-    note->setScale(0.1f);
-    note->runAction(Spawn::create(cocos2d::ScaleTo::create(_speed / 1000.0f, 2.0f),
-                                  Sequence::create(DelayTime::create(0.03), CallFunc::create([note](){note->setVisible(true);}), NULL)
-                                  , NULL)
-                    );
-    if(_isLongnote)
-    {
-        _endOfPoint = Vec2(initVec);
-        //キャッシュにテクスチャを登録
-        Sprite* sp = Sprite::createWithSpriteFrameName("Image/notes/longnotes_03.png");
-        sp->setName("EndNotes");
-        sp->setVisible(false);
-        sp->setPosition(_endOfPoint);
-        sp->setScale(0.1f);
-        addChild(sp);
-        
-      
-        //_scaleTick = (2.0-0.1) / _speed;
-    }
+    createNotesSprite(initVec, type);
     
     //タッチイベントリスナーを作成
     auto listener = cocos2d::EventListenerTouchOneByOne::create();
@@ -182,6 +104,75 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     result = NoteJudge::NON;
     _longNotesHoldId = -1;
     return true;
+}
+
+/**
+ *  開始地点とノーツのタイプを指定し、スプライトを作成する
+ *  @param initVec [Vec2] 初期地点
+ *  @param type    [int]  ノーツのタイプ(0: smile, 1: cool, 2: pure)
+ */
+void Note::createNotesSprite(Vec2 &initVec, int type)
+{
+    //ノーツ画像の作成
+    Sprite* note;
+    switch (type)
+    {
+        case 0:
+            note = Sprite::createWithSpriteFrameName("Image/notes/smile_03.png");
+            break;
+        case 1:
+            note = Sprite::createWithSpriteFrameName("Image/notes/cool_03.png");
+            break;
+        case 2:
+            note = Sprite::createWithSpriteFrameName("Image/notes/pure_03.png");
+            break;
+        default:
+            break;
+    }
+    
+    //同時ノーツの処理
+    if(_isParallel)
+    {
+        Sprite* parallel = Sprite::createWithSpriteFrameName("Image/notes/longbar_03.png");
+        parallel->setPosition(35.0f, 35.0f);
+        note->addChild(parallel);
+    }
+    
+    //星付きノーツの処理
+    if(_isStar)
+    {
+        Sprite* star = Sprite::createWithSpriteFrameName("Image/notes/star_03.png");
+        star->setPosition(35.0f, 35.0f);
+        note->addChild(star);
+    }
+
+    note->setName("BaseNotes");
+    addChild(note);
+
+    //アニメーションの処理
+    note->setVisible(false);
+    note->setPosition(initVec);
+    note->setScale(0.1f);
+    auto scale_to_action = ScaleTo::create(_speed / 1000.0f, 2.0f);
+    auto sequence_action = Sequence::create(DelayTime::create(0.03), CallFunc::create([note]()
+                                                                                      {
+                                                                                          note->setVisible(true);
+                                                                                      }), NULL);
+    
+    note->runAction(Spawn::create(scale_to_action,sequence_action, NULL));
+    
+    //ロングノーツの終端画像を追加
+    if(_isLongnote)
+    {
+        _endOfPoint = Vec2(initVec);
+        Sprite* sp = Sprite::createWithSpriteFrameName("Image/notes/longnotes_03.png");
+        sp->setName("EndNotes");
+        sp->setVisible(false);
+        sp->setPosition(_endOfPoint);
+        sp->setScale(0.1f);
+        addChild(sp);
+    }
+
 }
 
 /**
@@ -226,73 +217,72 @@ void Note::setReleaseCallback(const std::function<void (const Note &)> &f)
 bool Note::onTouchBegan(Touch *touch, Event *event)
 {
     
-    //もしも先頭要素でない場合は何もしないよ
+    //もしも先頭要素でない場合は何もしない
     if (!isFrontOfLane)
     {
         return false;
     }
 
 
-    //2. 位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
+    //位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
     Vec2 pos = touch->getLocation();
     
-    //タップした点と基準ベクトルの角度が、タップ可能の角度内に入っている場合処理を行う
-    if(isPointContain(pos))
+    //タップした点がアイコン内に入っていない場合はこれより下の処理を行わない
+    if(!isPointContain(pos))
     {
-        //4. タッチの判定を行う
-        NoteJudge j = startJudge();
-        if(j == NON)
-        {
-            //下の処理を行わずそのままcontinue
-            return false;
-        }
-
-        //5. タッチの判定により処理を変える
-        std::string fullpath;
-        switch (j)
-        {
-            case NoteJudge::PERFECT:
-                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-                break;
-            case NoteJudge::GREAT:
-                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-                break;
-            case NoteJudge::GOOD:
-                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-                break;
-            case NoteJudge::BAD:
-                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-                break;
-            default:
-                break;
-        }
-
-        //6. 音の再生
-        AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-
-        //7. タップ判定のコールバック関数実行
-        if (_touchCallbackFunc != nullptr)
-        {
-            _touchCallbackFunc(*this);
-        }
-
-        //8. ロングノーツかの判定
-        if(_isLongnote)
-        {
-            _longNotesHoldId = touch->getID();
-            _longnotesHold = true;
-        }
-        else
-        {
-            this->unscheduleUpdate();
-            //そうじゃない場合は親から削除
-            removeFromParentAndCleanup(true);
-        }
+        return false;
     }
     
+    //タッチの判定を行う
+    NoteJudge j = startJudge();
+    if(j == NON)
+    {
+        return false;
+    }
+
+    //5. タッチの判定により処理を変える
+    std::string fullpath;
+    switch (j)
+    {
+        case NoteJudge::PERFECT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+            break;
+        case NoteJudge::GREAT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+            break;
+        case NoteJudge::GOOD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+            break;
+        case NoteJudge::BAD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+            break;
+        default:
+            break;
+    }
+
+    //6. 音の再生
+    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+
+    //7. タップ判定のコールバック関数実行
+    if (_touchCallbackFunc != nullptr)
+    {
+        _touchCallbackFunc(*this);
+    }
+
+    //8. ロングノーツかの判定
+    if(_isLongnote)
+    {
+        _longNotesHoldId = touch->getID();
+        _longnotesHold = true;
+    }
+    else
+    {
+        this->unscheduleUpdate();
+        //そうじゃない場合は親から削除
+        removeFromParentAndCleanup(true);
+    }
 
     return true;
-
 }
 
 /**
@@ -426,46 +416,31 @@ void Note::onTouchEnded(Touch *touch, Event *event)
 
 /**
  *  ある点がタップ可能な範囲内に入っているかを判定する
+ *  判定方法はある点を基準にした半径r内に目的のSpriteが入っているかで判定する
+ *  Spriteは128pxなので半径R = (64+offset値)で決定している
  *
- *  @param pos <#pos description#>
+ *  @param pos タップした点
  *
- *  @return <#return value description#>
+ *  @return true: 半径が交差している, false: 判定ミス
  */
 bool Note::isPointContain(Vec2 pos)
 {
-    //3. その位置がタッチ可能な範囲内に収まっている場合
-    //ベクトルで指定範囲内かを計算する
+    Circle *finger_circle = Circle::create(this->convertToWorldSpace(pos), 38); //半径r = 15pxで仮決定
     
-    Vec2 center(480,480);
-    Circle *c = Circle::create(this->convertToWorldSpace(center), 250);
-    if(c->containsPoint(pos))
-    {
-        return false;
-    }
+    //TODO: 親からスプライトを取得しているので、ほかのやり方で位置を取得するべき
+    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(_lane+1))->getPosition();
+    Circle *target_cirlce = Circle::create(this->convertToWorldSpace(baseVec), 64); //offset4pxで仮決定
     
-    Vec2 v1(pos - center);
-    
-    //親レイヤーから基準となるベクトルを見つける
-    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(1))->getPosition() - center;
-    
-    float theta = v1.getAngle(baseVec);
-    float crossTheta = v1.cross(baseVec);
-    theta = MATH_RAD_TO_DEG(theta);
-    
-    if(crossTheta >= 0 && _lane == 8)
-    {
-        theta = theta - 360;
-    }
-    
-    float max_theta = -22.5*_lane + 11.25;
-    float min_theta = -22.5*_lane - 11.25;
-    
-    return theta > min_theta && theta <= max_theta;
+    return target_cirlce->intersectCircle(finger_circle);
 }
 
 /**
  *  タップしたときの判定を行うメソッド
- *
+ *  判定の時間範囲は以下の目的地からの周囲Nピクセルで決定している
+ *  PERFECT 16px
+ *  GREAT   40px
+ *  GOOD    64px
+ *  BAD     112px
  *  @return 判定結果
  */
 NoteJudge Note::startJudge()
