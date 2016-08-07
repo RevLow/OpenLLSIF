@@ -16,8 +16,6 @@
 #include "HomeScene.h"
 #include "StopWatch.h"
 
-
-
 Scene* PlayScene::createScene(std::string playSongFile, GameLevel level)
 {
     // 'scene' is an autorelease object
@@ -60,7 +58,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
 
     //ノーツの速度を設定(ms)
     // EASY | NORMAL | HARD | EXPERT | MASTER
-    // 1600    1300    1000    800      未実装
+    // 1600    1300    1000    800      700(未実装)
     switch (gameLevel)
     {
         case GameLevel::EASY:
@@ -251,6 +249,15 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
         play_scene->removeChild(atlas_label);
     }
     
+    //タッチイベントリスナーを作成
+    auto listener = cocos2d::EventListenerTouchAllAtOnce::create();
+    listener->setEnabled(true);
+    listener->onTouchesBegan = CC_CALLBACK_2(PlayScene::onTouchesBegan, this);
+    listener->onTouchesMoved = CC_CALLBACK_2(PlayScene::onTouchesMoved, this);
+    listener->onTouchesCancelled = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
+    listener->onTouchesEnded = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
+    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+    
     return true;
 }
 
@@ -367,12 +374,8 @@ void PlayScene::createNotes(const ValueMap& map)
     //タップ判定を行った後の処理
     note->setTouchCallback(CC_CALLBACK_1(PlayScene::noteTouchCallback, this));
 
-
     //ロングノーツを離したときの処理
     note->setReleaseCallback(CC_CALLBACK_1(PlayScene::noteReleaseCallback, this));
-
-
-    note->setIsFront(_displayed_notes[note->getLane()].empty() ? true : false);
     _displayed_notes[note->getLane()].push(note);
     
     addChild(note);
@@ -424,13 +427,6 @@ void PlayScene::noteOutDisplayedCallback(const Note& note)
     createJudgeSprite(NoteJudge::MISS);
     
     this->_displayed_notes[note.getLane()].pop();
-    
-    //もし、次のノートが存在するのならば、それが先頭になる
-    if(!this->_displayed_notes[note.getLane()].empty())
-    {
-        Note* next_note = this->_displayed_notes[note.getLane()].front();
-        next_note->setIsFront(true);
-    }
 }
 
 void PlayScene::noteTouchCallback(const Note& note)
@@ -438,25 +434,38 @@ void PlayScene::noteTouchCallback(const Note& note)
     Sprite *judge_sprite = this->getChildByName<Sprite*>("JudgeSprite");
     if(judge_sprite != nullptr)
         removeChild(judge_sprite);
-    auto over_sprite = getChildByName<Sprite*>("OverPerfect");
-    if(over_sprite != nullptr) removeChild(over_sprite);
+    
+    Sprite* over_sprite = getChildByName<Sprite*>("OverPerfect");
+    if(over_sprite != nullptr)
+        removeChild(over_sprite);
+    
+    //タッチの判定により処理を変える
+    std::string fullpath;
+    switch (note.getJudgeResult())
+    {
+        case NoteJudge::PERFECT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+            break;
+        case NoteJudge::GREAT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+            break;
+        case NoteJudge::GOOD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+            break;
+        case NoteJudge::BAD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+            break;
+        default:
+            break;
+    }
+    
+    //音の再生
+    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
     
     //判定とタッチのエフェクトを表示する
-    createJudgeSprite(note.getResult());
-
-    if(note.isLongNotes()) return;
-
-    //ここからはロングノーツじゃない場合の処理
-    createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
-    this->_displayed_notes[note.getLane()].pop();
-
-    //もし、次のノートが存在するのならば、それが先頭になる
-    if(!this->_displayed_notes[note.getLane()].empty())
-    {
-        Note* next_note = this->_displayed_notes[note.getLane()].front();
-        next_note->setIsFront(true);
-    }
-
+    createJudgeSprite(note.getJudgeResult());
+    if(!note.isLongNotes())
+        createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
 }
 
 void PlayScene::noteReleaseCallback(const Note& note)
@@ -467,17 +476,34 @@ void PlayScene::noteReleaseCallback(const Note& note)
     auto over_sprite = getChildByName<Sprite*>("OverPerfect");
     if(over_sprite != nullptr) removeChild(over_sprite);
     
-    //判定とタッチのエフェクトを表示する
-    createJudgeSprite(note.getResult());
-    createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
-    this->_displayed_notes[note.getLane()].pop();
     
-    //もし、次のノートが存在するのならば、それが先頭になる
-    if(!this->_displayed_notes[note.getLane()].empty())
+    //5. タッチの判定により処理を変える
+    std::string fullpath;
+    switch (note.getJudgeResult())
     {
-        Note* next_note = this->_displayed_notes[note.getLane()].front();
-        next_note->setIsFront(true);
+        case NoteJudge::PERFECT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+            break;
+        case NoteJudge::GREAT:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+            break;
+        case NoteJudge::GOOD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+            break;
+        case NoteJudge::NON:
+        case NoteJudge::BAD:
+            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+            break;
+        default:
+            break;
     }
+    
+    //6. 音の再生
+    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+    
+    //判定とタッチのエフェクトを表示する
+    createJudgeSprite(note.getJudgeResult());
+    createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
 }
 
 void PlayScene::createJudgeSprite(NoteJudge judge)
@@ -557,4 +583,117 @@ void PlayScene::createTapFx(Vec2 position)
     });
     tap_fx->runAction(action);
     action->gotoFrameAndPlay(0, false);
+}
+
+
+/**
+ *  ある点がタップ可能な範囲内に入っているかを判定する
+ *  判定方法はある点を基準にした半径r内に目的のSpriteが入っているかで判定する
+ *  Spriteは128pxなので半径R = (64+offset値)で決定している
+ *
+ *  @param pos タップした点
+ *
+ *  @return true: 半径が交差している, false: 判定ミス
+ */
+inline bool isPointContain(const Vec2& v1, const Vec2& v2)
+{
+    Circle *finger_circle = Circle::create(v1, 40); //半径r = 15pxで仮決定
+    Circle *target_cirlce = Circle::create(v2, 64); //offset4pxで仮決定
+    
+    return target_cirlce->intersectCircle(finger_circle);
+}
+
+void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event)
+{
+    Layer* play_layer = getChildByName<Layer*>("PlayLayer");
+    
+    for(Touch* touch : touches)
+    {
+        Vec2 location = touch->getLocation();
+        
+        // ひとつの指の位置に対し、複数のスプライトがタップ反応するとき
+        // 押した場所から最も近いスプライトに対して処理を行う
+        double min_length = DBL_MAX;
+        int min_lane_num = -1;
+        for (int i = 0;i < 9;i++)
+        {
+            int lane_i = i + 1;
+            Sprite* sp = play_layer->getChildByName<Sprite*>(std::to_string(lane_i));
+
+            if (!isPointContain(location, sp->getPosition()))
+            {
+                continue;
+            }
+            double length = (location - sp->getPosition()).length();
+            
+            if(length < min_length)
+            {
+                min_length = length;
+                min_lane_num = i;
+            }
+        }
+        if(min_lane_num == -1 || _displayed_notes[min_lane_num].empty()) continue;
+        
+        //min_lane_numのノーツに対してタップ処理をする
+        bool result = _displayed_notes[min_lane_num].front()->touchBeginAction(touch->getID());
+        if(result)
+        {
+            if (_displayed_notes[min_lane_num].front()->isLongNotes())
+                _hold_notes[touch->getID()] = _displayed_notes[min_lane_num].front();
+            _displayed_notes[min_lane_num].pop();
+        }
+    }
+}
+
+void PlayScene::onTouchesCancelled(const std::vector<Touch *> &touches, Event *unused_event)
+{
+    if(_hold_notes.empty()) return;
+    
+    for (Touch* touch : touches)
+    {
+        auto it = _hold_notes.find(touch->getID());
+        if(it->second != nullptr)
+        {
+            it->second->touchEndAction(touch->getID());
+            it->second = nullptr;
+            _hold_notes.erase(it);
+        }
+    }
+}
+//
+void PlayScene::onTouchesMoved(const std::vector<Touch *> &touches, Event *event)
+{
+    if(_hold_notes.empty()) return;
+    
+    Layer* play_layer = getChildByName<Layer*>("PlayLayer");
+    for (Touch* touch : touches)
+    {
+        auto it = _hold_notes.find(touch->getID());
+        if(it != _hold_notes.end() && it->second != nullptr)
+        {
+            int lane_num = it->second->getLane() + 1;
+            Vec2 point = play_layer->getChildByName<Sprite*>(std::to_string(lane_num))->getPosition();
+            if(isPointContain(touch->getLocation(), point)) continue;
+            
+            it->second->touchMoveAction(touch->getID());
+            it->second = nullptr;
+            _hold_notes.erase(it);
+        }
+    }
+}
+
+void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, Event *event)
+{
+    if(_hold_notes.empty()) return;
+    
+    for (Touch* touch : touches)
+    {
+        std::unordered_map<int, Note*>::iterator it = _hold_notes.find(touch->getID());
+        if(it != _hold_notes.end() && it->second != nullptr)
+        {
+            it->second->touchEndAction(touch->getID());
+            it->second = nullptr;
+            _hold_notes.erase(it);
+        }
+    }
 }

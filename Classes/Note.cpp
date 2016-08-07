@@ -85,23 +85,11 @@ bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
     
     createNotesSprite(initVec, type);
     
-    //タッチイベントリスナーを作成
-    auto listener = cocos2d::EventListenerTouchOneByOne::create();
-    listener->setEnabled(true);
-    listener->onTouchBegan = CC_CALLBACK_2(Note::onTouchBegan, this);
-    if(_isLongnote)
-    {
-        listener->onTouchMoved = CC_CALLBACK_2(Note::onTouchMoved, this);
-        listener->onTouchCancelled = CC_CALLBACK_2(Note::onTouchEnded, this);
-        listener->onTouchEnded = CC_CALLBACK_2(Note::onTouchEnded, this);
-    }
-    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    
     //時間計測開始
     startTimeCount = endTimeCount = StopWatch::getInstance()->currentTime();
     this->scheduleUpdate();
     
-    result = NoteJudge::NON;
+    _judgeResult = NoteJudge::NON;
     _longNotesHoldId = -1;
     return true;
 }
@@ -214,55 +202,15 @@ void Note::setReleaseCallback(const std::function<void (const Note &)> &f)
  *
  *  @return タッチに成功の場合: true
  */
-bool Note::onTouchBegan(Touch *touch, Event *event)
+bool Note::touchBeginAction(int touch_id)
 {
-    
-    //もしも先頭要素でない場合は何もしない
-    if (!isFrontOfLane)
-    {
-        return false;
-    }
-
-
-    //位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
-    Vec2 pos = touch->getLocation();
-    
-    //タップした点がアイコン内に入っていない場合はこれより下の処理を行わない
-    if(!isPointContain(pos))
-    {
-        return false;
-    }
-    
     //タッチの判定を行う
-    NoteJudge j = startJudge();
-    if(j == NON)
+    _judgeResult = startJudge();
+    if(_judgeResult == NON)
     {
         return false;
     }
-
-    //5. タッチの判定により処理を変える
-    std::string fullpath;
-    switch (j)
-    {
-        case NoteJudge::PERFECT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-            break;
-        case NoteJudge::GREAT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-            break;
-        case NoteJudge::GOOD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-            break;
-        case NoteJudge::BAD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-            break;
-        default:
-            break;
-    }
-
-    //6. 音の再生
-    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-
+    
     //7. タップ判定のコールバック関数実行
     if (_touchCallbackFunc != nullptr)
     {
@@ -272,13 +220,12 @@ bool Note::onTouchBegan(Touch *touch, Event *event)
     //8. ロングノーツかの判定
     if(_isLongnote)
     {
-        _longNotesHoldId = touch->getID();
+        _longNotesHoldId = touch_id;
         _longnotesHold = true;
     }
     else
     {
         this->unscheduleUpdate();
-        //そうじゃない場合は親から削除
         removeFromParentAndCleanup(true);
     }
 
@@ -291,7 +238,7 @@ bool Note::onTouchBegan(Touch *touch, Event *event)
  *  @param touch <#touch description#>
  *  @param event <#event description#>
  */
-void Note::onTouchMoved(Touch *touch, Event *event)
+void Note::touchMoveAction(int touch_id)
 {
     if ( !_longnotesHold)
     {
@@ -299,45 +246,13 @@ void Note::onTouchMoved(Touch *touch, Event *event)
     }
     
     //もともとつかんでいた指のIDと異なる場合
-    if(touch->getID() != _longNotesHoldId)
-    {
-        return;
-    }
-    
-    //2. 位置を取得する(タッチ座標は絶対座標なためこのレイヤーの相対座標に変換して扱う)
-    Vec2 pos = touch->getLocation();
-    
-    //タップした点と基準ベクトルの角度が、タップ可能の角度内に入っている場合は何も行わない
-    if(isPointContain(pos))
+    if(touch_id != _longNotesHoldId)
     {
         return;
     }
     
     //4. タッチの判定を行う
-    NoteJudge j = endJudge();
-    //5. タッチの判定により処理を変える
-    std::string fullpath;
-    switch (j)
-    {
-        case NoteJudge::PERFECT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-            break;
-        case NoteJudge::GREAT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-            break;
-        case NoteJudge::GOOD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-            break;
-        case NoteJudge::NON:
-        case NoteJudge::BAD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-            break;
-        default:
-            break;
-    }
-    
-    //6. 音の再生
-    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+    _judgeResult = endJudge();
     
     //7. タップ判定のコールバック関数実行
     if (_releaseCallbackFunc != nullptr)
@@ -359,7 +274,7 @@ void Note::onTouchMoved(Touch *touch, Event *event)
  *  @param touch 離した指の情報
  *  @param event event description
  */
-void Note::onTouchEnded(Touch *touch, Event *event)
+void Note::touchEndAction(int touch_id)
 {
     if (!_isLongnote || !_longnotesHold)
     {
@@ -368,37 +283,13 @@ void Note::onTouchEnded(Touch *touch, Event *event)
     
 
     //もともとつかんでいた指のIDと異なる場合
-    if(touch->getID() != _longNotesHoldId)
+    if(touch_id != _longNotesHoldId)
     {
         return;
     }
     
     //4. タッチの判定を行う
-    NoteJudge j = endJudge();
-
-    //5. タッチの判定により処理を変える
-    std::string fullpath;
-    switch (j)
-    {
-        case NoteJudge::PERFECT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-            break;
-        case NoteJudge::GREAT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-            break;
-        case NoteJudge::GOOD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-            break;
-        case NoteJudge::NON:
-        case NoteJudge::BAD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-            break;
-        default:
-            break;
-    }
-
-    //6. 音の再生
-    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+    _judgeResult = endJudge();
 
     //7. タップ判定のコールバック関数実行
     if (_releaseCallbackFunc != nullptr)
@@ -407,9 +298,6 @@ void Note::onTouchEnded(Touch *touch, Event *event)
     }
     
     this->unscheduleUpdate();
-    
-    
-    //そうじゃない場合は親から削除
     removeFromParentAndCleanup(true);
 
 }
@@ -423,16 +311,16 @@ void Note::onTouchEnded(Touch *touch, Event *event)
  *
  *  @return true: 半径が交差している, false: 判定ミス
  */
-bool Note::isPointContain(Vec2 pos)
-{
-    Circle *finger_circle = Circle::create(this->convertToWorldSpace(pos), 38); //半径r = 15pxで仮決定
-    
-    //TODO: 親からスプライトを取得しているので、ほかのやり方で位置を取得するべき
-    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(_lane+1))->getPosition();
-    Circle *target_cirlce = Circle::create(this->convertToWorldSpace(baseVec), 64); //offset4pxで仮決定
-    
-    return target_cirlce->intersectCircle(finger_circle);
-}
+//bool Note::isPointContain(Vec2 pos)
+//{
+//    Circle *finger_circle = Circle::create(this->convertToWorldSpace(pos), 38); //半径r = 15pxで仮決定
+//    
+//    //TODO: 親からスプライトを取得しているので、ほかのやり方で位置を取得するべき
+//    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(_lane+1))->getPosition();
+//    Circle *target_cirlce = Circle::create(this->convertToWorldSpace(baseVec), 64); //offset4pxで仮決定
+//    
+//    return target_cirlce->intersectCircle(finger_circle);
+//}
 
 /**
  *  タップしたときの判定を行うメソッド
@@ -475,8 +363,6 @@ NoteJudge Note::startJudge()
         rtn = NoteJudge::BAD;
     }
     
-    result = rtn;
-    
     return rtn;
 }
 /**
@@ -508,13 +394,6 @@ NoteJudge Note::endJudge()
     {
         rtn = NoteJudge::BAD;
     }
-    
-
-    //Director::getInstance()->purgeCachedData();//無駄なテクスチャキャッシュは消去してメモリを押さえる
-    //もしコールバックが存在するなら
-    //if(_callbackFunc) _callbackFunc();
-    
-    result = rtn;
     
     return rtn;
 }

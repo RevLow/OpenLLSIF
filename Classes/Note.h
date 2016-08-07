@@ -77,18 +77,14 @@ public:
     }
     
     //タップイベント
-    bool onTouchBegan(Touch *touch, Event *event);
-    void onTouchEnded(Touch *touch, Event *event);
-    void onTouchMoved(Touch *touch, Event *event);
+    bool touchBeginAction(int touch_id);
+    void touchEndAction(int touch_id);
+    void touchMoveAction(int touch_id);
     
-    CC_SYNTHESIZE_READONLY(NoteJudge, result, Result);
-    
-    //このノーツがレーン上の先頭要素かの判定フラグ
-    CC_SYNTHESIZE(bool, isFrontOfLane, IsFront);
-    CC_SYNTHESIZE(EventListenerTouchOneByOne* , listener, Listener);
+    CC_SYNTHESIZE_READONLY(NoteJudge, _judgeResult, JudgeResult);
 private:
     void createNotesSprite(Vec2 &initVec, int type);
-    bool isPointContain(Vec2 pos);
+    //bool isPointContain(Vec2 pos);
     NoteJudge startJudge();
     NoteJudge endJudge();
 private:

@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <memory>
+#include <unordered_map>
 #include "Note.h"
 USING_NS_CC;
 
@@ -76,6 +77,10 @@ public:
      */
     void noteReleaseCallback(const Note& note);
     
+    void onTouchesBegan(const std::vector<Touch*>& touches, Event *event);
+    void onTouchesCancelled(const std::vector<Touch*>& touches, Event *event);
+    void onTouchesMoved(const std::vector<Touch*>& touches, Event *event);
+    void onTouchesEnded(const std::vector<Touch*>& touches, Event *event);
 private:
     /**
      *@fn Run
@@ -141,6 +146,7 @@ private:
     //! 各レーンごとに生成されているノーツキュー
     std::vector< std::queue<Note*> > _displayed_notes;
     
+    std::unordered_map<int, Note*> _hold_notes;
     
     //! レイテンシーの値
     float _latency_ms = 0.0f;
