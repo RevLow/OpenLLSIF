@@ -9,10 +9,8 @@
 #ifndef __OpenLLSIF__Note__
 #define __OpenLLSIF__Note__
 
-#include <iostream>
 #include "cocos2d.h"
 #include "StopWatch.h"
-
 
 USING_NS_CC;
 
@@ -49,7 +47,7 @@ class Note : public Layer, create_func<Note>
     
 public:
     using create_func::create;
-    virtual bool init(ValueMap jsonInfo, cocos2d::Vec2 unitVec);
+    virtual bool init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec);
 
     void update(float flame);
     

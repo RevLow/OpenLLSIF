@@ -10,7 +10,8 @@
 #include "ui/CocosGUI.h"
 #include "cocostudio/CocoStudio.h"
 #include <uuid/uuid.h>
-#include "AudioManager.h"
+#include "SimpleAudioEngine.h"
+//#include "AudioManager.h"
 #include "RhythmAdjustScene.h"
 #import "external/unzip/unzip.h"
 
@@ -68,8 +69,8 @@ bool ConfigLayer::init()
         //close.mp3を鳴らす
         std::string filePath = "Sound/SE/close.mp3";
         std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-        AudioManager::getInstance()->play(fullPath, AudioManager::SE);
-        
+        //AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
         this->runAction(Sequence::create(
                                          Spawn::create(ScaleTo::create(0.05f, 0.5f),
                                                        FadeTo::create(0.05f, 0), NULL),
@@ -159,8 +160,8 @@ void ConfigLayer::ButtonClick(Ref* sender)
     //close.mp3を鳴らす
     std::string filePath = "Sound/SE/decide.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    AudioManager::getInstance()->play(fullPath, AudioManager::SE);
-    
+    //AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
     switch (tag)
     {
         case 0:
@@ -190,17 +191,7 @@ void ConfigLayer::ButtonClick(Ref* sender)
     }
 }
 
-
-
-
-
-
-
-/*=================================================================================================*/
-/*                         Installのウィンドウの作成                                                  */
-/*                                                                                                 */
-/*=================================================================================================*/
-
+#pragma mark - Install Layer Implements
 
 bool InstallLayer::init()
 {
@@ -227,7 +218,8 @@ bool InstallLayer::init()
                                           //close.mp3を鳴らす
                                           std::string filePath = "Sound/SE/close.mp3";
                                           std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-                                          AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+                                          //AudioManager::getInstance()->play(fullPath, AudioManager::SE);
+                                          CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
                                           
                                           this->runAction(Sequence::create(
                                                                            Spawn::create(ScaleTo::create(0.05f, 0.5f),
@@ -471,7 +463,8 @@ void InstallLayer::installFile(Ref* sender)
                                       }
                                       //音楽の再生
                                       std::string fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/close.mp3");
-                                      AudioManager::getInstance()->play(fullpath,AudioManager::SE);
+                                      //AudioManager::getInstance()->play(fullpath,AudioManager::SE);
+                                      CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
                                       
                                      //SongSelectionList.plistを修正
                                       fullpath = FileUtils::getInstance()->getCachedPath() + "SongSelectionList.plist";

@@ -9,7 +9,6 @@
 #ifndef __OpenLLSIF__RhythmAdjustScene__
 #define __OpenLLSIF__RhythmAdjustScene__
 
-#include <iostream>
 #include <vector>
 #include "Note.h"
 

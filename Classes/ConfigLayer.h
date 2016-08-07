@@ -10,7 +10,6 @@
 #define __OpenLLSIF__ConfigLayer__
 
 #include <cocos2d.h>
-#include <iostream>
 #include <extensions/cocos-ext.h>
 #include <thread>
 #include <mutex>

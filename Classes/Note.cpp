@@ -11,6 +11,8 @@
 #include "PRFilledPolygon.h"
 #include "triangulate.h"
 
+#pragma mark - Circle type implements
+
 bool Circle::init(const Point p, float r)
 {
     radius = r;
@@ -52,9 +54,9 @@ DrawNode* Circle::getDrawNode(Color4F color)
     return draw;
 }
 
-/* ===============================ここからNote型のメソッド====================*/
+#pragma mark - Note type implements
 
-bool Note::init(ValueMap jsonInfo, cocos2d::Vec2 unitVec)
+bool Note::init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec)
 {
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
     
@@ -197,9 +199,7 @@ void Note::setReleaseCallback(const std::function<void (const Note &)> &f)
 /**
  *  シングルタップを検出したときに呼ばれるメソッド
  *
- *  @param touch タッチした指の情報
- *  @param event event description
- *
+ *  @param touch_id [int] タッチした指のID
  *  @return タッチに成功の場合: true
  */
 bool Note::touchBeginAction(int touch_id)
@@ -235,8 +235,7 @@ bool Note::touchBeginAction(int touch_id)
 /**
  *  タップ中に指が動いたときに呼ばれる
  *
- *  @param touch <#touch description#>
- *  @param event <#event description#>
+ *  @param touch_id [int] タッチした指のID
  */
 void Note::touchMoveAction(int touch_id)
 {
@@ -378,13 +377,16 @@ NoteJudge Note::endJudge()
     return rtn;
 }
 
-
+/**
+ *  TODO: ノーツのタップ時の処理とロングノーツ時の処理を分けて書く必要有り
+ *
+ *  @param frame <#frame description#>
+ */
 void Note::update(float frame)
 {
 
     double now = StopWatch::getInstance()->currentTime();
     double elapsed = now - startTimeCount;
-    //RenderTexture* note = this->getChildByName<RenderTexture*>("BaseNotes");
     Sprite* note = this->getChildByName<Sprite*>("BaseNotes");
     cocos2d::Vec2 currentPos = note->getPosition();
 

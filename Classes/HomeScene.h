@@ -11,6 +11,8 @@
 
 #include "cocos2d.h"
 
+USING_NS_CC;
+
 enum ViewScene
 {
     Home=0,
@@ -23,32 +25,25 @@ public:
     using create_func::create;
     
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
-    static cocos2d::Scene* createScene(ViewScene entryScene);
+    static Scene* createScene(ViewScene entryScene);
     
     // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
     virtual bool init(ViewScene entryScene);
-    
-    // implement the "static create()" method manually
-    
+
     virtual void onEnterTransitionDidFinish();
 protected:
-    
-    void homeButton_action(Ref *ref);
-    void liveButton_action(Ref *ref);
+    void homeButtonAction(Ref *ref);
+    void liveButtonAction(Ref *ref);
+    void configButtonAction(Ref *ref);
+    void nextAlbumClick(Ref *ref);
+    void previousAlbumClick(Ref *ref);
+    bool jacketTouchEvent(Touch* touch, Event* e);
+private:
     void loadLiveScene();
     void loadHomeScene();
-    
-    void nextAlbum_click(Ref *ref);
-    void previousAlbum_click(Ref *ref);
-    bool jacket_touch(cocos2d::Touch* touch, cocos2d::Event* e);
 private:
-    std::vector<std::string> songStack;
+    std::vector<std::string> _songStack;
     ViewScene _currentScene;
-    
-    /*
-     ジャケットのタグ番号とファイルのパスの対応付けのためのMap
-     */
-    std::map<int, std::string> JacketInfoMap;
 };
 
 #endif /* defined(__OpenLLSIF__HomeScene__) */

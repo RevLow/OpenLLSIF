@@ -14,10 +14,8 @@
 		2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E283CAA1B5325A0004EABDA /* HomeScene.cpp */; };
 		2E2E91291CD4E86600F6AE78 /* TapAreaList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002BC1CCA628B009901E1 /* TapAreaList.plist */; };
 		2E2EBDD01C493E33009AF4E6 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDCE1C493E33009AF4E6 /* json11.cpp */; };
-		2E2EBDD31C4B7EDD009AF4E6 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDD11C4B7EDD009AF4E6 /* AudioManager.cpp */; };
 		2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B61C72191F00DDF6AD /* longNotesSpark.png */; };
 		2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B81C72192B00DDF6AD /* particle_texture.plist */; };
-		2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E3981331B5510ED001B096C /* PointWithDepth.cpp */; };
 		2E39813C1B5D27BD001B096C /* PlayScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E39813A1B5D27BD001B096C /* PlayScene.cpp */; };
 		2E4002C21CCBC8FE009901E1 /* UiSongList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002C11CCBC8FE009901E1 /* UiSongList.plist */; };
 		2E44AB851CD0FAF000682069 /* RhythmAdjustScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E44AB831CD0FAF000682069 /* RhythmAdjustScene.cpp */; };
@@ -106,12 +104,8 @@
 		2E283CAB1B5325A0004EABDA /* HomeScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeScene.h; sourceTree = "<group>"; };
 		2E2EBDCE1C493E33009AF4E6 /* json11.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json11.cpp; sourceTree = "<group>"; };
 		2E2EBDCF1C493E33009AF4E6 /* json11.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json11.hpp; sourceTree = "<group>"; };
-		2E2EBDD11C4B7EDD009AF4E6 /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioManager.cpp; sourceTree = "<group>"; };
-		2E2EBDD21C4B7EDD009AF4E6 /* AudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioManager.h; sourceTree = "<group>"; };
 		2E3230B61C72191F00DDF6AD /* longNotesSpark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = longNotesSpark.png; sourceTree = "<group>"; };
 		2E3230B81C72192B00DDF6AD /* particle_texture.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = particle_texture.plist; sourceTree = "<group>"; };
-		2E3981331B5510ED001B096C /* PointWithDepth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PointWithDepth.cpp; sourceTree = "<group>"; };
-		2E3981341B5510ED001B096C /* PointWithDepth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointWithDepth.h; sourceTree = "<group>"; };
 		2E39813A1B5D27BD001B096C /* PlayScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayScene.cpp; sourceTree = "<group>"; };
 		2E39813B1B5D27BD001B096C /* PlayScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayScene.h; sourceTree = "<group>"; };
 		2E4002BC1CCA628B009901E1 /* TapAreaList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TapAreaList.plist; sourceTree = "<group>"; };
@@ -380,14 +374,10 @@
 				2E2EBDCD1C493E0A009AF4E6 /* Modules */,
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
 				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
-				2E3981331B5510ED001B096C /* PointWithDepth.cpp */,
-				2E3981341B5510ED001B096C /* PointWithDepth.h */,
 				2E94E07B1B6CB30F003A4136 /* ConfigLayer.cpp */,
 				2E94E07C1B6CB30F003A4136 /* ConfigLayer.h */,
 				2EEC015F1B72932900FAEE4F /* Note.cpp */,
 				2EEC01601B72932900FAEE4F /* Note.h */,
-				2E2EBDD11C4B7EDD009AF4E6 /* AudioManager.cpp */,
-				2E2EBDD21C4B7EDD009AF4E6 /* AudioManager.h */,
 				2E1AF97E1C4FAEA900BDD1B2 /* StopWatch.cpp */,
 				2E1AF97F1C4FAEA900BDD1B2 /* StopWatch.h */,
 			);
@@ -586,7 +576,6 @@
 				2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */,
 				2E39813C1B5D27BD001B096C /* PlayScene.cpp in Sources */,
 				46880B8A19C43A87006E1F66 /* HelloWorldScene.cpp in Sources */,
-				2E2EBDD31C4B7EDD009AF4E6 /* AudioManager.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				2E9807611C63B03800D33CC2 /* triangulate.cpp in Sources */,
@@ -594,7 +583,6 @@
 				2E44AB851CD0FAF000682069 /* RhythmAdjustScene.cpp in Sources */,
 				2E9807601C63B03800D33CC2 /* PRFilledPolygon.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
-				2E3981351B5510ED001B096C /* PointWithDepth.cpp in Sources */,
 				2EEC01611B72932900FAEE4F /* Note.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

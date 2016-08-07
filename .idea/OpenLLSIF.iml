@@ -1,30 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="CIDR_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libcurl.dylib">
-      <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libcurl.dylib" isTestSource="false" />
-    </content>
-    <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libsqlite3.dylib">
-      <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libsqlite3.dylib" isTestSource="false" />
-    </content>
-    <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libssl.dylib">
-      <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libssl.dylib" isTestSource="false" />
-    </content>
-    <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libz.dylib">
-      <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libz.dylib" isTestSource="false" />
-    </content>
     <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libiconv.dylib">
       <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libiconv.dylib" isTestSource="false" />
     </content>
     <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libsqlite3.dylib">
       <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libsqlite3.dylib" isTestSource="false" />
     </content>
+    <content url="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libz.dylib">
+      <sourceFolder url="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/usr/lib/libz.dylib" isTestSource="false" />
+    </content>
     <content url="file://$MODULE_DIR$/.idea" />
     <content url="file://$MODULE_DIR$/Classes">
       <sourceFolder url="file://$MODULE_DIR$/Classes/AppDelegate.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/AppDelegate.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Classes/AudioManager.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Classes/AudioManager.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/ConfigLayer.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/ConfigLayer.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/HelloWorldScene.cpp" isTestSource="false" />
@@ -37,8 +26,6 @@
       <sourceFolder url="file://$MODULE_DIR$/Classes/PRFilledPolygon.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/PlayScene.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/PlayScene.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Classes/PointWithDepth.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Classes/PointWithDepth.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/RhythmAdjustScene.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/RhythmAdjustScene.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Classes/StopWatch.cpp" isTestSource="false" />
@@ -271,7 +258,7 @@
       <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/ios/CocosDenshion.m" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/ios/SimpleAudioEngine.mm" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/ios/SimpleAudioEngine_objc.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/ios/SimpleAudioEngine_objc.m" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/ios/SimpleAudioEngine_objc.mm" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/mac/CDAudioManager.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/mac/CDAudioManager.m" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cocos2d/cocos/audio/mac/CDConfig.h" isTestSource="false" />

@@ -9,7 +9,6 @@
 #ifndef __OpenLLSIF__StopWatch__
 #define __OpenLLSIF__StopWatch__
 
-#include <iostream>
 #include <chrono>
 
 enum StopWatchStatus

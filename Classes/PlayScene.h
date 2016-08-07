@@ -9,7 +9,6 @@
 #ifndef __OpenLLSIF__PlayScene__
 #define __OpenLLSIF__PlayScene__
 
-#include <iostream>
 #include <memory>
 #include <unordered_map>
 #include "Note.h"
@@ -78,7 +77,6 @@ public:
     void noteReleaseCallback(const Note& note);
     
     void onTouchesBegan(const std::vector<Touch*>& touches, Event *event);
-    void onTouchesCancelled(const std::vector<Touch*>& touches, Event *event);
     void onTouchesMoved(const std::vector<Touch*>& touches, Event *event);
     void onTouchesEnded(const std::vector<Touch*>& touches, Event *event);
 private:
@@ -123,33 +121,33 @@ private:
     void update(float dt);
 private:
     //! 現在のスコア
-    int _current_score;
+    int _currentScore;
     
     //! 計算で算出される最大スコア
-    int _max_score;
+    int _maxScore;
     
     //! ノーツのスピード
-    int _notes_speed_ms = 0;
+    int _notesSpeedMs = 0;
     
     //! 楽曲のファイルパス
-    std::string _song_file_path;
+    std::string _songFilePath;
     
     
     typedef std::shared_ptr<ValueMap> ValueMapPtr;
     
     //! 楽曲譜面のデータを格納するためのベクター
-    std::list< std::queue<ValueMapPtr>  > _notes_vector;
+    std::list< std::queue<ValueMapPtr>  > _notesVector;
     
     //! ノーツが進む方向の単位ベクトル
-    std::vector<cocos2d::Vec2> _direction_unit_vector;
+    std::vector<cocos2d::Vec2> _directionUnitVector;
     
     //! 各レーンごとに生成されているノーツキュー
-    std::vector< std::queue<Note*> > _displayed_notes;
+    std::vector< std::queue<Note*> > _displayedNotes;
     
-    std::unordered_map<int, Note*> _hold_notes;
+    std::unordered_map<int, Note*> _holdNotes;
     
     //! レイテンシーの値
-    float _latency_ms = 0.0f;
+    float _latencyMs = 0.0f;
 };
 
 #endif /* defined(__OpenLLSIF__PlayScene__) */
