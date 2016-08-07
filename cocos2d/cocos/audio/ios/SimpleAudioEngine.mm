@@ -139,6 +139,11 @@ static void static_stopAllEffects()
     [[SimpleAudioEngine sharedEngine] stopAllEffects];
 }
 
+static void static_setOnExitCallback(const std::function<void()>& callback)
+{
+    [[SimpleAudioEngine sharedEngine] setOnExitCallback:callback];
+}
+
 namespace CocosDenshion {
 
 static SimpleAudioEngine *s_pEngine;
@@ -288,6 +293,11 @@ void SimpleAudioEngine::resumeAllEffects()
 void SimpleAudioEngine::stopAllEffects()
 {
     static_stopAllEffects();
+}
+
+void SimpleAudioEngine::setOnExitCallback(const std::function<void()> &callbackFunc)
+{
+    static_setOnExitCallback(callbackFunc);
 }
 
 } // endof namespace CocosDenshion {

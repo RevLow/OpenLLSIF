@@ -25,7 +25,7 @@ public:
     
     CREATE_FUNC(RhythmAdjustScene);
     virtual void onEnterTransitionDidFinish();
-    void finishCallBack(int audioID, std::string fileName);
+    void finishCallBack();
 private:
     int index = 0;
     //タップの判定を行う正しい判定時間(ms)

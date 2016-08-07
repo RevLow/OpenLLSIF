@@ -24,6 +24,7 @@
 
 
 #import "CDAudioManager.h"
+#include <functional>
 
 /**
  A wrapper to the CDAudioManager object.
@@ -41,6 +42,7 @@
     
     BOOL    mute_;
     BOOL    enabled_;
+    std::function<void()> callback_;
 }
 
 /** Background music volume. Range is 0.0f to 1.0f. This will only have an effect if willPlayBackgroundMusic returns YES */
@@ -93,6 +95,7 @@
 -(void) unloadEffect:(NSString*) filePath;
 /** Gets a CDSoundSource object set up to play the specified file. */
 -(CDSoundSource *) soundSourceForFile:(NSString*) filePath;
+-(void) setOnExitCallback:(const std::function<void()>&) callback;
 
 /** Shuts down the shared audio engine instance so that it can be reinitialised */
 +(void) end;

@@ -324,7 +324,6 @@
 		2E2EBDCD1C493E0A009AF4E6 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
-				2E44AB831CD0FAF000682069 /* RhythmAdjustScene.cpp */,
 				2E98075C1C63B03800D33CC2 /* PRFilledPolygon.cpp */,
 				2E98075D1C63B03800D33CC2 /* PRFilledPolygon.h */,
 				2E98075E1C63B03800D33CC2 /* triangulate.cpp */,
@@ -353,6 +352,7 @@
 				2E283CAB1B5325A0004EABDA /* HomeScene.h */,
 				2E39813A1B5D27BD001B096C /* PlayScene.cpp */,
 				2E39813B1B5D27BD001B096C /* PlayScene.h */,
+				2E44AB831CD0FAF000682069 /* RhythmAdjustScene.cpp */,
 				2E44AB841CD0FAF000682069 /* RhythmAdjustScene.h */,
 			);
 			name = Scenes;

@@ -12,7 +12,8 @@
 #include "UIVideoPlayer.h"
 #include <thread>
 #include "json11.hpp"
-#include "AudioManager.h"
+//#include "AudioManager.h"
+#include "SimpleAudioEngine.h"
 #include "HomeScene.h"
 #include "StopWatch.h"
 
@@ -254,7 +255,6 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     listener->setEnabled(true);
     listener->onTouchesBegan = CC_CALLBACK_2(PlayScene::onTouchesBegan, this);
     listener->onTouchesMoved = CC_CALLBACK_2(PlayScene::onTouchesMoved, this);
-    listener->onTouchesCancelled = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
     listener->onTouchesEnded = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
     
@@ -300,10 +300,15 @@ void PlayScene::prepareGameRun()
     black_back_layer->runAction(Sequence::create(fade_out_action, run_game_action, NULL));
     
     //音声のプリロード
-    AudioManager::getInstance()->preload("Sound/SE/perfect.mp3");
-    AudioManager::getInstance()->preload("Sound/SE/great.mp3");
-    AudioManager::getInstance()->preload("Sound/SE/good.mp3");
-    AudioManager::getInstance()->preload("Sound/SE/bad.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/perfect.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/great.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/good.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/bad.mp3");
+
+//    AudioManager::getInstance()->preload("Sound/SE/perfect.mp3");
+//    AudioManager::getInstance()->preload("Sound/SE/great.mp3");
+//    AudioManager::getInstance()->preload("Sound/SE/good.mp3");
+//    AudioManager::getInstance()->preload("Sound/SE/bad.mp3");
     
     //透明度を戻した後、実行を行う
 //    play_scene->runAction(Sequence::create(FadeTo::create(0.5f, 255),
@@ -321,8 +326,10 @@ void PlayScene::run()
     //動画再生の開始
     if(video_layer != nullptr) video_layer->play();
     //音楽の再生
-    AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
-    AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
+//    AudioManager::getInstance()->play(_song_file_path,AudioManager::BGM);
+    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(_song_file_path.c_str());
+    //AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(PlayScene::finishCallBack, this));
+    CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
     StopWatch::getInstance()->start();
     this->scheduleUpdate();
 }
@@ -383,7 +390,8 @@ void PlayScene::createNotes(const ValueMap& map)
 
 void PlayScene::applicationDidEnterBackground()
 {
-    AudioManager::getInstance()->pause(AudioManager::BGM);
+    //AudioManager::getInstance()->pause(AudioManager::BGM);
+    CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
     unscheduleUpdate();
     StopWatch::getInstance()->pause();
 
@@ -402,15 +410,15 @@ void PlayScene::applicationWillEnterForeground()
     video_player->resume();
     this->resume();
 
-
-    AudioManager::getInstance()->resume(AudioManager::BGM);
+    CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+    //AudioManager::getInstance()->resume(AudioManager::BGM);
     StopWatch::getInstance()->resume();
 }
 
-void PlayScene::finishCallBack(int audioId, std::string fileName)
+void PlayScene::finishCallBack()
 {
     Director::getInstance()->purgeCachedData();
-    cocos2d::experimental::AudioEngine::uncacheAll();
+    //cocos2d::experimental::AudioEngine::uncacheAll();
     Scene* home_scene = HomeScene::createScene(ViewScene::Live);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, home_scene, Color3B::BLACK));
     StopWatch::getInstance()->stop();
@@ -460,8 +468,8 @@ void PlayScene::noteTouchCallback(const Note& note)
     }
     
     //音の再生
-    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-    
+    //AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
     //判定とタッチのエフェクトを表示する
     createJudgeSprite(note.getJudgeResult());
     if(!note.isLongNotes())
@@ -499,8 +507,8 @@ void PlayScene::noteReleaseCallback(const Note& note)
     }
     
     //6. 音の再生
-    AudioManager::getInstance()->play(fullpath, AudioManager::SE);
-    
+    //AudioManager::getInstance()->play(fullpath, AudioManager::SE);
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
     //判定とタッチのエフェクトを表示する
     createJudgeSprite(note.getJudgeResult());
     createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
@@ -645,21 +653,6 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event
     }
 }
 
-void PlayScene::onTouchesCancelled(const std::vector<Touch *> &touches, Event *unused_event)
-{
-    if(_hold_notes.empty()) return;
-    
-    for (Touch* touch : touches)
-    {
-        auto it = _hold_notes.find(touch->getID());
-        if(it->second != nullptr)
-        {
-            it->second->touchEndAction(touch->getID());
-            it->second = nullptr;
-            _hold_notes.erase(it);
-        }
-    }
-}
 //
 void PlayScene::onTouchesMoved(const std::vector<Touch *> &touches, Event *event)
 {

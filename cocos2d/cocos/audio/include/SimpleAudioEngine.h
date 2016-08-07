@@ -249,6 +249,7 @@ public:
      */
     virtual void unloadEffect(const char* filePath);
 
+    void setOnExitCallback(const std::function<void()> &callbackFunc);
 protected:
     /**
     * Constructor of SimpleAudioEngine.

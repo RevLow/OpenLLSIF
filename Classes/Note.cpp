@@ -303,26 +303,6 @@ void Note::touchEndAction(int touch_id)
 }
 
 /**
- *  ある点がタップ可能な範囲内に入っているかを判定する
- *  判定方法はある点を基準にした半径r内に目的のSpriteが入っているかで判定する
- *  Spriteは128pxなので半径R = (64+offset値)で決定している
- *
- *  @param pos タップした点
- *
- *  @return true: 半径が交差している, false: 判定ミス
- */
-//bool Note::isPointContain(Vec2 pos)
-//{
-//    Circle *finger_circle = Circle::create(this->convertToWorldSpace(pos), 38); //半径r = 15pxで仮決定
-//    
-//    //TODO: 親からスプライトを取得しているので、ほかのやり方で位置を取得するべき
-//    Vec2 baseVec = getParent()->getChildByName("PlayLayer")->getChildByName<Sprite*>(std::to_string(_lane+1))->getPosition();
-//    Circle *target_cirlce = Circle::create(this->convertToWorldSpace(baseVec), 64); //offset4pxで仮決定
-//    
-//    return target_cirlce->intersectCircle(finger_circle);
-//}
-
-/**
  *  タップしたときの判定を行うメソッド
  *  判定の時間範囲は以下の目的地からの周囲Nピクセルで決定している
  *  PERFECT 16px

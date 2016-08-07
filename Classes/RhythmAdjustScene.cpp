@@ -11,7 +11,8 @@
 #include "cocostudio/CocoStudio.h"
 #include "HomeScene.h"
 #include "StopWatch.h"
-#include "AudioManager.h"
+#include "SimpleAudioEngine.h"
+//#include "AudioManager.h"
 #include <algorithm>
 
 template <typename T>
@@ -68,7 +69,7 @@ bool RhythmAdjustScene::init()
     
     tapArea = Circle::create(five_sprite->getPosition(), areaSize.width);
     tapArea->retain();
-    AudioManager::getInstance()->preload(CHECK_AUDIO_FILE_NAME);
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(CHECK_AUDIO_FILE_NAME.c_str());
 #ifdef DEBUG_DEBUG
     DrawNode *nodes = tapArea->getDrawNode(Color4F::Color4F(1.0f, 0.0f, 1.0f, 1.0f));
     nodes->setPosition(five_sprite->getPosition());
@@ -90,18 +91,19 @@ bool RhythmAdjustScene::init()
 void RhythmAdjustScene::onEnterTransitionDidFinish()
 {
     
-    AudioManager::getInstance()->play(CHECK_AUDIO_FILE_NAME
-                                      , AudioManager::BGM);
-    AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(RhythmAdjustScene::finishCallBack, this));
+//    AudioManager::getInstance()->play(CHECK_AUDIO_FILE_NAME
+//                                      , AudioManager::BGM);
+//    AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(RhythmAdjustScene::finishCallBack, this));
+    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(CHECK_AUDIO_FILE_NAME.c_str());
+    CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(RhythmAdjustScene::finishCallBack, this));
     StopWatch::getInstance()->start();
     
 }
 
-void RhythmAdjustScene::finishCallBack(int audioID, std::string fileName)
+void RhythmAdjustScene::finishCallBack()
 {
     float medianValue = median(delta_times);
     tapArea->release();
-    CCLOG("%lf", medianValue);
     UserDefault::getInstance()->setFloatForKey("LATENCY", medianValue);
     Director::getInstance()->purgeCachedData();
     
@@ -132,7 +134,6 @@ void RhythmAdjustScene::CreateTapFx(Vec2 position)
 
 void RhythmAdjustScene::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
 {
-    CCLOG("CALL");
     if(tapArea->containsPoint(touches[0]->getLocation()))
     {
         double now = StopWatch::getInstance()->currentTime();

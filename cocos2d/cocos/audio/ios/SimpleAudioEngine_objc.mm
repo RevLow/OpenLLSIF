@@ -23,6 +23,7 @@
  */
 
 #import "SimpleAudioEngine_objc.h"
+#import <objc/runtime.h>
 
 @implementation SimpleAudioEngine
 
@@ -119,6 +120,25 @@ static CDBufferManager *bufferManager = nil;
 
 -(BOOL) willPlayBackgroundMusic {
     return [am willPlayBackgroundMusic];
+}
+
+-(void) setOnExitCallback:(const std::function<void()>&) callback
+{
+    callback_ = callback;
+    
+    void (^callbackBlock)(void) = ^(void)
+    {
+        if(callback_ != nullptr)
+            callback_();
+    };
+    
+    // 文字列から SEL 型を作っておく
+    SEL sel = NSSelectorFromString(@"callbackFunc");
+    // ブロックから IMP 型を作っておく
+    IMP imp = imp_implementationWithBlock(callbackBlock);
+    class_addMethod([SimpleAudioEngine class], sel, imp, "v@");
+    
+    [am setBackgroundMusicCompletionListener:self selector:@selector(callbackFunc)];
 }
 
 #pragma mark SimpleAudioEngine - sound effects

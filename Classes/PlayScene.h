@@ -52,7 +52,7 @@ public:
      *  @param audioID
      *  @param fileName
      */
-    void finishCallBack(int audioID, std::string fileName);
+    void finishCallBack();
     
     //ノーツに関するコールバック関数
     
