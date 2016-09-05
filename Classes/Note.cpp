@@ -7,9 +7,9 @@
 //
 
 #include "Note.h"
-#include "AudioManager.h"
-#include "PRFilledPolygon.h"
+//#include "AudioManager.h"
 #include "triangulate.h"
+#include "SimpleAudioEngine.h"
 
 #pragma mark - Circle type implements
 
@@ -56,23 +56,42 @@ DrawNode* Circle::getDrawNode(Color4F color)
 
 #pragma mark - Note type implements
 
+Note::FlickerState::FlickerState()
+: theta(0),
+time(0)
+{
+}
+
+Note::NoteInfo::NoteInfo()
+:lane(0),
+startTime(0),
+endTime(0),
+speed(0),
+isStar(false),
+isParallel(false),
+isLongNote(false),
+isHolding(false),
+direction(Vec2(0,0))
+{
+    
+}
+
 bool Note::init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec)
 {
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
     
     //jsonの情報からノーツの情報を初期化する
-    _isStar = jsonInfo.at("hold").asBool();
-    _lane = jsonInfo.at("lane").asInt();
-    _isParallel = jsonInfo.at("parallel").asBool();
-    _startTime = jsonInfo.at("starttime").asDouble();
-    _endTime = jsonInfo.at("endtime").asDouble();
-    _isLongnote = jsonInfo.at("longnote").asBool();
-    _speed = jsonInfo.at("speed").asDouble();
+    _noteInfo.isStar = jsonInfo.at("hold").asBool();
+    _noteInfo.lane = jsonInfo.at("lane").asInt();
+    _noteInfo.isParallel = jsonInfo.at("parallel").asBool();
+    _noteInfo.startTime = jsonInfo.at("starttime").asDouble();
+    _noteInfo.endTime = jsonInfo.at("endtime").asDouble();
+    _noteInfo.isLongNote = jsonInfo.at("longnote").asBool();
+    _noteInfo.speed = jsonInfo.at("speed").asDouble();
     latency = jsonInfo.at("latency").asFloat();
     _destination = Vec2(jsonInfo.at("destinationX").asFloat(),jsonInfo.at("destinationY").asFloat());
     int type = jsonInfo.at("type").asInt();
-    
-    limitArea = Director::getInstance()->getWinSizeInPixels();
+
     
     Vec2 norm = unitVec;
     Vec2 initVec(480, 480);
@@ -83,12 +102,12 @@ bool Note::init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec)
     norm.normalize();
     initVec += norm;
     unitVec -= norm;
-    _unitVec = unitVec / _speed;
+    _noteInfo.direction = unitVec / _noteInfo.speed;
     
     createNotesSprite(initVec, type);
     
     //時間計測開始
-    startTimeCount = endTimeCount = StopWatch::getInstance()->currentTime();
+    startTimeCount = endTimeCount = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
     this->scheduleUpdate();
     
     _judgeResult = NoteJudge::NON;
@@ -121,7 +140,7 @@ void Note::createNotesSprite(Vec2 &initVec, int type)
     }
     
     //同時ノーツの処理
-    if(_isParallel)
+    if(_noteInfo.isParallel)
     {
         Sprite* parallel = Sprite::createWithSpriteFrameName("Image/notes/longbar_03.png");
         parallel->setPosition(35.0f, 35.0f);
@@ -129,7 +148,7 @@ void Note::createNotesSprite(Vec2 &initVec, int type)
     }
     
     //星付きノーツの処理
-    if(_isStar)
+    if(_noteInfo.isStar)
     {
         Sprite* star = Sprite::createWithSpriteFrameName("Image/notes/star_03.png");
         star->setPosition(35.0f, 35.0f);
@@ -143,16 +162,16 @@ void Note::createNotesSprite(Vec2 &initVec, int type)
     note->setVisible(false);
     note->setPosition(initVec);
     note->setScale(0.1f);
-    auto scale_to_action = ScaleTo::create(_speed / 1000.0f, 2.0f);
-    auto sequence_action = Sequence::create(DelayTime::create(0.03), CallFunc::create([note]()
+    auto scaleToAction = ScaleTo::create(_noteInfo.speed / 1000.0f, 2.0f);
+    auto sequenceAction = Sequence::create(DelayTime::create(0.03), CallFunc::create([note]()
                                                                                       {
                                                                                           note->setVisible(true);
                                                                                       }), NULL);
     
-    note->runAction(Spawn::create(scale_to_action,sequence_action, NULL));
+    note->runAction(Spawn::create(scaleToAction,sequenceAction, NULL));
     
     //ロングノーツの終端画像を追加
-    if(_isLongnote)
+    if(_noteInfo.isLongNote)
     {
         _endOfPoint = Vec2(initVec);
         Sprite* sp = Sprite::createWithSpriteFrameName("Image/notes/longnotes_03.png");
@@ -218,10 +237,10 @@ bool Note::touchBeginAction(int touch_id)
     }
 
     //8. ロングノーツかの判定
-    if(_isLongnote)
+    if(_noteInfo.isLongNote)
     {
         _longNotesHoldId = touch_id;
-        _longnotesHold = true;
+        _noteInfo.isHolding = true;
     }
     else
     {
@@ -239,7 +258,7 @@ bool Note::touchBeginAction(int touch_id)
  */
 void Note::touchMoveAction(int touch_id)
 {
-    if ( !_longnotesHold)
+    if (!_noteInfo.isHolding)
     {
         return;
     }
@@ -275,7 +294,7 @@ void Note::touchMoveAction(int touch_id)
  */
 void Note::touchEndAction(int touch_id)
 {
-    if (!_isLongnote || !_longnotesHold)
+    if (!_noteInfo.isLongNote || !_noteInfo.isHolding)
     {
         return;
     }
@@ -312,32 +331,32 @@ void Note::touchEndAction(int touch_id)
  */
 NoteJudge Note::startJudge()
 {
-    double now = StopWatch::getInstance()->currentTime();
+    double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
 
-    double elapsed = fabs((_startTime-latency) - now);
+    double elapsed = fabs((_noteInfo.startTime-latency) - now);
     
     //もしも判定外の場合はNONを返す
     
-    if (elapsed >= _speed * 0.28) {
+    if (elapsed >= _noteInfo.speed * 0.28) {
         
         return NoteJudge::NON;
     }
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.04)
+    if (elapsed < _noteInfo.speed * 0.04)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.04 && elapsed < _speed*0.10)
+    else if(elapsed >= _noteInfo.speed * 0.04 && elapsed < _noteInfo.speed * 0.10)
     {
         rtn = NoteJudge::GREAT;
 
     }
-    else if(elapsed >= _speed*0.10 && fabs(elapsed) < _speed*0.16)
+    else if(elapsed >= _noteInfo.speed * 0.10 && fabs(elapsed) < _noteInfo.speed * 0.16)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.16 && elapsed < _speed*0.28)
+    else if(elapsed >= _noteInfo.speed * 0.16 && elapsed < _noteInfo.speed * 0.28)
     {
         rtn = NoteJudge::BAD;
     }
@@ -351,25 +370,25 @@ NoteJudge Note::startJudge()
  */
 NoteJudge Note::endJudge()
 {
-    double now = StopWatch::getInstance()->currentTime();
+    double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
 
-    double elapsed = fabs((_endTime-latency) - now);
+    double elapsed = fabs((_noteInfo.endTime - latency) - now);
     
     NoteJudge rtn;
-    if (elapsed < _speed*0.04)
+    if (elapsed < _noteInfo.speed * 0.04)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_speed*0.04 && elapsed < _speed*0.10)
+    else if(elapsed >=_noteInfo.speed * 0.04 && elapsed < _noteInfo.speed * 0.10)
     {
         rtn = NoteJudge::GREAT;
         
     }
-    else if(elapsed >= _speed*0.10 && fabs(elapsed) < _speed*0.16)
+    else if(elapsed >= _noteInfo.speed * 0.10 && fabs(elapsed) < _noteInfo.speed * 0.16)
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _speed*0.16)
+    else if(elapsed >= _noteInfo.speed * 0.16)
     {
         rtn = NoteJudge::BAD;
     }
@@ -377,167 +396,203 @@ NoteJudge Note::endJudge()
     return rtn;
 }
 
+#pragma mark Animation Methods
+
 /**
- *  TODO: ノーツのタップ時の処理とロングノーツ時の処理を分けて書く必要有り
- *
  *  @param frame <#frame description#>
  */
 void Note::update(float frame)
 {
-
-    double now = StopWatch::getInstance()->currentTime();
+    double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
     double elapsed = now - startTimeCount;
     Sprite* note = this->getChildByName<Sprite*>("BaseNotes");
-    cocos2d::Vec2 currentPos = note->getPosition();
 
-    if(_isLongnote)
-    {
-        Sprite* sp = this->getChildByName<Sprite*>("EndNotes");
-        if (now + _speed + latency > _endTime)
-        {
-            _endOfPoint += _unitVec*(now - endTimeCount);
-            sp->setPosition(_endOfPoint);
-            
-            auto runningAction = sp->getActionByTag(1);
-            
-            if(!runningAction && now < _endTime)
-            {
-                sp->setVisible(false);
-                auto action = Spawn::create(cocos2d::ScaleTo::create(_speed / 1000.0f, 2.0f),
-                                            Sequence::create(DelayTime::create(0.02), CallFunc::create([sp](){sp->setVisible(true);}), NULL)
-                                            , NULL);
-                action->setTag(1);
-                sp->runAction(action);
-                
-            }
-        }
-        
-        Vec2 v1 = currentPos - Vec2(480,480);
-        Vec2 v2(0, -1);
-        
-        double length = (currentPos - _endOfPoint).length();
-        float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
-
-
-        length += 10;
-        std::vector<Vec2> vList = std::vector<Vec2>();
-        std::vector<Vec2> uvCoordinate = std::vector<Vec2>();
-        Vec2 v = Vec2(0, -1*length);
-   
-        vList.push_back(Vec2(-30.0f * note->getScale(), v.y));
-        vList.push_back(Vec2(30.0f * note->getScale(), v.y));
-        vList.push_back(Vec2(30.0f * sp->getScale(),0));
-        vList.push_back(Vec2(-30.0f * sp->getScale() ,0));
-        
-        uvCoordinate.push_back(Vec2(0,0));
-        uvCoordinate.push_back(Vec2(1,0));
-        uvCoordinate.push_back(Vec2(1,1));
-        uvCoordinate.push_back(Vec2(0,1));
-
-        
-        
-        FilledPolygon *poly = getChildByName<FilledPolygon*>("LongnotesLine");//加算合成するポリゴン
-        
-        
-        if (poly == nullptr )
-        {
-            Texture2D *texture = Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_07.png");
-            poly = FilledPolygon::create(texture, vList, uvCoordinate);
-            poly->setName("LongnotesLine");
-            
-            
-            
-            addChild(poly);
-        }
-        else
-        {
-            poly->setTexturePolygon(vList, uvCoordinate);
-        }
-        
-        poly->setRotation(angle);
-        poly->setPosition(_endOfPoint);
-        
-        //つかんでいる状態の場合は点滅を行う
-        if(_longnotesHold)
-        {
-            poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-            poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
-//
-            //単純なsin関数での透明度
-            static float x = MATH_DEG_TO_RAD(0);
-            static float time = 0.0f;
-            
-            float middle = 0.5f;
-            float opacity = sin(x) * middle + middle; // 0~255
-            opacity *= 0.5;
-            if(x >= FLT_MAX) x=0;
-            //opacity += 0.2;
-            GLubyte opacityByte = static_cast<GLubyte>(opacity * 255.0f);
-            
-            poly->setOpacity(opacityByte);
-            if(opacity >= 1.0f && time < 20.0f)
-            {
-                time += elapsed;
-            }
-            else
-            {
-                x += MATH_DEG_TO_RAD(8.0);                 //数値はよしなに
-                time = 0.0f;
-            }
-            /*
-            auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
-            if(particle == nullptr)
-            {
-                particle = ParticleSystemQuad::create("particle_texture.plist");
-                //particle->setTexture(Director::getInstance()->getTextureCache()->addImage("longNotesSpark.png"));
-                particle->setAutoRemoveOnFinish(true);
-                particle->setPosition(currentPos);
-                particle->setRotation(angle);
-                particle->setSpeed(220);
-                particle->setScale(0.7);
-                particle->setName("longNotesParticle");
-                this->addChild(particle);
-            }*/
-        }
-
-
-
-        
-        endTimeCount = now;
-    }
+    if(_noteInfo.isLongNote)
+      updateLongNote(now, elapsed, note);
+    else
+      updateSimpleNote(now, elapsed, note);
     
-    if(!_longnotesHold)
+    startTimeCount = now;
+}
+
+void Note::updateNotePosition(Sprite* note, float elapsedTime)
+{
+    Vec2 currentPos = note->getPosition();
+    currentPos += _noteInfo.direction * elapsedTime;
+    if(currentPos.getDistance(Vec2(480,480)) > _destination.getDistance(Vec2(480,480)) && _noteInfo.isLongNote) currentPos = _destination;
+    note->setPosition(currentPos);
+}
+
+void Note::updateSimpleNote(double now, double elapsed, Sprite* note)
+{
+    Vec2 currentPos = note->getPosition();
+    double time = _noteInfo.startTime - now;
+
+    //画面判定外処理
+    if(time < -_noteInfo.speed * 0.25)
     {
-        double time = _startTime - now;
-        //if(currentPos.x < 0 || currentPos.x > limitArea.width || currentPos.y < 0 || currentPos.y > limitArea.height)
-        if(time < -_speed * 0.30)
+        if (_callbackFunc != nullptr)
+        {
+            _callbackFunc(*this);
+        }
+        
+        this->unscheduleUpdate();
+        this->removeFromParentAndCleanup(true);
+    }
+    else
+    {
+        updateNotePosition(note, elapsed);
+    }
+}
+
+void Note::updateLongNote(double now, double elapsed, Sprite* note)
+{
+    Vec2 currentPos = note->getPosition();
+    Sprite* sp = this->getChildByName<Sprite*>("EndNotes");
+    
+    //終端画像の処理
+    if (now + _noteInfo.speed + latency > _noteInfo.endTime)
+    {
+        _endOfPoint += _noteInfo.direction * (now - endTimeCount);
+        sp->setPosition(_endOfPoint);
+        
+        auto runningAction = sp->getActionByTag(1);
+        
+        /*
+         * 終端時間より速度分前の時間で終端画像のスケールアクションを実行する
+         * この処理は一度しか呼ばないようにアクションにタグを設定し、そのタグのアクションが実行済みかで
+         * 分岐判定を行う
+         */
+        if(!runningAction && now < _noteInfo.endTime)
+        {
+            sp->setVisible(false);
+            float scaleTimeSec = _noteInfo.speed / 1000.0f;
+            auto scaleAction = ScaleTo::create(scaleTimeSec, 2.0f);
+            
+            //seqActionは最初の数ミリ秒は中心から出てくるため、そこを隠すため表示しないようにしている
+            auto seqAction = Sequence::create(DelayTime::create(0.02),
+                                              CallFunc::create([sp](){sp->setVisible(true);}), NULL);
+            auto action = Spawn::create(scaleAction, seqAction, NULL);
+            action->setTag(1);
+            sp->runAction(action);
+        }
+    }
+
+    renderFilledPolygon(note, sp);
+    
+    //つかんでいる状態の場合は点滅を行う
+    if(_noteInfo.isHolding)
+    {
+        FilledPolygon* poly = getChildByName<FilledPolygon*>("LongnotesLine");
+        poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
+        poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
+        flickerPolygon(poly, elapsed);
+        /*
+         auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
+         if(particle == nullptr)
+         {
+         particle = ParticleSystemQuad::create("particle_texture.plist");
+         //particle->setTexture(Director::getInstance()->getTextureCache()->addImage("longNotesSpark.png"));
+         particle->setAutoRemoveOnFinish(true);
+         particle->setPosition(currentPos);
+         particle->setRotation(angle);
+         particle->setSpeed(220);
+         particle->setScale(0.7);
+         particle->setName("longNotesParticle");
+         this->addChild(particle);
+         }
+        */
+        
+        //押しても目的地に着いてない場合はそのまま進める
+        if(now < _noteInfo.startTime)
+        {
+            updateNotePosition(note, elapsed);
+        }
+    }
+    else
+    {
+        //画面外判定
+        double time = _noteInfo.startTime - now;
+        if(time < -_noteInfo.speed * 0.30)
         {
             if (_callbackFunc != nullptr)
             {
                 _callbackFunc(*this);
             }
             
-            //もし画面判定外にでたら
             this->unscheduleUpdate();
             this->removeFromParentAndCleanup(true);
         }
         else
         {
-            currentPos += _unitVec*elapsed;
-            note->setPosition(currentPos);
+            updateNotePosition(note, elapsed);
         }
+    }
+    endTimeCount = now;
+}
+
+void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
+{
+    Vec2 currentPos = startNoteSprite->getPosition();
+    
+    Vec2 v1 = currentPos - Vec2(480,480);
+    Vec2 v2(0, -1);
+    
+    double length = (currentPos - _endOfPoint).length();
+    float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
+    
+    
+    length += 10;
+    std::vector<Vec2> vList = std::vector<Vec2>();
+    std::vector<Vec2> uvCoordinate = std::vector<Vec2>();
+    Vec2 v = Vec2(0, -1*length);
+    
+    vList.push_back(Vec2(-30.0f * startNoteSprite->getScale(), v.y));
+    vList.push_back(Vec2(30.0f * startNoteSprite->getScale(), v.y));
+    vList.push_back(Vec2(30.0f * endNoteSprite->getScale(),0));
+    vList.push_back(Vec2(-30.0f * endNoteSprite->getScale() ,0));
+    
+    uvCoordinate.push_back(Vec2(0,0));
+    uvCoordinate.push_back(Vec2(1,0));
+    uvCoordinate.push_back(Vec2(1,1));
+    uvCoordinate.push_back(Vec2(0,1));
+    
+    FilledPolygon *poly = getChildByName<FilledPolygon*>("LongnotesLine");//加算合成するポリゴン
+    
+    //すでにポリゴンが描画されている場合は頂点座標とUV座標を変更するだけにする
+    if (poly == nullptr )
+    {
+        Texture2D *texture = Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_07.png");
+        poly = FilledPolygon::create(texture, vList, uvCoordinate);
+        poly->setName("LongnotesLine");
+        addChild(poly);
     }
     else
     {
-        //もし押しても目的地に着いてない場合はそのまま進める
-        if(now < _startTime)
-        {
-            currentPos += _unitVec*elapsed;
-            if(currentPos.getDistance(Vec2(480,480)) > _destination.getDistance(Vec2(480,480))) currentPos = _destination;
-            note->setPosition(currentPos);
-        }
-
+        poly->setTexturePolygon(vList, uvCoordinate);
     }
     
-    startTimeCount = now;
+    poly->setRotation(angle);
+    poly->setPosition(_endOfPoint);
+}
+
+void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
+{
+    //単純なsin関数での透明度
+    float middle = 0.5f;
+    float opacity = sin(_lnFlash.theta) * middle + middle; // 0~255
+    opacity *= 0.5;
+    if(_lnFlash.theta >= FLT_MAX) _lnFlash.theta=0;
+    GLubyte opacityByte = static_cast<GLubyte>(opacity * 255.0f);
+    
+    poly->setOpacity(opacityByte);
+    if(opacity >= 1.0f && _lnFlash.time < 20.0f)
+    {
+        _lnFlash.time += sleepTime;
+    }
+    else
+    {
+        _lnFlash.theta += MATH_DEG_TO_RAD(8.0);
+        _lnFlash.time = 0.0f;
+    }
 }

@@ -223,6 +223,8 @@ typedef enum {
 
 -(void) setBackgroundMusicCompletionListener:(id) listener selector:(SEL) selector;
 
+-(double) getCurrentTime;
+
 @end
 
 /** Fader for long audio source objects */

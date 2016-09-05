@@ -250,6 +250,7 @@ public:
     virtual void unloadEffect(const char* filePath);
 
     void setOnExitCallback(const std::function<void()> &callbackFunc);
+    double getCurrentTime();
 protected:
     /**
     * Constructor of SimpleAudioEngine.

@@ -13,7 +13,7 @@
 #include "json11.hpp"
 #include "SimpleAudioEngine.h"
 #include "HomeScene.h"
-#include "StopWatch.h"
+//#include "StopWatch.h"
 
 #pragma mark Inline function
 
@@ -28,8 +28,8 @@
  */
 inline bool isPointContain(const Vec2& v1, const Vec2& v2)
 {
-    Circle *fingerCircle = Circle::create(v1, 40); //半径r = 15pxで仮決定
-    Circle *targetCirlce = Circle::create(v2, 64); //offset4pxで仮決定
+    Circle *fingerCircle = Circle::create(v1, 55); //半径r = 15pxで仮決定
+    Circle *targetCirlce = Circle::create(v2, 42); //offset4pxで仮決定
     
     return targetCirlce->intersectCircle(fingerCircle);
 }
@@ -77,7 +77,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
 
     //ノーツの速度を設定(ms)
     // EASY | NORMAL | HARD | EXPERT | MASTER
-    // 1600    1300    1000    800      700(未実装)
+    // 1600    1300    1000    800      600(未実装)
     switch (gameLevel)
     {
         case GameLevel::EASY:
@@ -175,34 +175,35 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     _currentScore = 0;
     for(auto &lanes : jsonInfo["lane"].array_items())
     {
-        std::queue<ValueMapPtr> tmpNotesVec;
+        std::deque<ValueMapPtr> tmpNotesVec;
         
         for (auto &notesInfo : lanes.array_items())
         {
-            notesCount++;
             ValueMapPtr notes(new ValueMap);
+            
             (*notes)["starttime"] = notesInfo["starttime"].number_value();
             (*notes)["endtime"] = notesInfo["endtime"].number_value();
+            (*notes)["lane"] = notesInfo["lane"].number_value();
+            
             (*notes)["parallel"] = notesInfo["parallel"].bool_value();
             (*notes)["hold"] = notesInfo["hold"].bool_value();
-            (*notes)["lane"] = notesInfo["lane"].number_value();
             (*notes)["longnote"] = notesInfo["longnote"].bool_value();
+            
             (*notes)["latency"] = _latencyMs;
             
-            //ノーツのタイプを取得、
             (*notes)["type"] = fileInfo["Type"].isNull()? 0 : fileInfo.at("Type").asInt();
             (*notes)["speed"] = _notesSpeedMs;
             
-            //ノーツが最終的に到達すべき位置を取得する
+            //ノーツが最終的に到達する位置を取得する
             std::string laneStr = std::to_string(notesInfo["lane"].int_value()+1);
             Sprite* destinationSprite = playScene->getChildByName<Sprite*>(laneStr);
             (*notes)["destinationX"] = destinationSprite->getPosition().x;
             (*notes)["destinationY"] = destinationSprite->getPosition().y;
             
-            //ロングノーツの場合、終点の分も数える
+            notesCount++;
             if((*notes)["longnote"].asBool()) notesCount++;
             
-            tmpNotesVec.push(notes);
+            tmpNotesVec.push_back(notes);
         }
         _notesVector.push_back(tmpNotesVec);
     }
@@ -254,7 +255,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     
     // 作成したノーツを格納するベクターを初期化
     // ここの9は9レーン分を挿入するために定義
-    _displayedNotes = std::vector< std::queue<Note*> >(9);
+    _displayedNotes = std::vector< std::deque<Note*> >(9);
     
     //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
     for(std::string labelName : {"ScoreLabel", "life_text"})
@@ -306,7 +307,7 @@ void PlayScene::prepareGameRun()
     }
     
     auto blackBackLayer = this->getChildByName<LayerColor*>("BlackLayer");
-    auto fadeOutAction =FadeTo::create(0.5f, videoLayer != nullptr ? 200 : 120);
+    auto fadeOutAction =FadeTo::create(0.5f, videoLayer != nullptr ? 225 : 170);
     auto runGameAction = CallFunc::create([this, playScene](){
         playScene->setOpacity(255);
         this->run();
@@ -334,7 +335,7 @@ void PlayScene::run()
     //音楽の再生
     CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(_songFilePath.c_str());
     CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
-    StopWatch::getInstance()->start();
+//    StopWatch::getInstance()->start();
     this->scheduleUpdate();
 }
 
@@ -349,18 +350,20 @@ void PlayScene::update(float unused_dt)
     auto loadingBar = playSceneLayer->getChildByName<ui::LoadingBar*>("LoadingBar_1");
     loadingBar->setPercent(100.0f * ((double)_currentScore / (double)_maxScore) + 5.0f);
     
-    
     //Millisec単位で計測開始からの時間を取得
-    double elapse = StopWatch::getInstance()->currentTime();
-    
+    double elapse = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
+    if (elapse < 0)
+    {
+        elapse = 0.0;
+    }
     //イテレータで_notes_vectorを最初から最後まで探索
     //そして、今の時間(ms)を超えたノーツが存在する場合、新しいノーツを生成する
-    for (std::list<std::queue<ValueMapPtr>>::iterator it = _notesVector.begin(); it != _notesVector.end();)
+    for (std::list<std::deque<ValueMapPtr>>::iterator it = _notesVector.begin(); it != _notesVector.end();)
     {
         if(it->front()->at("starttime").asDouble() - _notesSpeedMs - _latencyMs < elapse)
         {
             createNotes(*(it->front()));
-            it->pop();
+            it->pop_front();
             
             if(it->empty())
             {
@@ -387,7 +390,7 @@ void PlayScene::createNotes(const ValueMap& map)
 
     //ロングノーツを離したときの処理
     note->setReleaseCallback(CC_CALLBACK_1(PlayScene::noteReleaseCallback, this));
-    _displayedNotes[note->getLane()].push(note);
+    _displayedNotes[note->getLane()].push_back(note);
     
     addChild(note);
 }
@@ -446,10 +449,9 @@ void PlayScene::createJudgeSprite(NoteJudge judge)
         addChild(overSprite);
         
         overSprite->runAction(Sequence::create(FadeIn::create(0.06f),
-                                                Spawn::create(FadeOut::create(0.1f),
-                                                              ScaleTo::create(0.05f, 2.0f),
-                                                              NULL),
-                                                RemoveSelf::create(),NULL));
+                                               Spawn::create(FadeOut::create(0.1f),
+                                                             ScaleTo::create(0.05f, 2.0f), NULL),
+                                               RemoveSelf::create(),NULL));
     }
 }
 
@@ -478,7 +480,7 @@ void PlayScene::applicationDidEnterBackground()
 {
     CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
     unscheduleUpdate();
-    StopWatch::getInstance()->pause();
+//    StopWatch::getInstance()->pause();
 
 
     this->pause();
@@ -495,7 +497,7 @@ void PlayScene::applicationWillEnterForeground()
     this->resume();
 
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-    StopWatch::getInstance()->resume();
+//    StopWatch::getInstance()->resume();
 }
 
 void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event)
@@ -512,7 +514,9 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event
         int minLaneNum = -1;
         for (int i = 0;i < 9;i++)
         {
+            if(_displayedNotes[i].empty()) continue;
             int lane_i = i + 1;
+            
             Sprite* sp = playLayer->getChildByName<Sprite*>(std::to_string(lane_i));
 
             if (!isPointContain(location, sp->getPosition()))
@@ -527,7 +531,7 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event
                 minLaneNum = i;
             }
         }
-        if(minLaneNum == -1 || _displayedNotes[minLaneNum].empty()) continue;
+        if(minLaneNum == -1) continue;
         
         //min_lane_numのノーツに対してタップ処理をする
         bool result = _displayedNotes[minLaneNum].front()->touchBeginAction(touch->getID());
@@ -535,7 +539,7 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event
         {
             if (_displayedNotes[minLaneNum].front()->isLongNotes())
                 _holdNotes[touch->getID()] = _displayedNotes[minLaneNum].front();
-            _displayedNotes[minLaneNum].pop();
+            _displayedNotes[minLaneNum].pop_front();
         }
     }
 }
@@ -585,7 +589,7 @@ void PlayScene::finishCallBack()
     Director::getInstance()->purgeCachedData();
     Scene* homeScene = HomeScene::createScene(ViewScene::Live);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, homeScene, Color3B::BLACK));
-    StopWatch::getInstance()->stop();
+//    StopWatch::getInstance()->stop();
 }
 
 void PlayScene::noteOutDisplayedCallback(const Note& note)
@@ -598,10 +602,20 @@ void PlayScene::noteOutDisplayedCallback(const Note& note)
     //Missの処理を行う
     createJudgeSprite(NoteJudge::MISS);
     
-    this->_displayedNotes[note.getLane()].pop();
+    this->_displayedNotes[note.getLane()].pop_front();
 }
 
 void PlayScene::noteTouchCallback(const Note& note)
+{
+    callbackHelperFunc(note);
+}
+
+void PlayScene::noteReleaseCallback(const Note& note)
+{
+    callbackHelperFunc(note, true);
+}
+
+void PlayScene::callbackHelperFunc(const Note& note, bool isRelease)
 {
     Sprite* judgeSprite = this->getChildByName<Sprite*>("JudgeSprite");
     if(judgeSprite != nullptr)
@@ -610,7 +624,6 @@ void PlayScene::noteTouchCallback(const Note& note)
     Sprite* overSprite = getChildByName<Sprite*>("OverPerfect");
     if(overSprite != nullptr)
         removeChild(overSprite);
-    
     //タッチの判定により処理を変える
     std::string fullpath;
     switch (note.getJudgeResult())
@@ -631,47 +644,18 @@ void PlayScene::noteTouchCallback(const Note& note)
             break;
     }
     
-    //音の再生
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
-    //判定とタッチのエフェクトを表示する
-    createJudgeSprite(note.getJudgeResult());
-    if(!note.isLongNotes())
-        createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
-}
+    //パンとゲインの設定
+    //押したレーンごとにパンとゲインをそれぞれ設定する
+    //パン:  [-0.1 .. 0.0 .. 0.1]
+    //ゲイン: [0.9 .. 1.0 .. 0.9]
+    float pan = (static_cast<float>(note.getLane()) - 4.0f) / 40.0f;
+    float gain = 1.0 - (static_cast<float>(abs(4 - note.getLane())) / 40.0);
 
-void PlayScene::noteReleaseCallback(const Note& note)
-{
-    Sprite* judgeSprite = this->getChildByName<Sprite*>("JudgeSprite");
-    if(judgeSprite != nullptr)
-        removeChild(judgeSprite);
-    auto overSprite = getChildByName<Sprite*>("OverPerfect");
-    if(overSprite != nullptr) removeChild(overSprite);
+    //音の再生
+    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str(), false, 1.0, pan, gain);
     
-    
-    //5. タッチの判定により処理を変える
-    std::string fullpath;
-    switch (note.getJudgeResult())
-    {
-        case NoteJudge::PERFECT:
-            fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-            break;
-        case NoteJudge::GREAT:
-            fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-            break;
-        case NoteJudge::GOOD:
-            fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-            break;
-        case NoteJudge::NON:
-        case NoteJudge::BAD:
-            fullpath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-            break;
-        default:
-            break;
-    }
-    
-    //6. 音の再生
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
     //判定とタッチのエフェクトを表示する
     createJudgeSprite(note.getJudgeResult());
-    createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
+    if(isRelease || !note.isLongNotes())
+        createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
 }

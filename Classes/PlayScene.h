@@ -119,6 +119,11 @@ private:
      * @param dt 前のフレームから今のフレームまでにかかった時間
      */
     void update(float dt);
+    
+    /**
+     *  コールバックの同じ処理をまとめる
+     */
+    void callbackHelperFunc(const Note& note, bool isRelease=false);
 private:
     //! 現在のスコア
     int _currentScore;
@@ -136,13 +141,13 @@ private:
     typedef std::shared_ptr<ValueMap> ValueMapPtr;
     
     //! 楽曲譜面のデータを格納するためのベクター
-    std::list< std::queue<ValueMapPtr>  > _notesVector;
+    std::list< std::deque<ValueMapPtr>  > _notesVector;
     
     //! ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> _directionUnitVector;
     
     //! 各レーンごとに生成されているノーツキュー
-    std::vector< std::queue<Note*> > _displayedNotes;
+    std::vector< std::deque<Note*> > _displayedNotes;
     
     std::unordered_map<int, Note*> _holdNotes;
     

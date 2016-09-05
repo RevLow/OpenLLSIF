@@ -10,7 +10,7 @@
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
 #include "HomeScene.h"
-#include "StopWatch.h"
+//#include "StopWatch.h"
 #include "SimpleAudioEngine.h"
 //#include "AudioManager.h"
 #include <algorithm>
@@ -96,7 +96,7 @@ void RhythmAdjustScene::onEnterTransitionDidFinish()
 //    AudioManager::getInstance()->setOnExitCallback(CC_CALLBACK_2(RhythmAdjustScene::finishCallBack, this));
     CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(CHECK_AUDIO_FILE_NAME.c_str());
     CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(RhythmAdjustScene::finishCallBack, this));
-    StopWatch::getInstance()->start();
+    //StopWatch::getInstance()->start();
     
 }
 
@@ -109,7 +109,7 @@ void RhythmAdjustScene::finishCallBack()
     
     Scene* scene = HomeScene::createScene(ViewScene::Home);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
-    StopWatch::getInstance()->stop();
+    //StopWatch::getInstance()->stop();
 }
 
 
@@ -136,7 +136,7 @@ void RhythmAdjustScene::onTouchesBegan(const std::vector<Touch *> &touches, coco
 {
     if(tapArea->containsPoint(touches[0]->getLocation()))
     {
-        double now = StopWatch::getInstance()->currentTime();
+        double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;
         double delta = 0;
         if(index < 8)
         {

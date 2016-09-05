@@ -10,7 +10,8 @@
 #define __OpenLLSIF__Note__
 
 #include "cocos2d.h"
-#include "StopWatch.h"
+//#include "StopWatch.h"
+#include "PRFilledPolygon.h"
 
 USING_NS_CC;
 
@@ -44,7 +45,6 @@ public:
 
 class Note : public Layer, create_func<Note>
 {
-    
 public:
     using create_func::create;
     virtual bool init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec);
@@ -53,11 +53,11 @@ public:
     
     const bool isLongNotes() const
     {
-        return _isLongnote;
+        return _noteInfo.isLongNote;
     }
     const bool isParallel() const
     {
-        return _isParallel;
+        return _noteInfo.isParallel;
     }
     //ノーツが消えるときに呼ばれるコールバック
     void setOutDisplayedCallback(const std::function<void(const Note&)> &f);
@@ -71,7 +71,7 @@ public:
     // 第何番目のレーンか
     const unsigned int getLane() const
     {
-        return _lane;
+        return _noteInfo.lane;
     }
     
     //タップイベント
@@ -82,30 +82,54 @@ public:
     CC_SYNTHESIZE_READONLY(NoteJudge, _judgeResult, JudgeResult);
 private:
     void createNotesSprite(Vec2 &initVec, int type);
-    //bool isPointContain(Vec2 pos);
     NoteJudge startJudge();
     NoteJudge endJudge();
-private:
-    double _speed;
-    bool _isStar = false;//星付きか
-    bool _isParallel = false;//複数レーンか
-    bool _isLongnote = false;
     
-    bool _longnotesHold = false;//ロングノーツをつかんでいるか
-    unsigned int _lane = 0;//レーン番号、左上から右上まで順番に0~8
-    cocos2d::Vec2 _unitVec;//1フレームあたりの増加量
-    cocos2d::Vec2 _endOfPoint;
-    cocos2d::Size limitArea;//画面範囲
-    cocos2d::Vec2 _destination;//目的地
-    //double _scaleTick;//msあたりのロングノーツの拡大スケール
-    //double _totalStopTime = 0.0;
-    double _startTime = 0.0;
-    double _endTime = 0.0;
+    void updateSimpleNote(double now, double elapsed, Sprite* note);
+    void updateLongNote(double now, double elapsed, Sprite* note);
+    void flickerPolygon(FilledPolygon* poly, double sleepTime);
+    void renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite);
+    inline void updateNotePosition(Sprite* note, float elapsedTime);
+private:
+    //点滅の状態
+    struct FlickerState
+    {
+        float theta;
+        float time;
+        
+        FlickerState();
+    };
+    FlickerState _lnFlash;
+    
+    //ノートの情報
+    struct NoteInfo
+    {
+        unsigned int lane;
+        
+        double startTime;
+        double endTime;
+        double speed;
+        
+        bool isStar;
+        bool isParallel;
+        bool isLongNote;
+        bool isHolding;
+        
+        //! ノーツの進む方向
+        Vec2 direction;
+        
+        NoteInfo();
+    };
+    NoteInfo _noteInfo;
+
+    Vec2 _endOfPoint;
+    Vec2 _destination;//目的地
     double startTimeCount;
     double endTimeCount;
     
     float latency = 0.0f;
     int _longNotesHoldId;
+    
     std::function<void(const Note&)> _callbackFunc;
     std::function<void(const Note&)> _touchCallbackFunc;
     std::function<void(const Note&)> _releaseCallbackFunc;

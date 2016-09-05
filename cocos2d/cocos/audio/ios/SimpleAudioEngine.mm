@@ -144,6 +144,11 @@ static void static_setOnExitCallback(const std::function<void()>& callback)
     [[SimpleAudioEngine sharedEngine] setOnExitCallback:callback];
 }
 
+static double static_getCurrentTime()
+{
+    [[SimpleAudioEngine sharedEngine] getCurrentTime];
+}
+
 namespace CocosDenshion {
 
 static SimpleAudioEngine *s_pEngine;
@@ -298,6 +303,11 @@ void SimpleAudioEngine::stopAllEffects()
 void SimpleAudioEngine::setOnExitCallback(const std::function<void()> &callbackFunc)
 {
     static_setOnExitCallback(callbackFunc);
+}
+    
+double SimpleAudioEngine::getCurrentTime()
+{
+    static_getCurrentTime();
 }
 
 } // endof namespace CocosDenshion {

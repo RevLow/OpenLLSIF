@@ -601,7 +601,12 @@ static BOOL configured = FALSE;
 -(void) setBackgroundMusicCompletionListener:(id) listener selector:(SEL) selector {
     backgroundMusicCompletionListener = listener;
     backgroundMusicCompletionSelector = selector;
-}    
+}
+
+-(double) getCurrentTime
+{
+  [self.backgroundMusic.audioSourcePlayer currentTime];
+}
 
 /*
  * Call this method to have the audio manager automatically handle application resign and
