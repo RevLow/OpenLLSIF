@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
-		2E1AF9801C4FAEA900BDD1B2 /* StopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E1AF97E1C4FAEA900BDD1B2 /* StopWatch.cpp */; };
 		2E283CA91B52B250004EABDA /* Sound in Resources */ = {isa = PBXBuildFile; fileRef = 2E283CA81B52B250004EABDA /* Sound */; };
 		2E283CAC1B5325A0004EABDA /* HomeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E283CAA1B5325A0004EABDA /* HomeScene.cpp */; };
 		2E2E91291CD4E86600F6AE78 /* TapAreaList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002BC1CCA628B009901E1 /* TapAreaList.plist */; };
@@ -29,6 +28,7 @@
 		2E9807EC1C654EBD00D33CC2 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807EB1C654EBD00D33CC2 /* res */; };
 		2E9807F41C679A8700D33CC2 /* background in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807F31C679A8700D33CC2 /* background */; };
 		2EB84E431DCAEAA60017C1A1 /* LLAudioEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EB84E421DCAEAA60017C1A1 /* LLAudioEngine.framework */; };
+		2EB84E4A1DCDDF3D0017C1A1 /* NoteMovement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EB84E481DCDDF3D0017C1A1 /* NoteMovement.cpp */; };
 		2EBD46C71CFC6D7800300BF8 /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */; };
 		2EC2146E1C523D37005CED97 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146D1C523D37005CED97 /* OpenGLES.framework */; };
 		2EC214701C523D52005CED97 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146F1C523D52005CED97 /* UIKit.framework */; };
@@ -89,8 +89,6 @@
 		1D6058910D05DD3D006BFB54 /* OpenLLSIF iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenLLSIF iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		2E1AF97E1C4FAEA900BDD1B2 /* StopWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StopWatch.cpp; sourceTree = "<group>"; };
-		2E1AF97F1C4FAEA900BDD1B2 /* StopWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StopWatch.h; sourceTree = "<group>"; };
 		2E2798071B6FCA66001C6D69 /* libcocos2d Mac.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcocos2d Mac.a"; path = "../cocos2d/build/build/Debug/libcocos2d Mac.a"; sourceTree = "<group>"; };
 		2E2798091B6FCA72001C6D69 /* libcocos2d iOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcocos2d iOS.a"; path = "../cocos2d/build/build/Debug-iphoneos/libcocos2d iOS.a"; sourceTree = "<group>"; };
 		2E283C8A1B52ABBD004EABDA /* Default */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Default; path = ../Resources/res/Default; sourceTree = "<group>"; };
@@ -126,6 +124,8 @@
 		2E9807EB1C654EBD00D33CC2 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		2E9807F31C679A8700D33CC2 /* background */ = {isa = PBXFileReference; lastKnownFileType = folder; path = background; sourceTree = "<group>"; };
 		2EB84E421DCAEAA60017C1A1 /* LLAudioEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LLAudioEngine.framework; path = ../../LLAudioEngine/Framework/LLAudioEngine.framework; sourceTree = "<group>"; };
+		2EB84E481DCDDF3D0017C1A1 /* NoteMovement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NoteMovement.cpp; sourceTree = "<group>"; };
+		2EB84E491DCDDF3D0017C1A1 /* NoteMovement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoteMovement.h; sourceTree = "<group>"; };
 		2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		2EC2146D1C523D37005CED97 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		2EC2146F1C523D52005CED97 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -382,8 +382,8 @@
 				2E94E07C1B6CB30F003A4136 /* ConfigLayer.h */,
 				2EEC015F1B72932900FAEE4F /* Note.cpp */,
 				2EEC01601B72932900FAEE4F /* Note.h */,
-				2E1AF97E1C4FAEA900BDD1B2 /* StopWatch.cpp */,
-				2E1AF97F1C4FAEA900BDD1B2 /* StopWatch.h */,
+				2EB84E481DCDDF3D0017C1A1 /* NoteMovement.cpp */,
+				2EB84E491DCDDF3D0017C1A1 /* NoteMovement.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -574,6 +574,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2EB84E4A1DCDDF3D0017C1A1 /* NoteMovement.cpp in Sources */,
 				2E94E07D1B6CB30F003A4136 /* ConfigLayer.cpp in Sources */,
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				2E2EBDD01C493E33009AF4E6 /* json11.cpp in Sources */,
@@ -583,7 +584,6 @@
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				2E9807611C63B03800D33CC2 /* triangulate.cpp in Sources */,
-				2E1AF9801C4FAEA900BDD1B2 /* StopWatch.cpp in Sources */,
 				2E44AB851CD0FAF000682069 /* RhythmAdjustScene.cpp in Sources */,
 				2E9807601C63B03800D33CC2 /* PRFilledPolygon.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,

@@ -32,6 +32,13 @@ inline float decreaseEasing(float);
  */
 inline float increaseEasing(float);
 
+enum NoteType
+{
+    SMILE = 0,
+    COOL,
+    PURE
+};
+
 enum NoteJudge
 {
     PERFECT = 0,
@@ -41,6 +48,14 @@ enum NoteJudge
     MISS,
     NON
 };
+
+enum ActionKey
+{
+    Simple,
+    LongNotes
+};
+
+const Vec2 initVec(480, 480);
 
 class Circle : public Node, create_func<Circle>
 {
@@ -61,7 +76,7 @@ class Note : public Layer, create_func<Note>
 {
 public:
     using create_func::create;
-    virtual bool init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec);
+    virtual bool init(const ValueMap& jsonInfo);
 
     void update(float flame);
     
@@ -95,15 +110,14 @@ public:
     
     CC_SYNTHESIZE_READONLY(NoteJudge, _judgeResult, JudgeResult);
 private:
-    void createNotesSprite(Vec2 &initVec, int type);
+    void createNotesSprite(const NoteType type);
     NoteJudge startJudge();
     NoteJudge endJudge();
     
-    void updateSimpleNote(double elapsed, Sprite* note);
-    void updateLongNote(double elapsed, Sprite* note);
+    void updateSimpleNote(Sprite* note);
+    void updateLongNote(const double& elapsed, Sprite* note);
     void flickerPolygon(FilledPolygon* poly, double sleepTime);
     void renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite);
-    inline void updateNotePosition(Sprite* note, float elapsedTime);
 private:
     //点滅の状態
     struct FlickerState
@@ -137,11 +151,8 @@ private:
         NoteInfo();
     };
     NoteInfo _noteInfo;
-
-    Vec2 _endOfPoint;
-    Vec2 _destination;//目的地
     
-    float latency = 0.0f;
+    float _latency;
     float _elapsedTime;
     int _longNotesHoldId;
     Rect _visibleRect;

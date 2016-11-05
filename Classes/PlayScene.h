@@ -140,9 +140,6 @@ private:
     //! 楽曲譜面のデータを格納するためのベクター
     std::vector< std::deque<ValueMap>  > _notesVector;
     
-    //! ノーツが進む方向の単位ベクトル
-    std::vector<cocos2d::Vec2> _directionUnitVector;
-    
     //! 各レーンごとに生成されているノーツキュー
     std::vector< std::deque<Note*> > _displayedNotes;
     

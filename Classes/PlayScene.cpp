@@ -149,19 +149,6 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     this->addChild(playScene);
 
     
-    auto startPosition = playScene->getChildByName<Sprite*>("music_icon_7");
-
-
-    //PlaySceneからそれぞれのボタンの位置を取得して、ノーツが進む方向を算出
-    for(int i=1;i<=9;i++)
-    {
-        auto destinationPosition = playScene->getChildByName<Sprite*>(std::to_string(i));
-        cocos2d::Vec2 v = destinationPosition->getPosition() - startPosition->getPosition();
-      
-        
-        _directionUnitVector.push_back(v);
-    }
-    
 /*===============譜面関係の処理========================*/
 
     
@@ -192,15 +179,8 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
             notes["longnote"] = notesInfo["longnote"].bool_value();
             
             notes["latency"] = _latencyMs;
-            
-            notes["type"] = fileInfo["Type"].isNull()? 0 : fileInfo.at("Type").asInt();
+            notes["type"] = fileInfo["Type"].isNull() ? NoteType::SMILE : fileInfo.at("Type").asInt();
             notes["speed"] = _notesSpeedMs;
-            
-            //ノーツが最終的に到達する位置を取得する
-            std::string laneStr = std::to_string(notesInfo["lane"].int_value()+1);
-            Sprite* destinationSprite = playScene->getChildByName<Sprite*>(laneStr);
-            notes["destinationX"] = destinationSprite->getPosition().x;
-            notes["destinationY"] = destinationSprite->getPosition().y;
             
             notesCount++;
             if(notes["longnote"].asBool()) notesCount++;
@@ -327,11 +307,6 @@ void PlayScene::prepareGameRun()
     LLAudioEngine::getInstance()->preloadEffect(fullPath);
     fullPath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
     LLAudioEngine::getInstance()->preloadEffect(fullPath);
-
-//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/perfect.mp3");
-//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/great.mp3");
-//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/good.mp3");
-//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/bad.mp3");
 }
 
 void PlayScene::run()
@@ -347,9 +322,6 @@ void PlayScene::run()
     //音楽の再生
     LLAudioEngine::getInstance()->playBackgroundMusic(_songFilePath);
     LLAudioEngine::getInstance()->setBackgroundExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
-    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(_songFilePath.c_str());
-    //CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
-//    StopWatch::getInstance()->start();
     this->scheduleUpdate();
 }
 
@@ -365,7 +337,7 @@ void PlayScene::update(float unused_dt)
     loadingBar->setPercent(100.0f * ((double)_currentScore / (double)_maxScore) + 5.0f);
     
     //Millisec単位で計測開始からの時間を取得
-    double elapse = LLAudioEngine::getInstance()->tellBackgroundMusic();//StopWatch::getInstance()->currentTime();
+    double elapse = LLAudioEngine::getInstance()->tellBackgroundMusic();
     if (elapse <= 0)
     {
         elapse = 0.0;
@@ -392,9 +364,7 @@ void PlayScene::update(float unused_dt)
 
 void PlayScene::createNotes(const ValueMap& map)
 {
-    Vec2 direction = _directionUnitVector[map.at("lane").asInt()];
-
-    Note *note = Note::create(map, direction);
+    Note *note = Note::create(map);
 
     //画面の判定外に出た場合の処理
     note->setOutDisplayedCallback(CC_CALLBACK_1(PlayScene::noteOutDisplayedCallback, this));
@@ -493,9 +463,7 @@ void PlayScene::createTapFx(Vec2 position)
 void PlayScene::applicationDidEnterBackground()
 {
     LLAudioEngine::getInstance()->pauseBackgroundMusic();
-    //CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
     unscheduleUpdate();
-//    StopWatch::getInstance()->pause();
 
 
     this->pause();
@@ -512,8 +480,6 @@ void PlayScene::applicationWillEnterForeground()
     this->resume();
 
     LLAudioEngine::getInstance()->resumeBackgroundMusic();
-    //CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-//    StopWatch::getInstance()->resume();
 }
 
 void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event)
@@ -609,8 +575,6 @@ void PlayScene::finishCallBack()
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, homeScene, Color3B::BLACK));
 
     });
-
-    //    StopWatch::getInstance()->stop();
 }
 
 void PlayScene::noteOutDisplayedCallback(const Note& note)
@@ -645,36 +609,41 @@ void PlayScene::callbackHelperFunc(const Note& note, bool isRelease)
     Sprite* overSprite = getChildByName<Sprite*>("OverPerfect");
     if(overSprite != nullptr)
         removeChild(overSprite);
+
     //タッチの判定により処理を変える
     std::string fullpath;
-    switch (note.getJudgeResult())
-    {
-        case NoteJudge::PERFECT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
-            break;
-        case NoteJudge::GREAT:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
-            break;
-        case NoteJudge::GOOD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
-            break;
-        case NoteJudge::BAD:
-            fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
-            break;
-        default:
-            break;
-    }
-
-    //音の再生
-    float soundTime = LLAudioEngine::getInstance()->tellBackgroundMusic();
-    if (soundTime - _previousSoundTime > 20)
-    {
+    try {
+        switch (note.getJudgeResult())
+        {
+            case NoteJudge::PERFECT:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+                break;
+            case NoteJudge::GREAT:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+                break;
+            case NoteJudge::GOOD:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+                break;
+            case NoteJudge::BAD:
+                fullpath=FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+                break;
+            default:
+                throw std::runtime_error("Invalid Judge");
+                break;
+        }
+        
+        //音の再生
+        float soundTime = LLAudioEngine::getInstance()->tellBackgroundMusic();
+        if (soundTime - _previousSoundTime > 20)
+        {
             LLAudioEngine::getInstance()->playEffect(fullpath);
-    }
-    _previousSoundTime = soundTime;
-
-    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
+        }
+        _previousSoundTime = soundTime;
     
+    } catch (std::runtime_error e) {
+        CCLOG(e.what());
+    }
+
     //判定とタッチのエフェクトを表示する
     createJudgeSprite(note.getJudgeResult());
     if(isRelease || !note.isLongNotes())
