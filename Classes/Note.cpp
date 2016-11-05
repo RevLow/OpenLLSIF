@@ -7,9 +7,11 @@
 //
 
 #include "Note.h"
-//#include "AudioManager.h"
 #include "triangulate.h"
-#include "SimpleAudioEngine.h"
+//#include "SimpleAudioEngine.h"
+#include <LLAudioEngine/LLAudioEngine.h>
+#include "ui/cocosGui.h"
+#include "cocostudio/CocoStudio.h"
 
 #pragma mark - Circle type implements
 
@@ -57,8 +59,10 @@ DrawNode* Circle::getDrawNode(Color4F color)
 #pragma mark - Note type implements
 
 Note::FlickerState::FlickerState()
-: theta(0),
-time(0)
+: isIncrease(false),
+time(0),
+duration(0.28),
+easing(decreaseEasing)
 {
 }
 
@@ -107,7 +111,6 @@ bool Note::init(const ValueMap& jsonInfo, cocos2d::Vec2 unitVec)
     createNotesSprite(initVec, type);
     
     //時間計測開始
-    startTimeCount = endTimeCount = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
     this->scheduleUpdate();
     
     _judgeResult = NoteJudge::NON;
@@ -143,7 +146,7 @@ void Note::createNotesSprite(Vec2 &initVec, int type)
     if(_noteInfo.isParallel)
     {
         Sprite* parallel = Sprite::createWithSpriteFrameName("Image/notes/longbar_03.png");
-        parallel->setPosition(35.0f, 35.0f);
+        parallel->setPosition(32.0f, 32.0f);
         note->addChild(parallel);
     }
     
@@ -151,7 +154,7 @@ void Note::createNotesSprite(Vec2 &initVec, int type)
     if(_noteInfo.isStar)
     {
         Sprite* star = Sprite::createWithSpriteFrameName("Image/notes/star_03.png");
-        star->setPosition(35.0f, 35.0f);
+        star->setPosition(32.0f, 32.0f);
         note->addChild(star);
     }
 
@@ -182,6 +185,9 @@ void Note::createNotesSprite(Vec2 &initVec, int type)
         addChild(sp);
     }
 
+    auto size = Director::getInstance()->getVisibleSize();
+    _visibleRect = Rect(0,0,size.width, size.height);
+    _elapsedTime = LLAudioEngine::getInstance()->tellBackgroundMusic();
 }
 
 /**
@@ -314,10 +320,11 @@ void Note::touchEndAction(int touch_id)
     {
         _releaseCallbackFunc(*this);
     }
+    auto node = getChildByName("longNotesFx");
+    removeChild(node);
     
     this->unscheduleUpdate();
     removeFromParentAndCleanup(true);
-
 }
 
 /**
@@ -331,9 +338,8 @@ void Note::touchEndAction(int touch_id)
  */
 NoteJudge Note::startJudge()
 {
-    double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
-
-    double elapsed = fabs((_noteInfo.startTime-latency) - now);
+    //double now = LLAudioEngine::getInstance()->tellBackgroundMusic();//CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;
+    double elapsed = fabs((_noteInfo.startTime-latency) - _elapsedTime);
     
     //もしも判定外の場合はNONを返す
     
@@ -360,6 +366,10 @@ NoteJudge Note::startJudge()
     {
         rtn = NoteJudge::BAD;
     }
+    else
+    {
+        rtn = NoteJudge::NON;
+    }
     
     return rtn;
 }
@@ -370,16 +380,15 @@ NoteJudge Note::startJudge()
  */
 NoteJudge Note::endJudge()
 {
-    double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
-
-    double elapsed = fabs((_noteInfo.endTime - latency) - now);
+    //double now = LLAudioEngine::getInstance()->tellBackgroundMusic();//CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;
+    double elapsed = fabs((_noteInfo.endTime - latency) - _elapsedTime);
     
     NoteJudge rtn;
     if (elapsed < _noteInfo.speed * 0.04)
     {
         rtn = NoteJudge::PERFECT;
     }
-    else if(elapsed >=_noteInfo.speed * 0.04 && elapsed < _noteInfo.speed * 0.10)
+    else if(elapsed >= _noteInfo.speed * 0.04 && elapsed < _noteInfo.speed * 0.10)
     {
         rtn = NoteJudge::GREAT;
         
@@ -388,9 +397,13 @@ NoteJudge Note::endJudge()
     {
         rtn = NoteJudge::GOOD;
     }
-    else if(elapsed >= _noteInfo.speed * 0.16)
+    else if(elapsed >= _noteInfo.speed * 0.16 && elapsed < _noteInfo.speed * 0.28)
     {
         rtn = NoteJudge::BAD;
+    }
+    else
+    {
+        rtn = NoteJudge::NON;
     }
     
     return rtn;
@@ -398,21 +411,17 @@ NoteJudge Note::endJudge()
 
 #pragma mark Animation Methods
 
-/**
- *  @param frame <#frame description#>
- */
 void Note::update(float frame)
 {
-    double now = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
-    double elapsed = now - startTimeCount;
+    double elapsed = frame * 1000.0;
+    _elapsedTime += elapsed;
+
     Sprite* note = this->getChildByName<Sprite*>("BaseNotes");
 
     if(_noteInfo.isLongNote)
-      updateLongNote(now, elapsed, note);
+      updateLongNote(elapsed, note);
     else
-      updateSimpleNote(now, elapsed, note);
-    
-    startTimeCount = now;
+      updateSimpleNote(elapsed, note);
 }
 
 void Note::updateNotePosition(Sprite* note, float elapsedTime)
@@ -423,13 +432,12 @@ void Note::updateNotePosition(Sprite* note, float elapsedTime)
     note->setPosition(currentPos);
 }
 
-void Note::updateSimpleNote(double now, double elapsed, Sprite* note)
+void Note::updateSimpleNote(double elapsed, Sprite* note)
 {
     Vec2 currentPos = note->getPosition();
-    double time = _noteInfo.startTime - now;
 
     //画面判定外処理
-    if(time < -_noteInfo.speed * 0.25)
+    if(!_visibleRect.containsPoint(currentPos))
     {
         if (_callbackFunc != nullptr)
         {
@@ -445,17 +453,17 @@ void Note::updateSimpleNote(double now, double elapsed, Sprite* note)
     }
 }
 
-void Note::updateLongNote(double now, double elapsed, Sprite* note)
+void Note::updateLongNote(double elapsed, Sprite* note)
 {
     Vec2 currentPos = note->getPosition();
     Sprite* sp = this->getChildByName<Sprite*>("EndNotes");
     
     //終端画像の処理
-    if (now + _noteInfo.speed + latency > _noteInfo.endTime)
+    if (_elapsedTime + _noteInfo.speed + latency > _noteInfo.endTime)
     {
-        _endOfPoint += _noteInfo.direction * (now - endTimeCount);
+        _endOfPoint += _noteInfo.direction * elapsed;
         sp->setPosition(_endOfPoint);
-        
+
         auto runningAction = sp->getActionByTag(1);
         
         /*
@@ -463,7 +471,7 @@ void Note::updateLongNote(double now, double elapsed, Sprite* note)
          * この処理は一度しか呼ばないようにアクションにタグを設定し、そのタグのアクションが実行済みかで
          * 分岐判定を行う
          */
-        if(!runningAction && now < _noteInfo.endTime)
+        if(!runningAction && _elapsedTime < _noteInfo.endTime)
         {
             sp->setVisible(false);
             float scaleTimeSec = _noteInfo.speed / 1000.0f;
@@ -487,24 +495,45 @@ void Note::updateLongNote(double now, double elapsed, Sprite* note)
         poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
         poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
         flickerPolygon(poly, elapsed);
-        /*
-         auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
-         if(particle == nullptr)
-         {
-         particle = ParticleSystemQuad::create("particle_texture.plist");
-         //particle->setTexture(Director::getInstance()->getTextureCache()->addImage("longNotesSpark.png"));
-         particle->setAutoRemoveOnFinish(true);
-         particle->setPosition(currentPos);
-         particle->setRotation(angle);
-         particle->setSpeed(220);
-         particle->setScale(0.7);
-         particle->setName("longNotesParticle");
-         this->addChild(particle);
-         }
-        */
         
+        Vec2 v1 = currentPos - Vec2(480,480);
+        Vec2 v2(0, -1);
+        float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
+        
+        auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
+        if(particle == nullptr)
+        {
+            this->runAction(Sequence::create(DelayTime::create(0.05),
+                                             CallFunc::create([currentPos, angle, this]()
+            {
+                auto particle = ParticleSystemQuad::create("particle_texture.plist");
+                particle->setBlendFunc((BlendFunc){GL_ONE, GL_ONE});
+                 
+                particle->setAutoRemoveOnFinish(true);
+                particle->setPosition(currentPos);
+                particle->setRotation(angle);
+                particle->setScale(0.9);
+                particle->setName("longNotesParticle");
+                this->addChild(particle);
+            }), NULL));
+        }
+        
+        auto lnFx = getChildByName<Layer*>("longNotesFx");
+        if (lnFx == nullptr)
+        {
+            auto lnFx = CSLoader::getInstance()->createNode("res/ln_hold.csb");
+            cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/ln_hold.csb");
+            lnFx->setAnchorPoint(Vec2(0.5, 0.5));
+            lnFx->setPosition(currentPos);
+            lnFx->setRotation(angle);
+            lnFx->setName("longNotesFx");
+            this->addChild(lnFx);
+            
+            lnFx->runAction(action);
+            action->gotoFrameAndPlay(0, true);
+        }
         //押しても目的地に着いてない場合はそのまま進める
-        if(now < _noteInfo.startTime)
+        if(_elapsedTime < _noteInfo.startTime)
         {
             updateNotePosition(note, elapsed);
         }
@@ -512,8 +541,7 @@ void Note::updateLongNote(double now, double elapsed, Sprite* note)
     else
     {
         //画面外判定
-        double time = _noteInfo.startTime - now;
-        if(time < -_noteInfo.speed * 0.30)
+        if(!_visibleRect.containsPoint(currentPos))
         {
             if (_callbackFunc != nullptr)
             {
@@ -528,7 +556,6 @@ void Note::updateLongNote(double now, double elapsed, Sprite* note)
             updateNotePosition(note, elapsed);
         }
     }
-    endTimeCount = now;
 }
 
 void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
@@ -576,23 +603,34 @@ void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
     poly->setPosition(_endOfPoint);
 }
 
+inline float decreaseEasing(float t)
+{
+    return 1.9975 * pow(t, 5) - 0.747499999999999 * pow(t, 4) - 2.3 * pow(t, 3) + 0.05 * t + 1;
+}
+
+inline float increaseEasing(float t)
+{
+    return 1.7*pow(t, 5) -6 * pow(t, 4) + 8.8 * pow(t, 3) + -7.4 * pow(t, 2) + 3.9 * t;
+}
+
 void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
 {
-    //単純なsin関数での透明度
-    float middle = 0.5f;
-    float opacity = sin(_lnFlash.theta) * middle + middle; // 0~255
-    opacity *= 0.5;
-    if(_lnFlash.theta >= FLT_MAX) _lnFlash.theta=0;
-    GLubyte opacityByte = static_cast<GLubyte>(opacity * 255.0f);
+    _lnFlash.time += sleepTime / 1000.0f;
+    if(_lnFlash.time >= _lnFlash.duration)
+    {
+        // 増加と減少を交換する
+        _lnFlash.isIncrease = !_lnFlash.isIncrease;
+        _lnFlash.time = 0;
+        constexpr float t1 = 28.0 / 60.0;
+        constexpr float t2 = 17.0 / 60.0;
+        _lnFlash.duration = _lnFlash.isIncrease ?  t1 : t2;
+        _lnFlash.easing = _lnFlash.isIncrease ? increaseEasing : decreaseEasing;
+    }
     
-    poly->setOpacity(opacityByte);
-    if(opacity >= 1.0f && _lnFlash.time < 20.0f)
-    {
-        _lnFlash.time += sleepTime;
-    }
-    else
-    {
-        _lnFlash.theta += MATH_DEG_TO_RAD(8.0);
-        _lnFlash.time = 0.0f;
-    }
+    float t = _lnFlash.time / _lnFlash.duration;
+    float opacity = _lnFlash.easing(t);
+    if(opacity <= 0.0) opacity = 0.0;
+    if(opacity >= 1.0) opacity = 1.0;
+
+    poly->setOpacity(255 * opacity);
 }

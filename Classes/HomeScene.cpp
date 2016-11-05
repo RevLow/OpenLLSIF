@@ -9,7 +9,8 @@
 #include "HomeScene.h"
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
-#include "SimpleAudioEngine.h"
+//#include "SimpleAudioEngine.h"
+#include <LLAudioEngine/LLAudioEngine.h>
 #include "PlayScene.h"
 #include "ConfigLayer.h"
 
@@ -143,8 +144,8 @@ void HomeScene::configButtonAction(Ref *ref)
     //decide.mp3を鳴らす
     std::string filePath = "Sound/SE/decide.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
-
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    LLAudioEngine::getInstance()->playEffect(fullPath.c_str());
     auto size = Director::getInstance()->getVisibleSize();
     auto configLayer = Config::ConfigLayer::create();
     addChild(configLayer);
@@ -178,13 +179,15 @@ void HomeScene::homeButtonAction(Ref *ref)
     {
         std::string filePath = "Sound/SE/SE_005.mp3";
         std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-        CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+        //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+        LLAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
         return;
     }
 
     std::string filePath = "Sound/SE/decide.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    LLAudioEngine::getInstance()->playEffect(fullPath.c_str());
     
     auto background = this->getChildByName("backgroundLayer");
     background->runAction(Sequence::create(FadeTo::create(0.3f, 0),CallFunc::create(CC_CALLBACK_0(HomeScene::loadHomeScene, this)), NULL));
@@ -209,11 +212,16 @@ void HomeScene::loadHomeScene()
     newLayer->runAction(action);
     action->gotoFrameAndPlay(0, true);
     this->addChild(newLayer, 0);
-    if(CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
-        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+    if (LLAudioEngine::getInstance()->isBackgroundMusicPlaying())
+    {
+        LLAudioEngine::getInstance()->stopBackgroundMusic();
+    }
+//    if(CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
+//        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
     std::string filePath = "Sound/BGM/title_bgm.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+    LLAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
 }
 
 /*
@@ -227,7 +235,8 @@ void HomeScene::liveButtonAction(Ref *ref)
     {
         std::string filePath = "Sound/SE/SE_005.mp3";
         std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+        //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+        LLAudioEngine::getInstance()->playEffect(fullPath.c_str());
         return;
     }
 
@@ -237,7 +246,8 @@ void HomeScene::liveButtonAction(Ref *ref)
     
     std::string filePath = "Sound/SE/decide.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    LLAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
 
     _currentScene = ViewScene::Live;
 }
@@ -329,9 +339,11 @@ void HomeScene::loadLiveScene()
 
         if (i == 0)
         {
-            CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+            //CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+            LLAudioEngine::getInstance()->stopBackgroundMusic();
             fullPath = extractFolderPath(_songStack[index]) + plist["BGM"].asString();
-            CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+            LLAudioEngine::getInstance()->playBackgroundMusic(fullPath, true);
+            //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
         }
     }
 
@@ -360,8 +372,9 @@ void HomeScene::nextAlbumClick(Ref *ref)
     //selection.mp3を鳴らす
     std::string filePath = "Sound/SE/selection.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
-
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    LLAudioEngine::getInstance()->playEffect(fullPath);
+    
     Node* jacketNode = getChildByName("jacketLayer");
 
     //もしも、jacketNodeが存在しない場合
@@ -467,7 +480,8 @@ void HomeScene::nextAlbumClick(Ref *ref)
     //スタック変更後の先頭曲を鳴らす
     plist = FileUtils::getInstance()->getValueMapFromFile(_songStack[0]);
     fullPath = extractFolderPath(_songStack[0]) + plist["BGM"].asString();
-    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+    LLAudioEngine::getInstance()->playBackgroundMusic(fullPath, true);
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
 }
 
 /*
@@ -482,7 +496,8 @@ void HomeScene::previousAlbumClick(Ref *ref)
     //selection.mp3を鳴らす
     std::string filePath = "Sound/SE/selection.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    LLAudioEngine::getInstance()->playEffect(fullPath);
     auto jacketNode = this->getChildByName("jacketLayer");
 
     //もしも、jacketNodeが存在しない場合
@@ -593,7 +608,8 @@ void HomeScene::previousAlbumClick(Ref *ref)
     //スタック変更後の先頭曲を鳴らす
     plist = FileUtils::getInstance()->getValueMapFromFile(_songStack[0]);
     fullPath = extractFolderPath(_songStack[0]) + plist["BGM"].asString();
-    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+    LLAudioEngine::getInstance()->playBackgroundMusic(fullPath, true);
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
 }
 
 /*
@@ -625,7 +641,8 @@ bool HomeScene::jacketTouchEvent(Touch* touch, Event* e)
     //決定音を鳴らす
     std::string filePath = "Sound/SE/decide2.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+    LLAudioEngine::getInstance()->playEffect(fullPath);
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
 
     //ノードの数が減っていくためあらかじめ数を保持しておく
     int num = node->getChildrenCount();
@@ -658,7 +675,8 @@ bool HomeScene::jacketTouchEvent(Touch* touch, Event* e)
         //アニメーション終了後にreferenceSpriteを消去
 
         node->removeChild(referenceSprite);
-        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+        LLAudioEngine::getInstance()->stopBackgroundMusic();
+        //CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
         std::string zipFileName = extractParentPath(_songStack[0]);
         std::string docPath = FileUtils::getInstance()->getCachedPath() + "Song/" + zipFileName;
 

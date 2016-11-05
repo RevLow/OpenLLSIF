@@ -137,11 +137,8 @@ private:
     //! 楽曲のファイルパス
     std::string _songFilePath;
     
-    
-    typedef std::shared_ptr<ValueMap> ValueMapPtr;
-    
     //! 楽曲譜面のデータを格納するためのベクター
-    std::list< std::deque<ValueMapPtr>  > _notesVector;
+    std::vector< std::deque<ValueMap>  > _notesVector;
     
     //! ノーツが進む方向の単位ベクトル
     std::vector<cocos2d::Vec2> _directionUnitVector;
@@ -153,6 +150,9 @@ private:
     
     //! レイテンシーの値
     float _latencyMs = 0.0f;
+    
+    //! 前にSEが再生された時間
+    float _previousSoundTime = 0.0f;
 };
 
 #endif /* defined(__OpenLLSIF__PlayScene__) */

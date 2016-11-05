@@ -11,16 +11,17 @@
 #include "cocostudio/CocoStudio.h"
 #include "UIVideoPlayer.h"
 #include "json11.hpp"
-#include "SimpleAudioEngine.h"
+//#include "SimpleAudioEngine.h"
+#include <LLAudioEngine/LLAudioEngine.h>
 #include "HomeScene.h"
-//#include "StopWatch.h"
 
 #pragma mark Inline function
 
 /**
  *  ある点がタップ可能な範囲内に入っているかを判定する
  *  判定方法はある点を基準にした半径r内に目的のSpriteが入っているかで判定する
- *  Spriteは128pxなので半径R = (64+offset値)で決定している
+ *  指の半径:    44px (iPhone4/4s上での指の大きさ)
+ *  Sprite半径: 64px
  *
  *  @param pos タップした点
  *
@@ -28,10 +29,11 @@
  */
 inline bool isPointContain(const Vec2& v1, const Vec2& v2)
 {
-    Circle *fingerCircle = Circle::create(v1, 55); //半径r = 15pxで仮決定
-    Circle *targetCirlce = Circle::create(v2, 42); //offset4pxで仮決定
+    Circle *fingerCircle = Circle::create(v1, 44);
+    Circle *targetCirlce = Circle::create(v2, 64);
     
     return targetCirlce->intersectCircle(fingerCircle);
+    
 }
 
 #pragma mark - PlayScene implements
@@ -175,35 +177,35 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     _currentScore = 0;
     for(auto &lanes : jsonInfo["lane"].array_items())
     {
-        std::deque<ValueMapPtr> tmpNotesVec;
+        std::deque<ValueMap> tmpNotesVec;
         
         for (auto &notesInfo : lanes.array_items())
         {
-            ValueMapPtr notes(new ValueMap);
+            ValueMap notes;
             
-            (*notes)["starttime"] = notesInfo["starttime"].number_value();
-            (*notes)["endtime"] = notesInfo["endtime"].number_value();
-            (*notes)["lane"] = notesInfo["lane"].number_value();
+            notes["starttime"] = notesInfo["starttime"].number_value();
+            notes["endtime"] = notesInfo["endtime"].number_value();
+            notes["lane"] = notesInfo["lane"].number_value();
             
-            (*notes)["parallel"] = notesInfo["parallel"].bool_value();
-            (*notes)["hold"] = notesInfo["hold"].bool_value();
-            (*notes)["longnote"] = notesInfo["longnote"].bool_value();
+            notes["parallel"] = notesInfo["parallel"].bool_value();
+            notes["hold"] = notesInfo["hold"].bool_value();
+            notes["longnote"] = notesInfo["longnote"].bool_value();
             
-            (*notes)["latency"] = _latencyMs;
+            notes["latency"] = _latencyMs;
             
-            (*notes)["type"] = fileInfo["Type"].isNull()? 0 : fileInfo.at("Type").asInt();
-            (*notes)["speed"] = _notesSpeedMs;
+            notes["type"] = fileInfo["Type"].isNull()? 0 : fileInfo.at("Type").asInt();
+            notes["speed"] = _notesSpeedMs;
             
             //ノーツが最終的に到達する位置を取得する
             std::string laneStr = std::to_string(notesInfo["lane"].int_value()+1);
             Sprite* destinationSprite = playScene->getChildByName<Sprite*>(laneStr);
-            (*notes)["destinationX"] = destinationSprite->getPosition().x;
-            (*notes)["destinationY"] = destinationSprite->getPosition().y;
+            notes["destinationX"] = destinationSprite->getPosition().x;
+            notes["destinationY"] = destinationSprite->getPosition().y;
             
             notesCount++;
-            if((*notes)["longnote"].asBool()) notesCount++;
+            if(notes["longnote"].asBool()) notesCount++;
             
-            tmpNotesVec.push_back(notes);
+            tmpNotesVec.push_back(std::move(notes));
         }
         _notesVector.push_back(tmpNotesVec);
     }
@@ -276,7 +278,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     listener->onTouchesMoved = CC_CALLBACK_2(PlayScene::onTouchesMoved, this);
     listener->onTouchesEnded = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    
+    std::function<void(void)> callbackFunc;
     return true;
 }
 
@@ -314,12 +316,22 @@ void PlayScene::prepareGameRun()
     });
     
     blackBackLayer->runAction(Sequence::create(fadeOutAction, runGameAction, NULL));
-    
+
+    LLAudioEngine::getInstance()->unloadAllEffect();
     //音声のプリロード
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/perfect.mp3");
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/great.mp3");
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/good.mp3");
-    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/bad.mp3");
+    std::string fullPath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/perfect.mp3");
+    LLAudioEngine::getInstance()->preloadEffect(fullPath);
+    fullPath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/great.mp3");
+    LLAudioEngine::getInstance()->preloadEffect(fullPath);
+    fullPath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/good.mp3");
+    LLAudioEngine::getInstance()->preloadEffect(fullPath);
+    fullPath = FileUtils::getInstance()->fullPathForFilename("Sound/SE/bad.mp3");
+    LLAudioEngine::getInstance()->preloadEffect(fullPath);
+
+//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/perfect.mp3");
+//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/great.mp3");
+//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/good.mp3");
+//    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("Sound/SE/bad.mp3");
 }
 
 void PlayScene::run()
@@ -333,8 +345,10 @@ void PlayScene::run()
     //動画再生の開始
     if(videoLayer != nullptr) videoLayer->play();
     //音楽の再生
-    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(_songFilePath.c_str());
-    CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
+    LLAudioEngine::getInstance()->playBackgroundMusic(_songFilePath);
+    LLAudioEngine::getInstance()->setBackgroundExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(_songFilePath.c_str());
+    //CocosDenshion::SimpleAudioEngine::getInstance()->setOnExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
 //    StopWatch::getInstance()->start();
     this->scheduleUpdate();
 }
@@ -351,18 +365,18 @@ void PlayScene::update(float unused_dt)
     loadingBar->setPercent(100.0f * ((double)_currentScore / (double)_maxScore) + 5.0f);
     
     //Millisec単位で計測開始からの時間を取得
-    double elapse = CocosDenshion::SimpleAudioEngine::getInstance()->getCurrentTime() * 1000.0;//StopWatch::getInstance()->currentTime();
-    if (elapse < 0)
+    double elapse = LLAudioEngine::getInstance()->tellBackgroundMusic();//StopWatch::getInstance()->currentTime();
+    if (elapse <= 0)
     {
         elapse = 0.0;
     }
     //イテレータで_notes_vectorを最初から最後まで探索
     //そして、今の時間(ms)を超えたノーツが存在する場合、新しいノーツを生成する
-    for (std::list<std::deque<ValueMapPtr>>::iterator it = _notesVector.begin(); it != _notesVector.end();)
+    for (std::vector<std::deque<ValueMap>>::iterator it = _notesVector.begin(); it != _notesVector.end();)
     {
-        if(it->front()->at("starttime").asDouble() - _notesSpeedMs - _latencyMs < elapse)
+        if(it->front().at("starttime").asDouble() - _notesSpeedMs - _latencyMs < elapse)
         {
-            createNotes(*(it->front()));
+            createNotes(it->front());
             it->pop_front();
             
             if(it->empty())
@@ -478,7 +492,8 @@ void PlayScene::createTapFx(Vec2 position)
 
 void PlayScene::applicationDidEnterBackground()
 {
-    CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+    LLAudioEngine::getInstance()->pauseBackgroundMusic();
+    //CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
     unscheduleUpdate();
 //    StopWatch::getInstance()->pause();
 
@@ -496,7 +511,8 @@ void PlayScene::applicationWillEnterForeground()
     videoPlayer->resume();
     this->resume();
 
-    CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+    LLAudioEngine::getInstance()->resumeBackgroundMusic();
+    //CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 //    StopWatch::getInstance()->resume();
 }
 
@@ -586,10 +602,15 @@ void PlayScene::onTouchesEnded(const std::vector<Touch *> &touches, Event *event
 
 void PlayScene::finishCallBack()
 {
-    Director::getInstance()->purgeCachedData();
-    Scene* homeScene = HomeScene::createScene(ViewScene::Live);
-    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, homeScene, Color3B::BLACK));
-//    StopWatch::getInstance()->stop();
+    Director::getInstance()->getScheduler()->performFunctionInCocosThread([](){
+        LLAudioEngine::getInstance()->unloadAllEffect();
+        Director::getInstance()->purgeCachedData();
+        Scene* homeScene = HomeScene::createScene(ViewScene::Live);
+        Director::getInstance()->replaceScene(TransitionFade::create(0.5f, homeScene, Color3B::BLACK));
+
+    });
+
+    //    StopWatch::getInstance()->stop();
 }
 
 void PlayScene::noteOutDisplayedCallback(const Note& note)
@@ -643,16 +664,16 @@ void PlayScene::callbackHelperFunc(const Note& note, bool isRelease)
         default:
             break;
     }
-    
-    //パンとゲインの設定
-    //押したレーンごとにパンとゲインをそれぞれ設定する
-    //パン:  [-0.1 .. 0.0 .. 0.1]
-    //ゲイン: [0.9 .. 1.0 .. 0.9]
-    float pan = (static_cast<float>(note.getLane()) - 4.0f) / 40.0f;
-    float gain = 1.0 - (static_cast<float>(abs(4 - note.getLane())) / 40.0);
 
     //音の再生
-    CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str(), false, 1.0, pan, gain);
+    float soundTime = LLAudioEngine::getInstance()->tellBackgroundMusic();
+    if (soundTime - _previousSoundTime > 20)
+    {
+            LLAudioEngine::getInstance()->playEffect(fullpath);
+    }
+    _previousSoundTime = soundTime;
+
+    //CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullpath.c_str());
     
     //判定とタッチのエフェクトを表示する
     createJudgeSprite(note.getJudgeResult());

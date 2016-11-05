@@ -978,6 +978,7 @@ void Scheduler::update(float dt)
         }
         
     }
+    
 }
 
 void Scheduler::schedule(SEL_SCHEDULE selector, Ref *target, float interval, unsigned int repeat, float delay, bool paused)

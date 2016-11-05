@@ -10,12 +10,27 @@
 #define __OpenLLSIF__Note__
 
 #include "cocos2d.h"
-//#include "StopWatch.h"
 #include "PRFilledPolygon.h"
 
 USING_NS_CC;
 
+/**
+ *  減少のイージング
+ *
+ *  @param float 時間
+ *
+ *  @return 入力時間のときの値(0.0 ~ 1.0)
+ */
+inline float decreaseEasing(float);
 
+/**
+ *  増加のイージング
+ *
+ *  @param float 時間
+ *
+ *  @return 入力時間の時の値(0.0 ~ 1.0)
+ */
+inline float increaseEasing(float);
 
 enum NoteJudge
 {
@@ -27,7 +42,6 @@ enum NoteJudge
     NON
 };
 
-//円を作るクラス 判定のために使用
 class Circle : public Node, create_func<Circle>
 {
     CC_SYNTHESIZE(float, radius , Radius);
@@ -85,8 +99,8 @@ private:
     NoteJudge startJudge();
     NoteJudge endJudge();
     
-    void updateSimpleNote(double now, double elapsed, Sprite* note);
-    void updateLongNote(double now, double elapsed, Sprite* note);
+    void updateSimpleNote(double elapsed, Sprite* note);
+    void updateLongNote(double elapsed, Sprite* note);
     void flickerPolygon(FilledPolygon* poly, double sleepTime);
     void renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite);
     inline void updateNotePosition(Sprite* note, float elapsedTime);
@@ -94,9 +108,11 @@ private:
     //点滅の状態
     struct FlickerState
     {
-        float theta;
+        bool isIncrease;
         float time;
-        
+        float duration;
+        std::function<float(float)> easing;
+
         FlickerState();
     };
     FlickerState _lnFlash;
@@ -124,11 +140,12 @@ private:
 
     Vec2 _endOfPoint;
     Vec2 _destination;//目的地
-    double startTimeCount;
-    double endTimeCount;
     
     float latency = 0.0f;
+    float _elapsedTime;
     int _longNotesHoldId;
+    Rect _visibleRect;
+    
     
     std::function<void(const Note&)> _callbackFunc;
     std::function<void(const Note&)> _touchCallbackFunc;

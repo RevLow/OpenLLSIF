@@ -15,10 +15,10 @@
 		2E2E91291CD4E86600F6AE78 /* TapAreaList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002BC1CCA628B009901E1 /* TapAreaList.plist */; };
 		2E2EBDD01C493E33009AF4E6 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EBDCE1C493E33009AF4E6 /* json11.cpp */; };
 		2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B61C72191F00DDF6AD /* longNotesSpark.png */; };
-		2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E3230B81C72192B00DDF6AD /* particle_texture.plist */; };
 		2E39813C1B5D27BD001B096C /* PlayScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E39813A1B5D27BD001B096C /* PlayScene.cpp */; };
 		2E4002C21CCBC8FE009901E1 /* UiSongList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4002C11CCBC8FE009901E1 /* UiSongList.plist */; };
 		2E44AB851CD0FAF000682069 /* RhythmAdjustScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E44AB831CD0FAF000682069 /* RhythmAdjustScene.cpp */; };
+		2E4A44331D7DB98800D90A7F /* particle_texture.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2E4A44321D7DB98800D90A7F /* particle_texture.plist */; };
 		2E61137C1B64AA1C006C82F8 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137B1B64AA1C006C82F8 /* CoreVideo.framework */; };
 		2E61137E1B64AA24006C82F8 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137D1B64AA24006C82F8 /* ImageIO.framework */; };
 		2E6113801B64AA5F006C82F8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E61137F1B64AA5F006C82F8 /* CoreMedia.framework */; };
@@ -28,6 +28,7 @@
 		2E9807611C63B03800D33CC2 /* triangulate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E98075E1C63B03800D33CC2 /* triangulate.cpp */; };
 		2E9807EC1C654EBD00D33CC2 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807EB1C654EBD00D33CC2 /* res */; };
 		2E9807F41C679A8700D33CC2 /* background in Resources */ = {isa = PBXBuildFile; fileRef = 2E9807F31C679A8700D33CC2 /* background */; };
+		2EB84E431DCAEAA60017C1A1 /* LLAudioEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EB84E421DCAEAA60017C1A1 /* LLAudioEngine.framework */; };
 		2EBD46C71CFC6D7800300BF8 /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */; };
 		2EC2146E1C523D37005CED97 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146D1C523D37005CED97 /* OpenGLES.framework */; };
 		2EC214701C523D52005CED97 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC2146F1C523D52005CED97 /* UIKit.framework */; };
@@ -105,13 +106,13 @@
 		2E2EBDCE1C493E33009AF4E6 /* json11.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json11.cpp; sourceTree = "<group>"; };
 		2E2EBDCF1C493E33009AF4E6 /* json11.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json11.hpp; sourceTree = "<group>"; };
 		2E3230B61C72191F00DDF6AD /* longNotesSpark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = longNotesSpark.png; sourceTree = "<group>"; };
-		2E3230B81C72192B00DDF6AD /* particle_texture.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = particle_texture.plist; sourceTree = "<group>"; };
 		2E39813A1B5D27BD001B096C /* PlayScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayScene.cpp; sourceTree = "<group>"; };
 		2E39813B1B5D27BD001B096C /* PlayScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayScene.h; sourceTree = "<group>"; };
 		2E4002BC1CCA628B009901E1 /* TapAreaList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TapAreaList.plist; sourceTree = "<group>"; };
 		2E4002C11CCBC8FE009901E1 /* UiSongList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = UiSongList.plist; sourceTree = "<group>"; };
 		2E44AB831CD0FAF000682069 /* RhythmAdjustScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RhythmAdjustScene.cpp; sourceTree = "<group>"; };
 		2E44AB841CD0FAF000682069 /* RhythmAdjustScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RhythmAdjustScene.h; sourceTree = "<group>"; };
+		2E4A44321D7DB98800D90A7F /* particle_texture.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = particle_texture.plist; sourceTree = "<group>"; };
 		2E61137B1B64AA1C006C82F8 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreVideo.framework; sourceTree = DEVELOPER_DIR; };
 		2E61137D1B64AA24006C82F8 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/ImageIO.framework; sourceTree = DEVELOPER_DIR; };
 		2E61137F1B64AA5F006C82F8 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreMedia.framework; sourceTree = DEVELOPER_DIR; };
@@ -124,6 +125,7 @@
 		2E98075F1C63B03800D33CC2 /* triangulate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangulate.h; sourceTree = "<group>"; };
 		2E9807EB1C654EBD00D33CC2 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		2E9807F31C679A8700D33CC2 /* background */ = {isa = PBXFileReference; lastKnownFileType = folder; path = background; sourceTree = "<group>"; };
+		2EB84E421DCAEAA60017C1A1 /* LLAudioEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LLAudioEngine.framework; path = ../../LLAudioEngine/Framework/LLAudioEngine.framework; sourceTree = "<group>"; };
 		2EBD46C61CFC6D7800300BF8 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		2EC2146D1C523D37005CED97 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		2EC2146F1C523D52005CED97 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -192,6 +194,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2EF36A101CC1EF810003BA10 /* libiconv.dylib in Frameworks */,
+				2EB84E431DCAEAA60017C1A1 /* LLAudioEngine.framework in Frameworks */,
 				2EC2147C1C524AD8005CED97 /* libcocos2d iOS.a in Frameworks */,
 				2EC214741C523D6B005CED97 /* Security.framework in Frameworks */,
 				2EC214721C523D5B005CED97 /* CoreMotion.framework in Frameworks */,
@@ -272,6 +275,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2EB84E421DCAEAA60017C1A1 /* LLAudioEngine.framework */,
 				2EF36A0F1CC1EF810003BA10 /* libiconv.dylib */,
 				2EC2147B1C524AD8005CED97 /* libcocos2d iOS.a */,
 				2EC214791C5245ED005CED97 /* libfreetype.a */,
@@ -332,7 +336,7 @@
 			isa = PBXGroup;
 			children = (
 				2E3230B61C72191F00DDF6AD /* longNotesSpark.png */,
-				2E3230B81C72192B00DDF6AD /* particle_texture.plist */,
+				2E4A44321D7DB98800D90A7F /* particle_texture.plist */,
 			);
 			name = Particle;
 			sourceTree = "<group>";
@@ -510,6 +514,7 @@
 			files = (
 				2E2E91291CD4E86600F6AE78 /* TapAreaList.plist in Resources */,
 				5087E78117EB970100C73F5D /* Icon-120.png in Resources */,
+				2E4A44331D7DB98800D90A7F /* particle_texture.plist in Resources */,
 				5087E78617EB970100C73F5D /* Icon-76.png in Resources */,
 				5087E77F17EB970100C73F5D /* Default@2x.png in Resources */,
 				50EF629917ECD46A001EB2F8 /* Icon-100.png in Resources */,
@@ -530,7 +535,6 @@
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
 				2E9807EC1C654EBD00D33CC2 /* res in Resources */,
 				2EBD46C71CFC6D7800300BF8 /* Entitlements.plist in Resources */,
-				2E3230B91C72192B00DDF6AD /* particle_texture.plist in Resources */,
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
 				2E3230B71C72191F00DDF6AD /* longNotesSpark.png in Resources */,
@@ -613,10 +617,12 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/devLibrary,
+					"$(PROJECT_DIR)",
+					/Users/tetsushi2/Documents/Develop/LLAudioEngine/Framework,
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ios/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -644,6 +650,8 @@
 					/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/build/Debug,
 					"/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/build/Debug-iphoneos",
 					/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/external/freetype2/prebuilt/ios,
+					/Users/tetsushi2/Documents/Develop/OpenLLSIF/LLAudioEngine/build/Debug,
+					"/Users/tetsushi2/Documents/Develop/OpenLLSIF/LLAudioEngine/build/Debug-iphoneos",
 				);
 				MACH_O_TYPE = mh_execute;
 				ONLY_ACTIVE_ARCH = YES;
@@ -671,9 +679,11 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/devLibrary,
+					"$(PROJECT_DIR)",
+					/Users/tetsushi2/Documents/Develop/LLAudioEngine/Framework,
 				);
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ios/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -698,6 +708,8 @@
 					/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/build/Debug,
 					"/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/build/build/Debug-iphoneos",
 					/Users/tetsushi2/Documents/Develop/OpenLLSIF/cocos2d/external/freetype2/prebuilt/ios,
+					/Users/tetsushi2/Documents/Develop/OpenLLSIF/LLAudioEngine/build/Debug,
+					"/Users/tetsushi2/Documents/Develop/OpenLLSIF/LLAudioEngine/build/Debug-iphoneos",
 				);
 				MACH_O_TYPE = mh_execute;
 				ONLY_ACTIVE_ARCH = YES;

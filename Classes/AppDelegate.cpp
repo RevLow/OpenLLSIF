@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
 #include "PlayScene.h"
+#include <LLAudioEngine/LLAudioSessionUtil.h>
 
 USING_NS_CC;
 
@@ -18,7 +19,8 @@ void AppDelegate::initGLContextAttrs()
 {
     //set OpenGL context attributions,now can only set six attributions:
     //red,green,blue,alpha,depth,stencil
-    GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8};
+    //GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8};
+    GLContextAttrs glContextAttrs = {8, 8, 8, 8, 0, 0};
 
     GLView::setGLContextAttrs(glContextAttrs);
 }
@@ -55,7 +57,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     
     //画面サイズの最適化
     //glview->setDesignResolutionSize(960, 640, ResolutionPolicy::SHOW_ALL);
-    
+    LLAudioSessionUtil::initialize();
+
     return true;
 }
 

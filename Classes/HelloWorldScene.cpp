@@ -2,7 +2,8 @@
 #include "HomeScene.h"
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
-#include "SimpleAudioEngine.h"
+#include <LLAudioEngine/LLAudioEngine.h>
+//#include "SimpleAudioEngine.h"
 //#include "AudioManager.h"
 
 USING_NS_CC;
@@ -57,8 +58,12 @@ bool HelloWorld::init()
 
     std::string filePath = "Sound/BGM/paradice_live.mp3";
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
-    CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(1.5);
-    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+//    CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.8);
+//    CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(1.0);
+//    CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
+    LLAudioEngine::getInstance()->setBackgroundMusic(1.0);
+    LLAudioEngine::getInstance()->setEffectVolume(0.9);
+    LLAudioEngine::getInstance()->playBackgroundMusic(fullPath.c_str(), true);
     //AudioManager::getInstance()->setSeVolume(1.5);
     //AudioManager::getInstance()->play(fullPath, AudioManager::BGM, true);
     //////////////////////////////
@@ -92,8 +97,10 @@ bool HelloWorld::init()
         std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
         //AudioManager::getInstance()->play(fullPath, AudioManager::AudioType::SE);
         //AudioManager::getInstance()->stop(AudioManager::BGM);
-        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
-        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+//        CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(fullPath.c_str());
+//        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+        LLAudioEngine::getInstance()->playEffect(fullPath.c_str());
+        LLAudioEngine::getInstance()->stopBackgroundMusic();
         
         //次のシーンを読み込む
         auto scene = HomeScene::createScene(ViewScene::Home);

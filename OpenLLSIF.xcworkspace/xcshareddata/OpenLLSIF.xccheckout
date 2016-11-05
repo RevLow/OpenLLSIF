@@ -5,14 +5,14 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>F4D887B7-3CCC-424C-A753-E22D0AB43B5A</string>
+	<string>09B70797-855E-477E-9BA2-CFB0BDCEEE8B</string>
 	<key>IDESourceControlProjectName</key>
 	<string>OpenLLSIF</string>
 	<key>IDESourceControlProjectPath</key>
 	<string>OpenLLSIF.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>27DD8EDA-6656-43BE-BBF0-1E4A0107D2B9</key>
+		<key>741AB758-D550-47BC-B301-CD075898E5B0</key>
 		<string>..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
@@ -20,14 +20,14 @@
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>27DD8EDA-6656-43BE-BBF0-1E4A0107D2B9</string>
+	<string>741AB758-D550-47BC-B301-CD075898E5B0</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>27DD8EDA-6656-43BE-BBF0-1E4A0107D2B9</string>
+			<string>741AB758-D550-47BC-B301-CD075898E5B0</string>
 			<key>IDESourceControlWCCName</key>
 			<string>OpenLLSIF</string>
 		</dict>
