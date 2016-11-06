@@ -406,37 +406,20 @@ void PlayScene::createJudgeSprite(NoteJudge judge)
     judgeSprite->setName("JudgeSprite");
     auto rect = Director::getInstance()->getVisibleSize();
     judgeSprite->setPosition(rect.width / 2, rect.height / 2);
-    judgeSprite->setScale(0.42f);
+    judgeSprite->setScale(0.0f);
     judgeSprite->setOpacity(0);
     judgeSprite->setLocalZOrder(1);
-    auto action1 = Spawn::create(ScaleTo::create(0.06f, 2.0f),
-                                  FadeTo::create(0.06f, 255), NULL);
+    auto action1 = EaseSineOut::create(Spawn::create(ScaleTo::create(0.05f, 2.0f),
+                                                     FadeTo::create(0.05f, 255), NULL));
     
-    auto action2 = FadeOut::create(0.3f);
+    auto action2 = FadeOut::create(0.2f);
     addChild(judgeSprite);
     
     judgeSprite->runAction(Sequence::create(action1,
-                                             DelayTime::create(0.1f),
-                                             action2,
-                                             RemoveSelf::create(), NULL));
+                                            DelayTime::create(0.15f),
+                                            action2,
+                                            RemoveSelf::create(), NULL));
     
-    //Perfectの場合は既存のPERFECTの画像の上にもう一枚上乗せする
-    if(judge==NoteJudge::PERFECT)
-    {
-        Sprite *overSprite = Sprite::createWithSpriteFrameName("Image/Judge/judging_19.png");
-        overSprite->setName("OverPerfect");
-        overSprite->setPosition(judgeSprite->getPosition());
-        overSprite->cocos2d::Node::setScale(0.5);
-        overSprite->setLocalZOrder(1);
-        overSprite->setOpacity(0);
-        overSprite->setBlendFunc(BlendFunc::ADDITIVE);
-        addChild(overSprite);
-        
-        overSprite->runAction(Sequence::create(FadeIn::create(0.06f),
-                                               Spawn::create(FadeOut::create(0.1f),
-                                                             ScaleTo::create(0.05f, 2.0f), NULL),
-                                               RemoveSelf::create(),NULL));
-    }
 }
 
 void PlayScene::createTapFx(Vec2 position)

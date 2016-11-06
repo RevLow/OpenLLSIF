@@ -600,5 +600,5 @@ void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
     if(opacity <= 0.0) opacity = 0.0;
     if(opacity >= 1.0) opacity = 1.0;
 
-    poly->setOpacity(255 * opacity);
+    poly->setOpacity(127 * opacity);
 }
