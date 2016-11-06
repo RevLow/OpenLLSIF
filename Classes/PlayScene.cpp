@@ -441,7 +441,7 @@ void PlayScene::createJudgeSprite(NoteJudge judge)
 
 void PlayScene::createTapFx(Vec2 position)
 {
-    auto tapFx= CSLoader::getInstance()->createNode("res/tapFx.csb");
+    auto tapFx= CSLoader::getInstance()->createNode("res/tapFx_0.csb");
     tapFx->setLocalZOrder(0);
     /*座標変換*/
     Vec2 rePosition = position;
@@ -449,7 +449,7 @@ void PlayScene::createTapFx(Vec2 position)
     rePosition.y -= tapFx->getContentSize().height / 2;
     tapFx->setPosition(rePosition);
     this->addChild(tapFx);
-    cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/tapFx.csb");
+    cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/tapFx_0.csb");
     action->setLastFrameCallFunc([tapFx, this](){
         this->removeChild(tapFx);
     });

@@ -189,8 +189,8 @@ void Note::createNotesSprite(const NoteType type)
         Sprite* sp = Sprite::createWithSpriteFrameName("Image/notes/longnotes_03.png");
         sp->setName("EndNotes");
         sp->setVisible(false);
-        sp->setPosition(initVec);
         sp->setScale(0.1f);
+        sp->setPosition(initVec);
         addChild(sp);
     }
 }
@@ -526,29 +526,33 @@ void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
 {
     Vec2 currentPos = startNoteSprite->getPosition();
     Vec2 endPosition = endNoteSprite->getPosition();
-
-    Vec2 v1 = currentPos - initVec;
-    Vec2 v2(0, -1);
+    float angle = MATH_DEG_TO_RAD( 90.0 - (22.5 * _noteInfo.lane) );
     
-
-    double length = (currentPos - endPosition).length();
-    float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
-    
-    
-    length += 10;
     std::vector<Vec2> vList = std::vector<Vec2>();
     std::vector<Vec2> uvCoordinate = std::vector<Vec2>();
-    Vec2 v = Vec2(0, -1*length);
     
-    vList.push_back(Vec2(-30.0f * startNoteSprite->getScale(), v.y));
-    vList.push_back(Vec2(30.0f * startNoteSprite->getScale(), v.y));
-    vList.push_back(Vec2(30.0f * endNoteSprite->getScale(),0));
-    vList.push_back(Vec2(-30.0f * endNoteSprite->getScale() ,0));
+    float scale1 = startNoteSprite->getScale() / 2.0;
+    float scale2 = endNoteSprite->getScale() / 2.0;
+    vList.resize(4);
+    uvCoordinate.resize(4);
     
-    uvCoordinate.push_back(Vec2(0,0));
-    uvCoordinate.push_back(Vec2(1,0));
-    uvCoordinate.push_back(Vec2(1,1));
-    uvCoordinate.push_back(Vec2(0,1));
+    vList[0].x = floor((currentPos.x + (scale1 * 60.0f) * cos(angle)) + 0.5);
+    vList[0].y = floor((currentPos.y - (scale1 * 60.0f) * sin(angle)) + 0.5);
+
+    vList[1].x = floor((currentPos.x - (scale1 * 60.0f) * cos(angle)) + 0.5);
+    vList[1].y = floor((currentPos.y + (scale1 * 60.0f) * sin(angle)) + 0.5);
+    
+    vList[2].x = floor((endPosition.x - (scale2 * 60.0f) * cos(angle)) + 0.5);
+    vList[2].y = floor((endPosition.y + (scale2 * 60.0f) * sin(angle)) + 0.5);
+    
+    vList[3].x = floor((endPosition.x + (scale2 * 60.0f) * cos(angle)) + 0.5);
+    vList[3].y = floor((endPosition.y - (scale2 * 60.0f) * sin(angle)) + 0.5);
+
+
+    uvCoordinate[0] = Vec2(1, 1);
+    uvCoordinate[1] = Vec2(0, 1);
+    uvCoordinate[2] = Vec2(0, 0);
+    uvCoordinate[3] = Vec2(1, 0);
     
     FilledPolygon *poly = getChildByName<FilledPolygon*>("LongnotesLine");//加算合成するポリゴン
     
@@ -557,6 +561,7 @@ void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
     {
         Texture2D *texture = Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_07.png");
         poly = FilledPolygon::create(texture, vList, uvCoordinate);
+        poly->setOpacity(127);
         poly->setName("LongnotesLine");
         addChild(poly);
     }
@@ -564,9 +569,6 @@ void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
     {
         poly->setTexturePolygon(vList, uvCoordinate);
     }
-    
-    poly->setRotation(angle);
-    poly->setPosition(endPosition);
 }
 
 inline float decreaseEasing(float t)
