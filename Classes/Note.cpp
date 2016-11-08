@@ -66,7 +66,7 @@ Note::FlickerState::FlickerState()
 : isIncrease(false),
 time(0),
 duration(0.28),
-easing(decreaseEasing)
+easing(SifUtil::decreaseEasing)
 {
 }
 
@@ -84,13 +84,6 @@ direction(Vec2(0,0))
     
 }
 
-inline Vec2 UnitPosition(int unitNum)
-{
-    float radian = MATH_DEG_TO_RAD(22.5 * unitNum);
-    return std::move(Vec2(initVec.x - cos(radian) * 400.0,
-                          initVec.y - sin(radian) * 400.0));
-}
-
 bool Note::init(const ValueMap& jsonInfo)
 {
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
@@ -106,7 +99,7 @@ bool Note::init(const ValueMap& jsonInfo)
     _latency = jsonInfo.at("latency").asFloat();
 
     // 1秒あたりの移動数を計算
-    auto v = UnitPosition(_noteInfo.lane) - initVec;
+    auto v = SifUtil::unitPosition(_noteInfo.lane) - SifUtil::initVec;
     _noteInfo.direction = Vec2(v.x / MSEC_TO_SEC(_noteInfo.speed), v.y / MSEC_TO_SEC(_noteInfo.speed));
     
     //ノーツ情報の設定
@@ -169,7 +162,7 @@ void Note::createNotesSprite(const NoteType type)
 
     //アニメーションの処理
     note->setVisible(false);
-    note->setPosition(initVec);
+    note->setPosition(SifUtil::initVec);
     note->setScale(0.1f);
     auto scaleToAction = ScaleTo::create(MSEC_TO_SEC(_noteInfo.speed), 2.0f);
     auto sequenceAction = Sequence::create(DelayTime::create(0.03), CallFunc::create([note]()
@@ -190,7 +183,7 @@ void Note::createNotesSprite(const NoteType type)
         sp->setName("EndNotes");
         sp->setVisible(false);
         sp->setScale(0.1f);
-        sp->setPosition(initVec);
+        sp->setPosition(SifUtil::initVec);
         addChild(sp);
     }
 }
@@ -472,7 +465,7 @@ void Note::updateLongNote(const double& elapsed, Sprite* note)
         poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
         flickerPolygon(poly, elapsed);
         
-        Vec2 v1 = currentPos - initVec;
+        Vec2 v1 = currentPos - SifUtil::initVec;
         Vec2 v2(0, -1);
         float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
         
@@ -509,10 +502,10 @@ void Note::updateLongNote(const double& elapsed, Sprite* note)
         }
         
         
-        if((currentPos - initVec).length() >= (UnitPosition(_noteInfo.lane) - initVec).length())
+        if((currentPos - SifUtil::initVec).length() >= (SifUtil::unitPosition(_noteInfo.lane) - SifUtil::initVec).length())
         {
             note->stopActionByTag(ActionKey::Simple);
-            note->setPosition(UnitPosition(_noteInfo.lane));
+            note->setPosition(SifUtil::unitPosition(_noteInfo.lane));
         }
     }
     else
@@ -571,16 +564,6 @@ void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
     }
 }
 
-inline float decreaseEasing(float t)
-{
-    return 1.9975 * pow(t, 5) - 0.747499999999999 * pow(t, 4) - 2.3 * pow(t, 3) + 0.05 * t + 1;
-}
-
-inline float increaseEasing(float t)
-{
-    return 1.7*pow(t, 5) -6 * pow(t, 4) + 8.8 * pow(t, 3) + -7.4 * pow(t, 2) + 3.9 * t;
-}
-
 void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
 {
     _lnFlash.time += MSEC_TO_SEC(sleepTime);
@@ -592,7 +575,7 @@ void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
         constexpr float t1 = 28.0 / 60.0;
         constexpr float t2 = 17.0 / 60.0;
         _lnFlash.duration = _lnFlash.isIncrease ?  t1 : t2;
-        _lnFlash.easing = _lnFlash.isIncrease ? increaseEasing : decreaseEasing;
+        _lnFlash.easing = _lnFlash.isIncrease ? SifUtil::increaseEasing : SifUtil::decreaseEasing;
     }
     
     float t = _lnFlash.time / _lnFlash.duration;

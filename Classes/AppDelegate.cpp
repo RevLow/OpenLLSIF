@@ -20,7 +20,7 @@ void AppDelegate::initGLContextAttrs()
     //set OpenGL context attributions,now can only set six attributions:
     //red,green,blue,alpha,depth,stencil
     //GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8};
-    GLContextAttrs glContextAttrs = {8, 8, 8, 8, 0, 0};
+    GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8};
 
     GLView::setGLContextAttrs(glContextAttrs);
 }

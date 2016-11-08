@@ -11,6 +11,8 @@
 
 #include <memory>
 #include <unordered_map>
+#include "SifUtil.h"
+
 #include "Note.h"
 USING_NS_CC;
 
@@ -32,6 +34,11 @@ public:
     static cocos2d::Scene* createScene(std::string playSongFile, GameLevel level);
     bool init(std::string playSongFile, GameLevel gameLevel);
     using create_func::create;
+    
+    /**
+     *  シーンが読み込まれたら使う
+     */
+    virtual void onEnterTransitionDidFinish();
     
     /**
      *@fn applicationWillEnterForeground
@@ -75,6 +82,8 @@ public:
      *  @param note 
      */
     void noteReleaseCallback(const Note& note);
+    
+    void makeUnitFrameAtlas();
     
     void onTouchesBegan(const std::vector<Touch*>& touches, Event *event);
     void onTouchesMoved(const std::vector<Touch*>& touches, Event *event);

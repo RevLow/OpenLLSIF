@@ -147,7 +147,18 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     playScene->setLocalZOrder(0);
     playScene->setOpacity(0);
     this->addChild(playScene);
-
+    
+    // ユニット画像の設定
+    // オフスクリーンレンダリングで画像を作る
+    makeUnitFrameAtlas();
+    
+    for (int i = 0; i < 9; i++)
+    {
+        auto sprite = Sprite::createWithSpriteFrameName(std::to_string(i)+".png");
+        sprite->setPosition(SifUtil::unitPosition(i));
+        sprite->getTexture()->setAliasTexParameters();
+        playScene->addChild(sprite);
+    }
     
 /*===============譜面関係の処理========================*/
 
@@ -197,6 +208,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     
     //ゲーム開始時のアニメーション用のレイヤーを重ねる
     auto playSplashLayer = CSLoader::getInstance()->createNode("res/splash_layer.csb");
+    playSplashLayer->setName("SplashLayer");
     playSplashLayer->setLocalZOrder(1);
     auto jacketImage = playSplashLayer->getChildByName<Sprite*>("jacketImage");
     Sprite* sp = Sprite::create(playSongFile + '/' + coverImagePath);
@@ -211,28 +223,8 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     auto nameShadow = playSplashLayer->getChildByName<ui::Text*>("song_name_shadow");
     songNameLabel->setString(songName);
     nameShadow->setString(songName);
+    playSplashLayer->setVisible(false);
     this->addChild(playSplashLayer);
-    
-    //アニメーションを動かす
-    auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/splash_layer.csb");
-    
-    
-    //最終フレームに到達したら、スプラッシュ画像を消去し、ゲーム開始準備を実行
-    action->setLastFrameCallFunc([playSplashLayer,this]()
-                                {
-                                    playSplashLayer->runAction(Sequence::create(FadeTo::create(1.0f, 0),
-                                                                                   CallFunc::create(
-                                                                                   [this, playSplashLayer]()
-                                                                                   {
-                                                                                       this->removeChild(playSplashLayer);
-                                                                                       this->prepareGameRun();
-                                                                                   }),
-                                                                                   NULL));
-    
-                                });
-    
-    playSplashLayer->runAction(action);
-    action->gotoFrameAndPlay(0, false);
     
     
     // 作成したノーツを格納するベクターを初期化
@@ -258,8 +250,34 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     listener->onTouchesMoved = CC_CALLBACK_2(PlayScene::onTouchesMoved, this);
     listener->onTouchesEnded = CC_CALLBACK_2(PlayScene::onTouchesEnded, this);
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    std::function<void(void)> callbackFunc;
     return true;
+}
+
+void PlayScene::onEnterTransitionDidFinish()
+{
+    auto playSplashLayer = getChildByName("SplashLayer");
+    playSplashLayer->setVisible(true);
+    
+    //アニメーションを動かす
+    auto action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/splash_layer.csb");
+    
+    
+    //最終フレームに到達したら、スプラッシュ画像を消去し、ゲーム開始準備を実行
+    action->setLastFrameCallFunc([playSplashLayer,this]()
+                                 {
+                                     playSplashLayer->runAction(Sequence::create(FadeTo::create(1.0f, 0),
+                                                                                 CallFunc::create(
+                                                                                                  [this, playSplashLayer]()
+                                                                                                  {
+                                                                                                      this->removeChild(playSplashLayer);
+                                                                                                      this->prepareGameRun();
+                                                                                                  }),
+                                                                                 NULL));
+                                     
+                                 });
+    
+    playSplashLayer->runAction(action);
+    action->gotoFrameAndPlay(0, false);
 }
 
 #pragma mark Private methods
@@ -467,8 +485,6 @@ void PlayScene::applicationWillEnterForeground()
 
 void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event)
 {
-    Layer* playLayer = getChildByName<Layer*>("PlayLayer");
-    
     for(Touch* touch : touches)
     {
         Vec2 location = touch->getLocation();
@@ -480,15 +496,12 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event
         for (int i = 0;i < 9;i++)
         {
             if(_displayedNotes[i].empty()) continue;
-            int lane_i = i + 1;
-            
-            Sprite* sp = playLayer->getChildByName<Sprite*>(std::to_string(lane_i));
-
-            if (!isPointContain(location, sp->getPosition()))
+            Vec2 position = SifUtil::unitPosition(i);
+            if (!isPointContain(location, position))
             {
                 continue;
             }
-            double length = (location - sp->getPosition()).length();
+            double length = (location - position).length();
             
             if(length < minLength)
             {
@@ -514,14 +527,13 @@ void PlayScene::onTouchesMoved(const std::vector<Touch *> &touches, Event *event
 {
     if(_holdNotes.empty()) return;
     
-    Layer* playLayer = getChildByName<Layer*>("PlayLayer");
     for (Touch* touch : touches)
     {
         auto it = _holdNotes.find(touch->getID());
         if(it != _holdNotes.end() && it->second != nullptr)
         {
-            int laneNum = it->second->getLane() + 1;
-            Vec2 point = playLayer->getChildByName<Sprite*>(std::to_string(laneNum))->getPosition();
+            int laneNum = it->second->getLane();
+            Vec2 point = SifUtil::unitPosition(laneNum);
             if(isPointContain(touch->getLocation(), point)) continue;
             
             it->second->touchMoveAction(touch->getID());
@@ -631,4 +643,54 @@ void PlayScene::callbackHelperFunc(const Note& note, bool isRelease)
     createJudgeSprite(note.getJudgeResult());
     if(isRelease || !note.isLongNotes())
         createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
+}
+
+
+void PlayScene::makeUnitFrameAtlas()
+{
+    const int imgWidth = 128;
+    const int imgHeight = 128;
+    int x = 0;
+    int y = 0;
+    ValueVector data = FileUtils::getInstance()->getValueVectorFromFile("UnitData.plist");
+    
+    // 縦横３つずつの画像が入る大きさを確保する
+    RenderTexture* texture = RenderTexture::create(512, 512);
+    texture->beginWithClear(0, 0, 0, 0);
+    
+    for (Value fileNameData : data)
+    {
+        auto sprite = Sprite::create(fileNameData.asString());
+        sprite->setScaleY(-1.0);
+        sprite->setAnchorPoint(Vec2(0,1));
+        sprite->setPosition(Vec2(x, y));
+        
+        x += imgWidth;
+        if(x >= 3 * imgWidth)
+        {
+            x = 0;
+            y += imgHeight;
+        }
+        
+        //書き込み
+        sprite->visit();
+        Director::getInstance()->getTextureCache()->removeTextureForKey(fileNameData.asString());
+    }
+    
+    texture->end();
+    
+    //スプライトフレームを作成
+    x = 0;
+    y = 0;
+    for(int i=0;i < 9;i++)
+    {
+        SpriteFrame* frame = SpriteFrame::createWithTexture(texture->getSprite()->getTexture(), Rect(x, y, imgWidth, imgHeight));
+        SpriteFrameCache::getInstance()->addSpriteFrame(frame, std::to_string(i)+".png");
+        x += imgWidth;
+        if(x >= 3 * imgWidth)
+        {
+            x = 0;
+            y += imgHeight;
+        }
+    }
 }

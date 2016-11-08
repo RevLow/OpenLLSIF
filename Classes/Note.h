@@ -10,27 +10,10 @@
 #define __OpenLLSIF__Note__
 
 #include "cocos2d.h"
+#include "SifUtil.h"
 #include "PRFilledPolygon.h"
 
 USING_NS_CC;
-
-/**
- *  減少のイージング
- *
- *  @param float 時間
- *
- *  @return 入力時間のときの値(0.0 ~ 1.0)
- */
-inline float decreaseEasing(float);
-
-/**
- *  増加のイージング
- *
- *  @param float 時間
- *
- *  @return 入力時間の時の値(0.0 ~ 1.0)
- */
-inline float increaseEasing(float);
 
 enum NoteType
 {
@@ -54,8 +37,6 @@ enum ActionKey
     Simple,
     LongNotes
 };
-
-const Vec2 initVec(480, 480);
 
 class Circle : public Node, create_func<Circle>
 {
