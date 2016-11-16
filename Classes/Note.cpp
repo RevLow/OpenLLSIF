@@ -99,8 +99,8 @@ bool Note::init(const ValueMap& jsonInfo)
     _latency = jsonInfo.at("latency").asFloat();
 
     // 1秒あたりの移動数を計算
-    auto v = SifUtil::unitPosition(_noteInfo.lane) - SifUtil::initVec;
-    _noteInfo.direction = Vec2(v.x / MSEC_TO_SEC(_noteInfo.speed), v.y / MSEC_TO_SEC(_noteInfo.speed));
+    auto theta = SifUtil::BETWEEN_UNITS_ANGLE * _noteInfo.lane;
+    _noteInfo.direction = Vec2(-SifUtil::UNIT_RADIUS * cos(MATH_DEG_TO_RAD(theta)) / MSEC_TO_SEC(_noteInfo.speed), -SifUtil::UNIT_RADIUS * sin(MATH_DEG_TO_RAD(theta)) / MSEC_TO_SEC(_noteInfo.speed));
     
     //ノーツ情報の設定
     int type = jsonInfo.at("type").asInt();
@@ -519,7 +519,7 @@ void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
 {
     Vec2 currentPos = startNoteSprite->getPosition();
     Vec2 endPosition = endNoteSprite->getPosition();
-    float angle = MATH_DEG_TO_RAD( 90.0 - (22.5 * _noteInfo.lane) );
+    float angle = MATH_DEG_TO_RAD( 90.0 - (SifUtil::BETWEEN_UNITS_ANGLE * _noteInfo.lane) );
     
     std::vector<Vec2> vList = std::vector<Vec2>();
     std::vector<Vec2> uvCoordinate = std::vector<Vec2>();

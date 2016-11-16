@@ -20,7 +20,7 @@ float SifUtil::increaseEasing(float t)
 
 Vec2 SifUtil::unitPosition(int unitNum)
 {
-    float radian = MATH_DEG_TO_RAD(22.5 * unitNum);
-    return std::move(Vec2(SifUtil::initVec.x - cos(radian) * 400.0,
-                          SifUtil::initVec.y - sin(radian) * 400.0));
+    float radian = MATH_DEG_TO_RAD(BETWEEN_UNITS_ANGLE * unitNum);
+    return std::move(Vec2(SifUtil::initVec.x - cos(radian) * UNIT_RADIUS,
+                          SifUtil::initVec.y - sin(radian) * UNIT_RADIUS));
 }
