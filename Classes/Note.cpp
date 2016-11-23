@@ -140,7 +140,7 @@ void Note::createNotesSprite(const NoteType type)
         default:
             break;
     }
-    
+
     //同時ノーツの処理
     if(_noteInfo.isParallel)
     {

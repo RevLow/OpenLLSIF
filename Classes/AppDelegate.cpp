@@ -45,7 +45,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setDisplayStats(true);
 
     // set FPS. the default value is 1.0/60 if you don't call this
-    director->setAnimationInterval(1.0 / 120);
+    director->setAnimationInterval(1.0 / 60);
 
     register_all_packages();
 
@@ -59,6 +59,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
     //glview->setDesignResolutionSize(960, 640, ResolutionPolicy::SHOW_ALL);
     LLAudioSessionUtil::initialize();
 
+    //ビデオ表示のために透過する
+    experimental::FrameBuffer::getOrCreateDefaultFBO(glview)->setClearColor(cocos2d::Color4F(0.0,0.0,0.0,0.0));
+    
+    Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
     return true;
 }
 

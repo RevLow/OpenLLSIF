@@ -63,7 +63,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     {
         return false;
     }
-    
+
     //PLAYUI用のテクスチャアトラスを読み込む
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("res/PlayUI.plist");
 
@@ -146,6 +146,7 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     playScene->setName("PlayLayer");
     playScene->setLocalZOrder(0);
     playScene->setOpacity(0);
+
     this->addChild(playScene);
     
     // ユニット画像の設定
@@ -232,16 +233,15 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     _displayedNotes = std::vector< std::deque<Note*> >(9);
     
     //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
-    for(std::string labelName : {"ScoreLabel", "life_text"})
-    {
-        ui::TextAtlas* atlasLabel = playScene->getChildByName<ui::TextAtlas *>(labelName);
-        auto cloneLabel = atlasLabel->clone();
-        cloneLabel->setGlobalZOrder(1);
-        cloneLabel->setLocalZOrder(2);
-        cloneLabel->setOpacity(0);
-        addChild(cloneLabel);
-        playScene->removeChild(atlasLabel);
-    }
+
+    ui::TextAtlas* atlasLabel = playScene->getChildByName<ui::TextAtlas *>("ScoreLabel");
+//    auto cloneLabel = atlasLabel->clone();
+//    cloneLabel->setGlobalZOrder(1);
+//    cloneLabel->setLocalZOrder(2);
+//    cloneLabel->setOpacity(0);
+//    addChild(cloneLabel);
+    playScene->removeChild(atlasLabel);
+
     
     //タッチイベントリスナーを作成
     auto listener = cocos2d::EventListenerTouchAllAtOnce::create();
@@ -331,9 +331,7 @@ void PlayScene::run()
 {
     auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
     //スコアとライフの透明度を変更
-    this->getChildByName("ScoreLabel")->setOpacity(255);
-    this->getChildByName("life_text")->setOpacity(255);
-    
+    //this->getChildByName("ScoreLabel")->setOpacity(255);
     
     //動画再生の開始
     if(videoLayer != nullptr) videoLayer->play();
@@ -346,13 +344,13 @@ void PlayScene::run()
 void PlayScene::update(float unused_dt)
 {
     //スコアの設定
-    auto playSceneLayer = this->getChildByName("PlayLayer");
-    auto score = this->getChildByName<ui::TextAtlas*>("ScoreLabel");
+//    auto playSceneLayer = this->getChildByName("PlayLayer");
+//    auto score = this->getChildByName<ui::TextAtlas*>("ScoreLabel");
+//    
+//    score->setString(std::to_string(_currentScore));
     
-    score->setString(std::to_string(_currentScore));
-    
-    auto loadingBar = playSceneLayer->getChildByName<ui::LoadingBar*>("LoadingBar_1");
-    loadingBar->setPercent(100.0f * ((double)_currentScore / (double)_maxScore) + 5.0f);
+//    auto loadingBar = playSceneLayer->getChildByName<ui::LoadingBar*>("LoadingBar_1");
+//    loadingBar->setPercent(100.0f * ((double)_currentScore / (double)_maxScore) + 5.0f);
     
     //Millisec単位で計測開始からの時間を取得
     double elapse = LLAudioEngine::getInstance()->tellBackgroundMusic();

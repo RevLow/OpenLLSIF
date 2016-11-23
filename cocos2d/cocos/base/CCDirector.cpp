@@ -186,7 +186,9 @@ Director::~Director(void)
     CC_SAFE_RELEASE(_notificationNode);
     CC_SAFE_RELEASE(_scheduler);
     CC_SAFE_RELEASE(_actionManager);
-    CC_SAFE_DELETE(_defaultFBO);
+    //CC_SAFE_DELETE(_defaultFBO);
+    CC_SAFE_RELEASE(_defaultFBO);
+    experimental::FrameBuffer::clean();
     
     delete _eventBeforeUpdate;
     delete _eventAfterUpdate;
@@ -403,8 +405,6 @@ void Director::setOpenGLView(GLView *openGLView)
         }
         
         _defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
-        //ビデオ表示のために透過する
-        _defaultFBO->setClearColor(cocos2d::Color4F(0.0,0.0,0.0,0.0));
         _defaultFBO->retain();
     }
 }

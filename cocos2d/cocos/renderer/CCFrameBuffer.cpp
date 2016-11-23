@@ -485,5 +485,14 @@ void FrameBuffer::attachDepthStencilTarget(RenderTargetDepthStencil* rt)
     _rtDepthStencil = rt;
     _fboBindingDirty = true;
 }
+    
+void FrameBuffer::clean()
+{
+    if(_defaultFBO)
+    {
+        _defaultFBO = nullptr;
+    }
+    _frameBuffers.clear();
+}
 } //end of namespace experimental
 NS_CC_END
