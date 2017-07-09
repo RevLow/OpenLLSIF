@@ -56,13 +56,14 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->runWithScene(scene);
     
     //画面サイズの最適化
-    //glview->setDesignResolutionSize(960, 640, ResolutionPolicy::SHOW_ALL);
+    glview->setDesignResolutionSize(960, 640, ResolutionPolicy::SHOW_ALL);
     LLAudioSessionUtil::initialize();
 
     //ビデオ表示のために透過する
     experimental::FrameBuffer::getOrCreateDefaultFBO(glview)->setClearColor(cocos2d::Color4F(0.0,0.0,0.0,0.0));
+
     
-    Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
+    //Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
     return true;
 }
 

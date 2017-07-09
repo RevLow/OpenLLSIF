@@ -7,7 +7,6 @@
 //
 
 #include "Note.h"
-#include "triangulate.h"
 //#include "SimpleAudioEngine.h"
 #include <LLAudioEngine/LLAudioEngine.h>
 #include "ui/cocosGui.h"
@@ -19,7 +18,7 @@
 
 #pragma mark - Circle type implements
 
-bool Circle::init(const Point p, float r)
+bool Circle::init(const Point& p, float r)
 {
     radius = r;
     m_obPosition = p;
@@ -28,14 +27,14 @@ bool Circle::init(const Point p, float r)
     return true;
 }
 
-bool Circle::containsPoint(const Vec2 p)
+bool Circle::containsPoint(const Vec2& p)
 {
     Vec2 v1(m_obPosition.x, m_obPosition.y);
     return v1.distance(p) < radius;
 }
 
 
-bool Circle::intersectRect(const Rect rect)
+bool Circle::intersectRect(const Rect& rect)
 {
     Vec2 p1(
               clampf(m_obPosition.x , rect.origin.x , rect.origin.x + rect.size.width),
@@ -185,6 +184,12 @@ void Note::createNotesSprite(const NoteType type)
         sp->setScale(0.1f);
         sp->setPosition(SifUtil::initVec);
         addChild(sp);
+        
+        Sprite* lnSprite = Sprite::createWithSpriteFrameName("Image/notes/longNoteLine_07.png");
+        lnSprite->setName("longNotesLine");
+        resetLongNotesPolygonInfo(note, sp, lnSprite);
+        lnSprite->setOpacity(214);
+        addChild(lnSprite);
     }
 }
 
@@ -455,51 +460,66 @@ void Note::updateLongNote(const double& elapsed, Sprite* note)
         }
     }
 
-    renderFilledPolygon(note, sp);
+    Sprite* lnSprite = getChildByName<Sprite*>("longNotesLine");
+    resetLongNotesPolygonInfo(note, sp, lnSprite);
     
     //つかんでいる状態の場合は点滅を行う
     if(_noteInfo.isHolding)
     {
-        FilledPolygon* poly = getChildByName<FilledPolygon*>("LongnotesLine");
-        poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
-        poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
-        flickerPolygon(poly, elapsed);
-        
-        Vec2 v1 = currentPos - SifUtil::initVec;
-        Vec2 v2(0, -1);
-        float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
-        
-        auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
-        if(particle == nullptr)
+        auto holdingAction = lnSprite->getActionByTag(ActionKey::Holding);
+        if (!holdingAction)
         {
-            this->runAction(Sequence::create(DelayTime::create(0.05),
-                                             CallFunc::create([currentPos, angle, this](){
-                                                                    auto particle = ParticleSystemQuad::create("particle_texture.plist");
-                                                                    particle->setBlendFunc((BlendFunc){GL_ONE, GL_ONE});
-                                                                     
-                                                                    particle->setAutoRemoveOnFinish(true);
-                                                                    particle->setPosition(currentPos);
-                                                                    particle->setRotation(angle);
-                                                                    particle->setScale(0.9);
-                                                                    particle->setName("longNotesParticle");
-                                                                    this->addChild(particle);
-                                                                }), NULL));
+            lnSprite->setOpacity((GLubyte)0);
+
+            auto fadeInAction = EaseExponentialOut::create(FadeTo::create(27.0/ 60.0, 127));
+            auto fadeOutAction = EaseCubicActionInOut::create(FadeOut::create(17.0 / 60.0));
+            auto seqAction = Sequence::create(fadeInAction, fadeOutAction, NULL);
+            auto loopAction = RepeatForever::create(seqAction);
+            loopAction->setTag(ActionKey::Holding);
+            lnSprite->runAction(loopAction);
         }
         
-        auto lnFx = getChildByName<Layer*>("longNotesFx");
-        if (lnFx == nullptr)
-        {
-            auto lnFx = CSLoader::getInstance()->createNode("res/ln_hold.csb");
-            cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/ln_hold.csb");
-            lnFx->setAnchorPoint(Vec2(0.5, 0.5));
-            lnFx->setPosition(currentPos);
-            lnFx->setRotation(angle);
-            lnFx->setName("longNotesFx");
-            this->addChild(lnFx);
-            
-            lnFx->runAction(action);
-            action->gotoFrameAndPlay(0, true);
-        }
+        
+//        FilledPolygon* poly = getChildByName<FilledPolygon*>("LongnotesLine");
+//        poly->setBlendFunc((BlendFunc){GL_SRC_ALPHA, GL_ONE});
+//        poly->setTexture(Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_Brightness.png"));
+//        flickerPolygon(poly, elapsed);
+//        
+//        Vec2 v1 = currentPos - SifUtil::initVec;
+//        Vec2 v2(0, -1);
+//        float angle = MATH_RAD_TO_DEG(v1.getAngle(v2));
+//        
+//        auto particle = getChildByName<ParticleSystemQuad*>("longNotesParticle");
+//        if(particle == nullptr)
+//        {
+//            this->runAction(Sequence::create(DelayTime::create(0.05),
+//                                             CallFunc::create([currentPos, angle, this](){
+//                                                                    auto particle = ParticleSystemQuad::create("particle_texture.plist");
+//                                                                    particle->setBlendFunc((BlendFunc){GL_ONE, GL_ONE});
+//                                                                     
+//                                                                    particle->setAutoRemoveOnFinish(true);
+//                                                                    particle->setPosition(currentPos);
+//                                                                    particle->setRotation(angle);
+//                                                                    particle->setScale(0.9);
+//                                                                    particle->setName("longNotesParticle");
+//                                                                    this->addChild(particle);
+//                                                                }), NULL));
+//        }
+//        
+//        auto lnFx = getChildByName<Layer*>("longNotesFx");
+//        if (lnFx == nullptr)
+//        {
+//            auto lnFx = CSLoader::getInstance()->createNode("res/ln_hold.csb");
+//            cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createAction("res/ln_hold.csb");
+//            lnFx->setAnchorPoint(Vec2(0.5, 0.5));
+//            lnFx->setPosition(currentPos);
+//            lnFx->setRotation(angle);
+//            lnFx->setName("longNotesFx");
+//            this->addChild(lnFx);
+//            
+//            lnFx->runAction(action);
+//            action->gotoFrameAndPlay(0, true);
+//        }
         
         
         if((currentPos - SifUtil::initVec).length() >= (SifUtil::unitPosition(_noteInfo.lane) - SifUtil::initVec).length())
@@ -513,75 +533,79 @@ void Note::updateLongNote(const double& elapsed, Sprite* note)
         //画面外判定
         updateSimpleNote(note);
     }
+    
+
 }
 
-void Note::renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite)
+void Note::resetLongNotesPolygonInfo(cocos2d::Sprite* startNoteSprite, cocos2d::Sprite* endNoteSprite, cocos2d::Sprite* lnSprite)
 {
     Vec2 currentPos = startNoteSprite->getPosition();
     Vec2 endPosition = endNoteSprite->getPosition();
     float angle = MATH_DEG_TO_RAD( 90.0 - (SifUtil::BETWEEN_UNITS_ANGLE * _noteInfo.lane) );
-    
-    std::vector<Vec2> vList = std::vector<Vec2>();
-    std::vector<Vec2> uvCoordinate = std::vector<Vec2>();
-    
     float scale1 = startNoteSprite->getScale() / 2.0;
     float scale2 = endNoteSprite->getScale() / 2.0;
-    vList.resize(4);
-    uvCoordinate.resize(4);
-    
-    vList[0].x = floor((currentPos.x + (scale1 * 60.0f) * cos(angle)) + 0.5);
-    vList[0].y = floor((currentPos.y - (scale1 * 60.0f) * sin(angle)) + 0.5);
 
-    vList[1].x = floor((currentPos.x - (scale1 * 60.0f) * cos(angle)) + 0.5);
-    vList[1].y = floor((currentPos.y + (scale1 * 60.0f) * sin(angle)) + 0.5);
-    
-    vList[2].x = floor((endPosition.x - (scale2 * 60.0f) * cos(angle)) + 0.5);
-    vList[2].y = floor((endPosition.y + (scale2 * 60.0f) * sin(angle)) + 0.5);
-    
-    vList[3].x = floor((endPosition.x + (scale2 * 60.0f) * cos(angle)) + 0.5);
-    vList[3].y = floor((endPosition.y - (scale2 * 60.0f) * sin(angle)) + 0.5);
+    PolygonInfo info = lnSprite->getPolygonInfo();
+    V3F_C4B_T2F_Quad* quad = new V3F_C4B_T2F_Quad;
+    V3F_C4B_T2F* vertsItr = info.triangles.verts;
 
 
-    uvCoordinate[0] = Vec2(1, 1);
-    uvCoordinate[1] = Vec2(0, 1);
-    uvCoordinate[2] = Vec2(0, 0);
-    uvCoordinate[3] = Vec2(1, 0);
+    float x = floor((endPosition.x - (scale2 * 60.0f) * cos(angle)) + 0.5);
+    float y = floor((endPosition.y + (scale2 * 60.0f) * sin(angle)) + 0.5);
+    quad->tl.vertices.set(x, y, 0);
+    quad->tl.colors = vertsItr->colors;
+    quad->tl.texCoords = vertsItr->texCoords;
+    vertsItr++;
     
-    FilledPolygon *poly = getChildByName<FilledPolygon*>("LongnotesLine");//加算合成するポリゴン
+
+    x = floor((currentPos.x - (scale1 * 60.0f) * cos(angle)) + 0.5);
+    y = floor((currentPos.y + (scale1 * 60.0f) * sin(angle)) + 0.5);
+
+    quad->bl.vertices.set(x, y, 0);
+    quad->bl.colors = vertsItr->colors;
+    quad->bl.texCoords = vertsItr->texCoords;
+    vertsItr++;
     
-    //すでにポリゴンが描画されている場合は頂点座標とUV座標を変更するだけにする
-    if (poly == nullptr )
-    {
-        Texture2D *texture = Director::getInstance()->getTextureCache()->addImage("Image/longNoteLine_07.png");
-        poly = FilledPolygon::create(texture, vList, uvCoordinate);
-        poly->setOpacity(127);
-        poly->setName("LongnotesLine");
-        addChild(poly);
-    }
-    else
-    {
-        poly->setTexturePolygon(vList, uvCoordinate);
-    }
+
+    x = floor((endPosition.x + (scale2 * 60.0f) * cos(angle)) + 0.5);
+    y = floor((endPosition.y - (scale2 * 60.0f) * sin(angle)) + 0.5);
+    quad->tr.vertices.set(x, y, 0);
+    quad->tr.colors = vertsItr->colors;
+    quad->tr.texCoords = vertsItr->texCoords;
+    vertsItr++;
+    
+    x = floor((currentPos.x + (scale1 * 60.0f) * cos(angle)) + 0.5);
+    y = floor((currentPos.y - (scale1 * 60.0f) * sin(angle)) + 0.5);
+    quad->br.vertices.set(x, y, 0);
+    quad->br.colors = vertsItr->colors;
+    quad->br.texCoords = vertsItr->texCoords;
+    vertsItr++;
+    
+    info.setQuad(quad);
+
+    lnSprite->setAnchorPoint(Vec2(0.0f, 0.0f));
+    lnSprite->setPolygonInfo(std::move(info));
+    delete quad;
 }
 
-void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
-{
-    _lnFlash.time += MSEC_TO_SEC(sleepTime);
-    if(_lnFlash.time >= _lnFlash.duration)
-    {
-        // 増加と減少を交換する
-        _lnFlash.isIncrease = !_lnFlash.isIncrease;
-        _lnFlash.time = 0;
-        constexpr float t1 = 28.0 / 60.0;
-        constexpr float t2 = 17.0 / 60.0;
-        _lnFlash.duration = _lnFlash.isIncrease ?  t1 : t2;
-        _lnFlash.easing = _lnFlash.isIncrease ? SifUtil::increaseEasing : SifUtil::decreaseEasing;
-    }
-    
-    float t = _lnFlash.time / _lnFlash.duration;
-    float opacity = _lnFlash.easing(t);
-    if(opacity <= 0.0) opacity = 0.0;
-    if(opacity >= 1.0) opacity = 1.0;
-
-    poly->setOpacity(127 * opacity);
-}
+//void Note::flickerPolygon(FilledPolygon* poly, double sleepTime)
+//{
+//    _lnFlash.time += MSEC_TO_SEC(sleepTime);
+//    if(_lnFlash.time >= _lnFlash.duration)
+//    {
+//        // 増加と減少を交換する
+//        _lnFlash.isIncrease = !_lnFlash.isIncrease;
+//        _lnFlash.time = 0;
+//        constexpr float t1 = 28.0 / 60.0;
+//        constexpr float t2 = 17.0 / 60.0;
+//        _lnFlash.duration = _lnFlash.isIncrease ?  t1 : t2;
+//        _lnFlash.easing = _lnFlash.isIncrease ? SifUtil::increaseEasing : SifUtil::decreaseEasing;
+//    }
+//    
+//    float t = _lnFlash.time / _lnFlash.duration;
+//    float opacity = _lnFlash.easing(t);
+//    if(opacity <= 0.0) opacity = 0.0;
+//    if(opacity >= 1.0) opacity = 1.0;
+//
+//    poly->setOpacity(127 * opacity);
+//}

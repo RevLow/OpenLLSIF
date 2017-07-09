@@ -11,7 +11,6 @@
 
 #include "cocos2d.h"
 #include "SifUtil.h"
-#include "PRFilledPolygon.h"
 
 USING_NS_CC;
 
@@ -35,7 +34,8 @@ enum NoteJudge
 enum ActionKey
 {
     Simple,
-    LongNotes
+    LongNotes,
+    Holding
 };
 
 class Circle : public Node, create_func<Circle>
@@ -45,9 +45,9 @@ class Circle : public Node, create_func<Circle>
     
     using create_func::create;
 public:
-    virtual bool init(const Point p, float radius);
-    bool containsPoint(const Vec2 p);
-    bool intersectRect(const Rect rect);
+    virtual bool init(const Point& p, float radius);
+    bool containsPoint(const Vec2& p);
+    bool intersectRect(const Rect& rect);
     bool intersectCircle(Circle* circle);
     DrawNode* getDrawNode(Color4F c);
 };
@@ -97,8 +97,8 @@ private:
     
     void updateSimpleNote(Sprite* note);
     void updateLongNote(const double& elapsed, Sprite* note);
-    void flickerPolygon(FilledPolygon* poly, double sleepTime);
-    void renderFilledPolygon(Sprite* startNoteSprite, Sprite* endNoteSprite);
+    //void flickerPolygon(FilledPolygon* poly, double sleepTime);
+    void resetLongNotesPolygonInfo(cocos2d::Sprite* startNoteSprite, cocos2d::Sprite* endNoteSprite, cocos2d::Sprite* lnSprite);
 private:
     //点滅の状態
     struct FlickerState

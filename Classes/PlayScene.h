@@ -159,6 +159,9 @@ private:
     
     //! 前にSEが再生された時間
     float _previousSoundTime = 0.0f;
+    
+    //! 再生するビデオ
+    std::string _playVideoPath = "";
 };
 
 #endif /* defined(__OpenLLSIF__PlayScene__) */

@@ -27,6 +27,7 @@
 #import "cocos2d.h"
 #import "AppDelegate.h"
 #import "RootViewController.h"
+#import "PlayerModel.h"
 
 @implementation AppController
 
@@ -58,12 +59,17 @@ static AppDelegate s_sharedApplication;
     
     // Enable or disable multiple touches
     [eaglView setMultipleTouchEnabled:YES];
+    
+    PlayerModel* model = [PlayerModel sharedModel];
 
     // Use RootViewController manage CCEAGLView 
 //    _viewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
 //    _viewController.wantsFullScreenLayout = YES;
 //    _viewController.view = eaglView;
 
+    model.mainUiView = [[UIView alloc] initWithFrame:[window bounds]];
+    [model.mainUiView addSubview:eaglView];
+    
     _viewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
     _viewController.wantsFullScreenLayout = YES;
     eaglView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin |
@@ -72,9 +78,9 @@ static AppDelegate s_sharedApplication;
     UIViewAutoresizingFlexibleBottomMargin |
     UIViewAutoresizingFlexibleWidth |
     UIViewAutoresizingFlexibleHeight;
+    _viewController.view = model.mainUiView;
     _viewController.view.autoresizesSubviews = YES;
     _viewController.view.frame = eaglView.frame;
-    [_viewController.view addSubview:eaglView];
     _viewController.view.backgroundColor = [UIColor clearColor];
     eaglView.backgroundColor = [UIColor clearColor];
     

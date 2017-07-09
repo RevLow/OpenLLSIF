@@ -9,10 +9,9 @@
 #include "PlayScene.h"
 #include "ui/cocosGui.h"
 #include "cocostudio/CocoStudio.h"
-#include "UIVideoPlayer.h"
 #include "json11.hpp"
-//#include "SimpleAudioEngine.h"
 #include <LLAudioEngine/LLAudioEngine.h>
+#include "VideoManager.h"
 #include "HomeScene.h"
 
 #pragma mark Inline function
@@ -21,7 +20,7 @@
  *  ある点がタップ可能な範囲内に入っているかを判定する
  *  判定方法はある点を基準にした半径r内に目的のSpriteが入っているかで判定する
  *  指の半径:    44px (iPhone4/4s上での指の大きさ)
- *  Sprite半径: 64px
+ *  Sprite半径: 128px
  *
  *  @param pos タップした点
  *
@@ -30,7 +29,7 @@
 inline bool isPointContain(const Vec2& v1, const Vec2& v2)
 {
     Circle *fingerCircle = Circle::create(v1, 44);
-    Circle *targetCirlce = Circle::create(v2, 64);
+    Circle *targetCirlce = Circle::create(v2, 128);
     
     return targetCirlce->intersectCircle(fingerCircle);
     
@@ -114,23 +113,11 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     //画面サイズを取得
     auto screenSize = Director::getInstance()->getVisibleSize();
 
-    
-    //BGVが設定されている場合、ビデオを再生するためのレイヤーを追加
-    //ただし、cocos2dのコードそのままだと最前面にビデオが来てしまうため
-    //http://discuss.cocos2d-x.org/t/enhancement-request-for-videoplayer/16024
-    //を参考にエンジン本体のコードを変更する
-    if(videoFilePath != "")
+    if (videoFilePath != "")
     {
-        auto videoPlayer = cocos2d::experimental::ui::VideoPlayer::create();
-        videoPlayer->setContentSize(screenSize);
-        videoPlayer->setPosition(Vec2(screenSize.width / 2, screenSize.height / 2));
-        videoPlayer->setKeepAspectRatioEnabled(true);
-        this->addChild(videoPlayer, -1);
-        videoPlayer->setName("VideoLayer");
-        videoPlayer->setFileName(playSongFile + '/' + videoFilePath);
-        videoPlayer->prepareVideo(); //ビデオファイルをあらかじめロードしておくため、エンジンのビデオプレイヤーに処理を追加する
+        _playVideoPath = playSongFile + '/' + videoFilePath;
     }
-    
+
     LayerColor* blackLayer = LayerColor::create(Color4B::BLACK, screenSize.width, screenSize.height);
     blackLayer->setOpacity(40);
     blackLayer->setName("BlackLayer");
@@ -230,18 +217,8 @@ bool PlayScene::init(std::string playSongFile, GameLevel gameLevel)
     
     // 作成したノーツを格納するベクターを初期化
     // ここの9は9レーン分を挿入するために定義
-    _displayedNotes = std::vector< std::deque<Note*> >(9);
-    
-    //draw callを減らすためScoreLabelとlife_textのグローバルZを大きくし、別にレンダリングする
-
-    ui::TextAtlas* atlasLabel = playScene->getChildByName<ui::TextAtlas *>("ScoreLabel");
-//    auto cloneLabel = atlasLabel->clone();
-//    cloneLabel->setGlobalZOrder(1);
-//    cloneLabel->setLocalZOrder(2);
-//    cloneLabel->setOpacity(0);
-//    addChild(cloneLabel);
-    playScene->removeChild(atlasLabel);
-
+    //_displayedNotes = std::vector< std::deque<Note*> >(9);
+    _displayedNotes.resize(9);
     
     //タッチイベントリスナーを作成
     auto listener = cocos2d::EventListenerTouchAllAtOnce::create();
@@ -297,17 +274,15 @@ void PlayScene::prepareGameRun()
     playSceneAction->gotoFrameAndPlay(0, true);
     
     //背景画像を設定
-    auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
-
-    if (videoLayer != nullptr)
+    if (_playVideoPath != "")
     {
         
-        auto backSprite = this->getChildByName<LayerColor*>("backgroundImage");
+        auto backSprite = this->getChildByName<Sprite*>("backgroundImage");
         backSprite->runAction(FadeTo::create(0.5f, 0));
     }
     
     auto blackBackLayer = this->getChildByName<LayerColor*>("BlackLayer");
-    auto fadeOutAction =FadeTo::create(0.5f, videoLayer != nullptr ? 225 : 170);
+    auto fadeOutAction =FadeTo::create(0.5f, _playVideoPath != "" ? 225 : 170);
     auto runGameAction = CallFunc::create([this, playScene](){
         playScene->setOpacity(255);
         this->run();
@@ -329,29 +304,28 @@ void PlayScene::prepareGameRun()
 
 void PlayScene::run()
 {
-    auto videoLayer = this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
-    //スコアとライフの透明度を変更
-    //this->getChildByName("ScoreLabel")->setOpacity(255);
+
+    std::function<void()> func = [this]()
+    {
+        //音楽の再生
+        LLAudioEngine::getInstance()->playBackgroundMusic(_songFilePath);
+        LLAudioEngine::getInstance()->setBackgroundExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
+        this->scheduleUpdate();
+    };
     
-    //動画再生の開始
-    if(videoLayer != nullptr) videoLayer->play();
-    //音楽の再生
-    LLAudioEngine::getInstance()->playBackgroundMusic(_songFilePath);
-    LLAudioEngine::getInstance()->setBackgroundExitCallback(CC_CALLBACK_0(PlayScene::finishCallBack, this));
-    this->scheduleUpdate();
+    if(_playVideoPath != "")
+    {
+        //動画再生の開始
+        VideoManager::play(_playVideoPath, func);
+    }
+    else
+    {
+        func();
+    }
 }
 
 void PlayScene::update(float unused_dt)
 {
-    //スコアの設定
-//    auto playSceneLayer = this->getChildByName("PlayLayer");
-//    auto score = this->getChildByName<ui::TextAtlas*>("ScoreLabel");
-//    
-//    score->setString(std::to_string(_currentScore));
-    
-//    auto loadingBar = playSceneLayer->getChildByName<ui::LoadingBar*>("LoadingBar_1");
-//    loadingBar->setPercent(100.0f * ((double)_currentScore / (double)_maxScore) + 5.0f);
-    
     //Millisec単位で計測開始からの時間を取得
     double elapse = LLAudioEngine::getInstance()->tellBackgroundMusic();
     if (elapse <= 0)
@@ -380,7 +354,7 @@ void PlayScene::update(float unused_dt)
 
 void PlayScene::createNotes(const ValueMap& map)
 {
-    Note *note = Note::create(map);
+    Note* note = Note::create(map);
 
     //画面の判定外に出た場合の処理
     note->setOutDisplayedCallback(CC_CALLBACK_1(PlayScene::noteOutDisplayedCallback, this));
@@ -390,7 +364,7 @@ void PlayScene::createNotes(const ValueMap& map)
 
     //ロングノーツを離したときの処理
     note->setReleaseCallback(CC_CALLBACK_1(PlayScene::noteReleaseCallback, this));
-    _displayedNotes[note->getLane()].push_back(note);
+    _displayedNotes[note->getLane()].emplace_back(note);
     
     addChild(note);
 }
@@ -459,23 +433,23 @@ void PlayScene::createTapFx(Vec2 position)
 
 #pragma mark Override functions
 
+double sleeptime;
+
 void PlayScene::applicationDidEnterBackground()
 {
     LLAudioEngine::getInstance()->pauseBackgroundMusic();
     unscheduleUpdate();
-
-
     this->pause();
-    auto videoPlayer =  this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
-    videoPlayer->pause();
+    VideoManager::pause();
 }
 
 
 void PlayScene::applicationWillEnterForeground()
 {
     scheduleUpdate();
-    auto videoPlayer =  this->getChildByName<experimental::ui::VideoPlayer*>("VideoLayer");
-    videoPlayer->resume();
+    float t = LLAudioEngine::getInstance()->tellBackgroundMusic();
+    VideoManager::seekTo(t);
+    VideoManager::resume();
     this->resume();
 
     LLAudioEngine::getInstance()->resumeBackgroundMusic();
@@ -508,6 +482,7 @@ void PlayScene::onTouchesBegan(const std::vector<Touch *> &touches, Event *event
             }
         }
         if(minLaneNum == -1) continue;
+        
         
         //min_lane_numのノーツに対してタップ処理をする
         bool result = _displayedNotes[minLaneNum].front()->touchBeginAction(touch->getID());
@@ -564,6 +539,7 @@ void PlayScene::finishCallBack()
     Director::getInstance()->getScheduler()->performFunctionInCocosThread([](){
         LLAudioEngine::getInstance()->unloadAllEffect();
         Director::getInstance()->purgeCachedData();
+        VideoManager::stop();
         Scene* homeScene = HomeScene::createScene(ViewScene::Live);
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, homeScene, Color3B::BLACK));
 
@@ -639,15 +615,15 @@ void PlayScene::callbackHelperFunc(const Note& note, bool isRelease)
 
     //判定とタッチのエフェクトを表示する
     createJudgeSprite(note.getJudgeResult());
-    if(isRelease || !note.isLongNotes())
-        createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
+    //if(isRelease || !note.isLongNotes())
+        //createTapFx(note.getChildByName<Sprite*>("BaseNotes")->getPosition());
 }
 
 
 void PlayScene::makeUnitFrameAtlas()
 {
-    const int imgWidth = 128;
-    const int imgHeight = 128;
+    constexpr int imgWidth = 128;
+    constexpr int imgHeight = 128;
     int x = 0;
     int y = 0;
     ValueVector data = FileUtils::getInstance()->getValueVectorFromFile("UnitData.plist");

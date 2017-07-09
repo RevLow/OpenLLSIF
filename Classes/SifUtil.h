@@ -19,10 +19,10 @@ namespace SifUtil
     const Vec2 initVec(480, 480);
 
     //! ユニットを配置する半径
-    const float UNIT_RADIUS = 400;
+    constexpr float UNIT_RADIUS = 400;
     
     //! ユニット間の角度
-    const float BETWEEN_UNITS_ANGLE = 22.5;
+    constexpr float BETWEEN_UNITS_ANGLE = 22.5;
     
     /**
      *  減少のイージング

@@ -5,29 +5,44 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>09B70797-855E-477E-9BA2-CFB0BDCEEE8B</string>
+	<string>348886C0-5899-4A96-B1CA-4C4DDB793ED6</string>
 	<key>IDESourceControlProjectName</key>
 	<string>OpenLLSIF</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>64288EDB-CD54-48BB-B91C-CAA89AA8AC16</key>
+		<string>ssh://github.com/RevLow/LLAudioEngine.git</string>
+	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>OpenLLSIF.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>741AB758-D550-47BC-B301-CD075898E5B0</key>
+		<key>602444E6-32AF-47F0-BA34-78FD26B8DC3E</key>
 		<string>..</string>
+		<key>64288EDB-CD54-48BB-B91C-CAA89AA8AC16</key>
+		<string>../../LLAudioEngine</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/Hare8563/Cocos2d-x.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>741AB758-D550-47BC-B301-CD075898E5B0</string>
+	<string>602444E6-32AF-47F0-BA34-78FD26B8DC3E</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>741AB758-D550-47BC-B301-CD075898E5B0</string>
+			<string>64288EDB-CD54-48BB-B91C-CAA89AA8AC16</string>
+			<key>IDESourceControlWCCName</key>
+			<string>LLAudioEngine</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>602444E6-32AF-47F0-BA34-78FD26B8DC3E</string>
 			<key>IDESourceControlWCCName</key>
 			<string>OpenLLSIF</string>
 		</dict>
